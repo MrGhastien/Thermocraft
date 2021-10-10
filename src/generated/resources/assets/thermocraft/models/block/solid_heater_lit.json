@@ -1,0 +1,11 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "down": "minecraft:block/furnace_top",
+    "up": "thermocraft:block/solid_heater_top",
+    "north": "thermocraft:block/solid_heater_front_lit",
+    "south": "thermocraft:block/solid_heater_side",
+    "east": "thermocraft:block/solid_heater_side",
+    "west": "thermocraft:block/solid_heater_side"
+  }
+}

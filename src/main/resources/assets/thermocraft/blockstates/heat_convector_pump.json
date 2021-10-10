@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "thermocraft:block/heat_convector_pump"
+    },
+    "facing=south": {
+      "model": "thermocraft:block/heat_convector_pump",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "thermocraft:block/heat_convector_pump",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "thermocraft:block/heat_convector_pump",
+      "y": 90
+    }
+  }
+}

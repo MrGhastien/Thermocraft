@@ -1,0 +1,68 @@
+{
+	"credit": "Made with Blockbench",
+	"textures": {
+		"frame": "thermocraft:block/thermal_capacitor_frame",
+		"interface": "thermocraft:block/conductor_core",
+		"particle": "thermocraft:block/conductor_core"
+	},
+	"elements": [
+		{
+			"from": [5, 10, 11],
+			"to": [6, 11, 16],
+			"faces": {
+				"east": {"uv": [0, 0, 5, 1], "texture": "#1"},
+				"west": {"uv": [0, 0, 5, 1], "texture": "#1"},
+				"up": {"uv": [0, 0, 1, 5], "texture": "#1"},
+				"down": {"uv": [0, 0, 1, 5], "texture": "#1"}
+			}
+		},
+		{
+			"from": [10, 10, 11],
+			"to": [11, 11, 16],
+			"faces": {
+				"east": {"uv": [0, 0, 5, 1], "texture": "#1"},
+				"west": {"uv": [0, 0, 5, 1], "texture": "#1"},
+				"up": {"uv": [0, 0, 1, 5], "texture": "#1"},
+				"down": {"uv": [0, 0, 1, 5], "texture": "#1"}
+			}
+		},
+		{
+			"from": [5, 5, 11],
+			"to": [6, 6, 16],
+			"faces": {
+				"east": {"uv": [0, 0, 5, 1], "texture": "#1"},
+				"west": {"uv": [0, 0, 5, 1], "texture": "#1"},
+				"up": {"uv": [0, 0, 1, 5], "texture": "#1"},
+				"down": {"uv": [0, 0, 1, 5], "texture": "#1"}
+			}
+		},
+		{
+			"from": [10, 5, 11],
+			"to": [11, 6, 16],
+			"faces": {
+				"east": {"uv": [0, 0, 5, 1], "texture": "#1"},
+				"west": {"uv": [0, 0, 5, 1], "texture": "#1"},
+				"up": {"uv": [0, 0, 1, 5], "texture": "#1"},
+				"down": {"uv": [0, 0, 1, 5], "texture": "#1"}
+			}
+		},
+		{
+			"name": "core",
+			"from": [6, 6, 10],
+			"to": [10, 10, 16],
+			"rotation": {"angle": 0, "axis": "x", "origin": [11, 5, 16]},
+			"faces": {
+				"east": {"uv": [0, 1, 4, 7], "rotation": 270, "texture": "#2"},
+				"west": {"uv": [0, 1, 4, 7], "rotation": 90, "texture": "#2"},
+				"up": {"uv": [0, 9, 4, 15], "texture": "#2"},
+				"down": {"uv": [0, 9, 4, 15], "rotation": 180, "texture": "#2"}
+			}
+		}
+	],
+	"groups": [
+		{
+			"name": "frame",
+			"origin": [8, 8, 8],
+			"children": [0, 1, 2, 3]
+		}, 4]
+}

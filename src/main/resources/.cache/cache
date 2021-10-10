@@ -1,0 +1,6 @@
+58f67c7dfe7c1f8d9533637a32b56c41871a9dfe assets/thermocraft/blockstates/solid_heater.json
+4a3026366fd5ed8119af7f3491a124f5a1bc9ace assets/thermocraft/models/block/solid_heater.json
+a7c36ab01bc730c0c57087d2f5467dae8e73a163 assets/thermocraft/models/block/solid_heater_lit.json
+74ba495a6b3a2c2a83a8c941d1c6bf11944a64a8 assets/thermocraft/models/item/solid_heater.json
+7c47e83a67e1bded2d5f23ae87354c6316e7b725 data/thermocraft/advancements/recipes/boiling/water_to_lava.json
+e0522d4266b3e749973c55776d3112a844c097b1 data/thermocraft/recipes/boiling/water_to_lava.json

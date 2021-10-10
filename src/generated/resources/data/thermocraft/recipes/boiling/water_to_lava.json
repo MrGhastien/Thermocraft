@@ -1,0 +1,13 @@
+{
+  "type": "thermocraft:boiling",
+  "input": {
+    "type": "thermocraft:fluid",
+    "fluid": "minecraft:water",
+    "amount": 10
+  },
+  "result": {
+    "fluid": "minecraft:lava",
+    "amount": 10
+  },
+  "inputHeatCapacity": 10.0
+}

@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "thermocraft:block/thermal_capacitor"
+    }
+  }
+}

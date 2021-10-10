@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "thermocraft:ether_of_sadness",
+      "required": false
+    },
+    {
+      "id": "thermocraft:flowing_ether_of_sadness",
+      "required": false
+    }
+  ]
+}
