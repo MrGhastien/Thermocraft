@@ -42,10 +42,18 @@ class FixedPointNumberTest {
 
     @Test
     void testFloatValue() {
+        assertEquals(78345.625f, new FixedPointNumber(78345.625f).floatValue());
+        assertEquals(78345.625f, new FixedPointNumber(78345.625).floatValue());
+        assertEquals(5.25f, new FixedPointNumber(5.25f).floatValue());
+        assertEquals(5.25f, new FixedPointNumber(5.25).floatValue());
     }
 
     @Test
     void testDoubleValue() {
+        assertEquals(5.25, new FixedPointNumber(5.25).doubleValue());
+        assertEquals(5.25, new FixedPointNumber(5.25f).doubleValue());
+        assertEquals(78345.625, new FixedPointNumber(78345.625).doubleValue());
+        assertEquals(78345.625, new FixedPointNumber(78345.625f).doubleValue());
     }
 
     @Test

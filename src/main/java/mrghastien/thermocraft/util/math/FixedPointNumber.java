@@ -70,7 +70,7 @@ public class FixedPointNumber extends Number {
         //The mantissa is always between 1 & 2. Thus a bit set to 1 is added prior to all the mantissa bits.
         //It isn't actually stored because it is always 1.
         //Now the integer part of the number is just the mantissa left-shifted by the exponent, equivalent to multiplying by 2^exponent.
-        long integral = (mantissa | (1 << 23)) >>> (23- exponent); //Only take the integral part of the shifted mantissa
+        long integral = relativeRightShift(mantissa | (1 << 23), 23 - exponent); //Only take the integral part of the shifted mantissa
         short fractional = (short) (relativeRightShift(mantissa, 7 - exponent) & ((1 << 16) - 1)); //Take the 16 first bits from the left from the
         return new Pair<>(integral, fractional);
     }
@@ -85,19 +85,29 @@ public class FixedPointNumber extends Number {
         return bits >>> shift;
     }
 
+    private static int relativeLeftShift(int bits, int shift) {
+        if(shift < 0) return bits >>> -shift;
+        return bits << shift;
+    }
+
+    private static long relativeLeftShift(long bits, long shift) {
+        if(shift < 0) return bits >> -shift;
+        return bits << shift;
+    }
+
     private static Pair<Long, Short> convertFromDouble(double number) {
         long bits = Double.doubleToRawLongBits(number);
         if(bits == 0) return new Pair<>(0L, (short)0);
         long exponent = ((bits & 0x7ff0000000000000L) >>> 52) - ((1 << 10) - 1);
         long mantissa = bits & ((1L << 52) - 1);
-        long integral = (mantissa | (1L << 52)) >>> (52 - exponent);
+        long integral = relativeRightShift(mantissa | (1L << 52), 52 - exponent);
         short fractional = (short) (relativeRightShift(mantissa, 36 - exponent) & ((1 << 16) - 1));
         return new Pair<>(integral, fractional);
     }
 
     @Override
     public int intValue() {
-        return (int) integral;
+        return (int)integral;
     }
 
     @Override
@@ -118,15 +128,39 @@ public class FixedPointNumber extends Number {
         return Objects.hash(integral, fractional);
     }
 
+    private byte findExponent() {
+        long mantissa = integral;
+        byte exponent = 0;
+        while(mantissa > 1) {
+            mantissa >>>= 1;
+            exponent++;
+        }
+        return exponent;
+    }
+
     //TODO: Fixed to floating point conversion
     @Override
     public float floatValue() {
-        return 0.0f;
+        int bits = ((int) (integral >>> 63)) << 31;
+        int exponent = findExponent();
+        bits |= (exponent + (1 << 7) - 1) << 23;
+        int mantissa = intValue() & ((1 << exponent) - 1);
+        mantissa = relativeLeftShift(mantissa, 23 - exponent);
+        mantissa |= relativeLeftShift(Short.toUnsignedInt(fractional), 7 - exponent);
+        bits |= mantissa;
+        return Float.intBitsToFloat(bits);
     }
 
     @Override
     public double doubleValue() {
-        return 0.0;
+        long bits = integral & (1L << 63); //Sign bit
+        long exponent = findExponent();
+        bits |= (exponent + (1 << 10) - 1) << 52; //Place the exponent bits
+        long mantissa = integral & ((1L << exponent) - 1);
+        mantissa = relativeLeftShift(mantissa, 52 - exponent);
+        mantissa |= relativeLeftShift(Short.toUnsignedLong(fractional), 36 - exponent);
+        bits |= mantissa;
+        return Double.longBitsToDouble(bits);
     }
 
     private String fractionalToString() {
