@@ -1,6 +1,7 @@
 package mrghastien.thermocraft.util.math;
 
 import mrghastien.thermocraft.common.capabilities.heat.SidedHeatHandler;
+import mrghastien.thermocraft.util.Pair;
 
 import java.util.Objects;
 
@@ -26,8 +27,8 @@ import java.util.Objects;
  */
 public class FixedPointNumber extends Number {
 
-    private final long integral;
-    private final short fractional;
+    protected long integral;
+    protected short fractional;
 
     /**Creates a FixedPointNumber from the integer and fractional parts.
      * @param integral The integer part
@@ -43,8 +44,9 @@ public class FixedPointNumber extends Number {
      * @param number The double-precision-floating-point number to convert.
      */
     public FixedPointNumber(double number) {
-        this.integral = (long) number;
-        this.fractional = mirrorBits(getDoubleMantissa((number % 1.0) + 1.0), 52);
+        Pair<Long, Short> values = convertFromDouble(number);
+        this.integral = values.getFirst();
+        this.fractional = values.getSecond();
     }
 
     /**Creates a FixedPointNumber from a single-precision-floating-point number.
@@ -52,25 +54,45 @@ public class FixedPointNumber extends Number {
      * @param number The floating-point number to convert.
      */
     public FixedPointNumber(float number) {
-        this.integral = (long) number;
-        this.fractional = mirrorBits(getFloatMantissa((number % 1.0f) + 1.0f), 23);
+        Pair<Long, Short> values = convertFromFloat(number);
+        this.integral = values.getFirst();
+        this.fractional = values.getSecond();
     }
 
-    private static long getDoubleMantissa(double d) {
-        return Double.doubleToRawLongBits(d) & 0x000fffffffffffffL;
+    private static Pair<Long, Short> convertFromFloat(float number) {
+        int bits = Float.floatToRawIntBits(number);
+        if(bits == 0) return new Pair<>(0L, (short)0);
+        int exponent = ((bits & 0x7f800000) >>> 23) - ((1 << 7) - 1);
+        //Take the bits of the exponent, shift them to
+        // make sure the first bit of the exponent is the first bit,
+        // and subtract 127.
+        int mantissa = bits & ((1 << 23) - 1);
+        //The mantissa is always between 1 & 2. Thus a bit set to 1 is added prior to all the mantissa bits.
+        //It isn't actually stored because it is always 1.
+        //Now the integer part of the number is just the mantissa left-shifted by the exponent, equivalent to multiplying by 2^exponent.
+        long integral = (mantissa | (1 << 23)) >>> (23- exponent); //Only take the integral part of the shifted mantissa
+        short fractional = (short) (relativeRightShift(mantissa, 7 - exponent) & ((1 << 16) - 1)); //Take the 16 first bits from the left from the
+        return new Pair<>(integral, fractional);
     }
 
-    private static int getFloatMantissa(float d) {
-        return Float.floatToRawIntBits(d) & 0x007fffff;
+    private static int relativeRightShift(int bits, int shift) {
+        if(shift < 0) return bits << -shift;
+        return bits >>> shift;
     }
 
-    private static short mirrorBits(long bits, int mantissaSize) {
-        short result = 0;
-        bits >>>= mantissaSize - 16; //Only take the first 16 bits
-        for(int i = 0; i < 16; i++) {
-            result |= bits & (1L << 16 - i);
-        }
-        return result;
+    private static long relativeRightShift(long bits, long shift) {
+        if(shift < 0) return bits << -shift;
+        return bits >>> shift;
+    }
+
+    private static Pair<Long, Short> convertFromDouble(double number) {
+        long bits = Double.doubleToRawLongBits(number);
+        if(bits == 0) return new Pair<>(0L, (short)0);
+        long exponent = ((bits & 0x7ff0000000000000L) >>> 52) - ((1 << 10) - 1);
+        long mantissa = bits & ((1L << 52) - 1);
+        long integral = (mantissa | (1L << 52)) >>> (52 - exponent);
+        short fractional = (short) (relativeRightShift(mantissa, 36 - exponent) & ((1 << 16) - 1));
+        return new Pair<>(integral, fractional);
     }
 
     @Override
@@ -108,8 +130,9 @@ public class FixedPointNumber extends Number {
     }
 
     private String fractionalToString() {
-        StringBuilder builder = new StringBuilder();
         int frac = Short.toUnsignedInt(fractional);
+        if(frac == 0) return "0";
+        StringBuilder builder = new StringBuilder();
         while(frac != 0) {
             frac *= 10;
             int n = frac >> 16;
@@ -121,18 +144,21 @@ public class FixedPointNumber extends Number {
 
     @Override
     public String toString() {
-        return Long.toUnsignedString(integral) + "." + fractionalToString();
+        return integral + "." + fractionalToString();
     }
 
     //TODO: Operations
     public FixedPointNumber add(FixedPointNumber n) {
-        int sum = Short.toUnsignedInt(fractional) + Short.toUnsignedInt(n.fractional);
-        return new FixedPointNumber(integral + n.integral + (sum >> 16) & 1, (short) (sum & 0xffff));
+        return add(n.integral, n.fractional);
+    }
+
+    public FixedPointNumber add(long n, short frac) {
+        int sum = Short.toUnsignedInt(fractional) + Short.toUnsignedInt(frac);
+        return new FixedPointNumber(integral + n + ((sum >> 16) & 1), (short) (sum & 0xffff));
     }
 
     public FixedPointNumber sub(FixedPointNumber n) {
-        int sum = fractional - n.fractional;
-        return new FixedPointNumber(integral - n.integral - sum < 0 ? 1 : 0, (short) Math.abs(fractional - n.fractional));
+        return add(n.negate());
     }
 
     public FixedPointNumber onesComplement() {
@@ -140,13 +166,16 @@ public class FixedPointNumber extends Number {
     }
 
     //TODO: Signed
-    public FixedPointNumber twoComplement() {
-
-        return null;
+    public FixedPointNumber negate() {
+        long invertedInt = ~integral;
+        int invertedFrac = ((short)~fractional) + 1;
+        if((invertedFrac >>> 16) == 1) invertedInt++;
+        //invertedInt = (invertedInt & ((1L << 63) - 1)) | ~(invertedInt >>> 63);
+        return new FixedPointNumber(invertedInt, (short) invertedFrac);
     }
 
     public boolean isNegative() {
-        return (integral & 1L << 63) == 1;
+        return (integral >>> 63) == 1;
     }
 
     public byte[] toByteArray() {
@@ -173,6 +202,50 @@ public class FixedPointNumber extends Number {
 
         public Mutable(float number) {
             super(number);
+        }
+
+        public void set(long integer) {
+            this.integral = integer;
+        }
+
+        public void set(long integer, short fraction) {
+            set(integer);
+            this.fractional = fraction;
+        }
+
+        //TODO: make proper conversion
+        public void set(double number) {
+            Pair<Long, Short> values = FixedPointNumber.convertFromDouble(number);
+            set(values.getFirst(), values.getSecond());
+        }
+
+        public void set(float number) {
+            Pair<Long, Short> values = FixedPointNumber.convertFromFloat(number);
+            set(values.getFirst(), values.getSecond());
+        }
+
+        public FixedPointNumber add(long n, short frac) {
+            int sum = Short.toUnsignedInt(fractional) + Short.toUnsignedInt(frac);
+            this.integral = integral + n + (sum >> 16) & 1;
+            this.fractional = (short) (sum & 0xffff);
+            return this;
+        }
+
+        public FixedPointNumber onesComplement() {
+            this.integral = ~integral;
+            this.fractional = (short) ~fractional;
+            return this;
+        }
+
+        //TODO: Signed
+        public FixedPointNumber negate() {
+            long invertedInt = ~integral;
+            int invertedFrac = ((short)~fractional) + 1;
+            if((invertedFrac >>> 16) == 1) invertedInt++;
+            invertedInt = (invertedInt & ((1L << 63) - 1)) | ~(invertedInt >>> 63);
+            this.integral = invertedInt;
+            this.fractional = (short) invertedFrac;
+            return this;
         }
     }
 }
