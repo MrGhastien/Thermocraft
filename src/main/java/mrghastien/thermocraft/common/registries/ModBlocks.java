@@ -30,7 +30,7 @@ public class ModBlocks {
     }
 
     //Standard blocks
-    //public static final RegistryObject<>
+    public static final RegistryObject<CaloriteOreBlock> CALORITE_ORE = registerWithItem("calorite_ore", CaloriteOreBlock::new);
 
     //Machines
     public static final RegistryObject<SolidHeaterBlock> SOLID_HEATER = registerWithItem("solid_heater", SolidHeaterBlock::new);
