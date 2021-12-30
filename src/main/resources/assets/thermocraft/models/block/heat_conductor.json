@@ -3,7 +3,7 @@
   "textures": {
     "frame": "thermocraft:block/thermal_capacitor_frame",
     "interface": "thermocraft:block/interface",
-    "core": "thermocraft:block/conductor_frame",
+    "core": "thermocraft:block/conductor_core",
     "particle": "thermocraft:block/thermal_capacitor_frame"
   },
   "center": {

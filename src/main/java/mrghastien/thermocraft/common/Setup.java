@@ -6,7 +6,6 @@ import mrghastien.thermocraft.client.renderers.ThermalCapacitorRenderer;
 import mrghastien.thermocraft.client.screens.*;
 import mrghastien.thermocraft.common.capabilities.Capabilities;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetworkHandler;
-import mrghastien.thermocraft.common.network.NetworkHandler;
 import mrghastien.thermocraft.common.network.packets.PacketHandler;
 import mrghastien.thermocraft.common.registries.*;
 import net.minecraft.client.gui.ScreenManager;
@@ -44,9 +43,9 @@ class Setup {
 
         MinecraftForge.EVENT_BUS.addListener(HeatNetworkHandler.instance()::onWorldTick);
         MinecraftForge.EVENT_BUS.addListener(HeatNetworkHandler.instance()::onWorldUnload);
-        MinecraftForge.EVENT_BUS.addListener(NetworkHandler.getInstance(LogicalSide.SERVER)::onServerTick);
-        MinecraftForge.EVENT_BUS.addListener(NetworkHandler.getInstance(LogicalSide.SERVER)::onWorldUnload);
-        MinecraftForge.EVENT_BUS.addListener(NetworkHandler.getInstance(LogicalSide.CLIENT)::onWorldUnload);
+        //MinecraftForge.EVENT_BUS.addListener(NetworkHandler.getInstance(LogicalSide.SERVER)::onServerTick);
+        //MinecraftForge.EVENT_BUS.addListener(NetworkHandler.getInstance(LogicalSide.SERVER)::onWorldUnload);
+        //MinecraftForge.EVENT_BUS.addListener(NetworkHandler.getInstance(LogicalSide.CLIENT)::onWorldUnload);
 
     }
 

@@ -2,21 +2,18 @@ package mrghastien.thermocraft.common.capabilities.fluid;
 
 import mrghastien.thermocraft.api.IChangeListener;
 import mrghastien.thermocraft.api.fluid.IModFluidTank;
-import mrghastien.thermocraft.common.inventory.containers.BaseContainer;
-import mrghastien.thermocraft.common.network.NetworkDataType;
-import mrghastien.thermocraft.common.network.NetworkHandler;
+import mrghastien.thermocraft.common.ThermoCraft;
+import mrghastien.thermocraft.common.network.data.DataType;
+import mrghastien.thermocraft.common.network.data.IDataHolder;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import java.util.function.Predicate;
 
 /**
- * Basically the same as {@link net.minecraftforge.fluids.capability.templates.FluidTank}, but doesn't implements {@link IFluidHandler}
+ * Basically the same as {@link net.minecraftforge.fluids.capability.templates.FluidTank}, but does not implement {@link IFluidHandler}
  */
 public class ModFluidTank implements IModFluidTank {
 
@@ -46,7 +43,10 @@ public class ModFluidTank implements IModFluidTank {
 
     @Override
     public void setFluid(FluidStack stack) {
-        this.fluid = stack;
+        if(stack.isFluidEqual(fluid))
+            setAmount(stack.getAmount());
+        else
+            this.fluid = stack;
     }
 
     @Override
@@ -84,6 +84,7 @@ public class ModFluidTank implements IModFluidTank {
         this.capacity = nbt.getInt("Capacity");
     }
 
+    @Nonnull
     @Override
     public FluidStack getFluid() {
         return fluid;
@@ -140,9 +141,7 @@ public class ModFluidTank implements IModFluidTank {
     @Nonnull
     @Override
     public FluidStack drain(int maxDrain, IFluidHandler.FluidAction action) {
-        int drained = maxDrain;
-        if(fluid.getAmount() < maxDrain)
-            drained = fluid.getAmount();
+        int drained = Math.min(fluid.getAmount(), maxDrain);
         FluidStack stack = new FluidStack(fluid, drained);
         if(action.execute() && drained > 0) {
             fluid.shrink(drained);
@@ -162,14 +161,12 @@ public class ModFluidTank implements IModFluidTank {
         listener.onChanged();
     }
 
-    public void gatherData(Object key, PacketDistributor.PacketTarget target, World world) {
-        NetworkHandler handler = NetworkHandler.getInstance(world);
-        handler.add(NetworkDataType.FLUIDSTACK, target, key, this::getFluid, v -> this.setFluid((FluidStack) v));
-        handler.add(NetworkDataType.INT, target, key, this::getCapacity, v -> this.setCapacity((int) v));
+    public void gatherData(String tankName, IDataHolder holder) {
+        holder.addData(DataType.FLUID_STACK, tankName + "fluid", () -> getFluid().copy(), this::setFluid);
+        holder.addData(DataType.INT, tankName + "capacity", this::getCapacity, this::setCapacity);
     }
 
-    public void gatherContainerData(BaseContainer<?> container) {
-        container.registerData(NetworkDataType.FLUIDSTACK, this::getFluid, v -> fluid = (FluidStack) v);
-        container.registerData(NetworkDataType.INT, this::getCapacity, v -> capacity = (int) v);
+    public void gatherData(IDataHolder holder) {
+        gatherData("", holder);
     }
 }

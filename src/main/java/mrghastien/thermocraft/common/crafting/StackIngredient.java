@@ -1,5 +1,9 @@
 package mrghastien.thermocraft.common.crafting;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonSyntaxException;
 import mrghastien.thermocraft.common.ThermoCraft;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -15,15 +19,9 @@ import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.IIngredientSerializer;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.stream.Stream;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSyntaxException;
-
-import javax.annotation.Nonnull;
 
 /**
  * Ingredient taking into account the number of items.

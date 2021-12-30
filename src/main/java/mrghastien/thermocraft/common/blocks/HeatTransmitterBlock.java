@@ -52,26 +52,6 @@ public abstract class HeatTransmitterBlock extends Block {
     @Override
     public abstract TileEntity createTileEntity(BlockState state, IBlockReader world);
 
-    @Override
-    public void onNeighborChange(BlockState state, IWorldReader world, BlockPos pos, BlockPos neighbor) {
-        indicateChange(pos, world, neighbor);
-    }
-
-    @Override
-    public void neighborChanged(BlockState state, World world, BlockPos pos, Block block, BlockPos neighbor, boolean isMoving) {
-        super.neighborChanged(state, world, pos, block, neighbor, isMoving);
-        indicateChange(pos, world, neighbor);
-    }
-
-    private void indicateChange(BlockPos pos, IWorldReader world, BlockPos neighbor) {
-        if(!world.isClientSide()) {
-            TileEntity te = world.getBlockEntity(pos);
-            if(te instanceof HeatTransmitterTile<?>) {
-                ((HeatTransmitterTile<?>) te).onNeighborChange(Direction.getNearest(neighbor.getX() - pos.getX(), neighbor.getY() - pos.getY(), neighbor.getZ() - pos.getZ()));
-            }
-        }
-    }
-
     public abstract HeatNetworkHandler.HeatNetworkType getNetworkType();
 
     @Override
@@ -87,5 +67,20 @@ public abstract class HeatTransmitterBlock extends Block {
             }
         }
         return shape;
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public void neighborChanged(BlockState state, World world, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean isMoving) {
+        super.neighborChanged(state, world, pos, neighborBlock, neighborPos, isMoving);
+        if(world.isClientSide()) return;
+        TileEntity te = world.getBlockEntity(pos);
+        if(te instanceof HeatTransmitterTile<?>) {
+            Direction dir = Direction.getNearest(neighborPos.getX() - pos.getX(),
+                    neighborPos.getY() - pos.getY(),
+                    neighborPos.getZ() - pos.getZ());
+            ((HeatTransmitterTile<?>)te).OnNeighborChanged(dir);
+        }
+
     }
 }

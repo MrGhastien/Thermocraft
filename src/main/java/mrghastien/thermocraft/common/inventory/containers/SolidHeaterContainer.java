@@ -10,7 +10,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
-public class SolidHeaterContainer extends BaseContainer<SolidHeaterTile> {
+public class SolidHeaterContainer extends BaseContainer {
 
     public SolidHeaterContainer(SolidHeaterTile tileEntity, int id, PlayerInventory playerInventory) {
         super(ModContainers.SOLID_HEATER.get(), id, playerInventory, tileEntity, 1);

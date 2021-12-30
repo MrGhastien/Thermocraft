@@ -43,4 +43,9 @@ public class MathUtils {
     public static int clamp(int value, int min, int max) {
         return value < min ? min : Math.min(value, max);
     }
+
+    public static long clamp(long value, long min, long max) {
+        return value < min ? min : Math.min(value, max);
+    }
+
 }

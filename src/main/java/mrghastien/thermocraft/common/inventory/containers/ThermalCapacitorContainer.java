@@ -8,7 +8,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class ThermalCapacitorContainer extends BaseContainer<ThermalCapacitorTile> {
+public class ThermalCapacitorContainer extends BaseContainer {
 
     public ThermalCapacitorContainer(int id, PlayerInventory playerInventory, ThermalCapacitorTile tileEntity) {
         super(ModContainers.THERMAL_CAPACITOR.get(), id, playerInventory, tileEntity, 0);

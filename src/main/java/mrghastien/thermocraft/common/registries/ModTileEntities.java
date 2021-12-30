@@ -1,12 +1,13 @@
 package mrghastien.thermocraft.common.registries;
 
-import mrghastien.thermocraft.api.heat.TransferType;
 import mrghastien.thermocraft.common.ThermoCraft;
 import mrghastien.thermocraft.common.tileentities.BoilerTile;
 import mrghastien.thermocraft.common.tileentities.FluidInjectorTile;
 import mrghastien.thermocraft.common.tileentities.SolidHeaterTile;
 import mrghastien.thermocraft.common.tileentities.ThermalCapacitorTile;
-import mrghastien.thermocraft.common.tileentities.cables.*;
+import mrghastien.thermocraft.common.tileentities.cables.HeatConductorTile;
+import mrghastien.thermocraft.common.tileentities.cables.HeatConvectorPumpTile;
+import mrghastien.thermocraft.common.tileentities.cables.HeatConvectorTile;
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;

@@ -8,7 +8,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class ConvectorControllerContainer extends BaseContainer<HeatConvectorPumpTile> {
+public class ConvectorControllerContainer extends BaseContainer {
 
     public ConvectorControllerContainer(int id, PlayerInventory playerInventory, HeatConvectorPumpTile tileEntity) {
         super(ModContainers.HEAT_CONVECTOR_PUMP.get(), id, playerInventory, tileEntity, 0);

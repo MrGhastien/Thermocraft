@@ -8,6 +8,7 @@ import net.minecraft.fluid.Fluid;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.Constants;
 
 public class ConvectorCable extends Cable {
 
@@ -23,7 +24,8 @@ public class ConvectorCable extends Cable {
 
     public void setFluid(Fluid fluid) {
         this.fluid = fluid;
-        if(!world.isClientSide() && updateDirections()) HeatNetworkHandler.instance().sendCableChangesToClient(this, UpdateCablePacket.UpdateType.CONNECTIONS);
+        if(!world.isClientSide() && updateDirections())
+            world.sendBlockUpdated(pos, getBlockState(), getBlockState(), Constants.BlockFlags.DEFAULT | Constants.BlockFlags.UPDATE_NEIGHBORS);
     }
 
     @Override

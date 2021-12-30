@@ -4,7 +4,6 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import mrghastien.thermocraft.common.ThermoCraft;
 import mrghastien.thermocraft.common.capabilities.heat.transport.cables.Cable;
-import mrghastien.thermocraft.common.network.NetworkHandler;
 import mrghastien.thermocraft.common.network.packets.CreateClientHeatNetworkPacket;
 import mrghastien.thermocraft.common.network.packets.InvalidateClientHeatNetworkPacket;
 import mrghastien.thermocraft.common.network.packets.PacketHandler;
@@ -25,18 +24,16 @@ import java.util.*;
 import java.util.function.BiFunction;
 
 /**
-    This code is inspired / derived / whatever from Mekanism's system for pipes and cables.
+    This code is inspired / derived from Mekanism's system for pipes and cables.
     This isn't copy-paste-d code or the same thing but renamed, I only wrote some algorithms which roughly do what Mekanism does.
-    {@link mrghastien.thermocraft.common.network.data.INetworkData}
  */
 public final class  HeatNetworkHandler {
 
     private static final HeatNetworkHandler INSTANCE = new HeatNetworkHandler();
 
-    private final BiMap<Long, HeatNetwork> networks = HashBiMap.create();
-    private final BiMap<Long, HeatNetwork> clientNetworks = HashBiMap.create();
+    private final Map<Long, HeatNetwork> networks = new HashMap<>();
+    private final Map<Long, HeatNetwork> clientNetworks = new HashMap<>();
     private final Map<BlockPos, Cable> unassigned = new LinkedHashMap<>();
-    private final Map<BlockPos, Pair<Cable, Direction>> needUpdate = new LinkedHashMap<>();
     private final Set<HeatNetwork> invalid = new LinkedHashSet<>();
 
     private long id;
@@ -61,6 +58,10 @@ public final class  HeatNetworkHandler {
 
     public HeatNetwork get(long id) {
         return id == -1 ? null : networks.get(id);
+    }
+
+    public boolean isPresent(BlockPos pos, World world, HeatNetworkType type) {
+        return get(pos, world, type) != null;
     }
 
     public HeatNetwork getClient(long id) {
@@ -115,19 +116,6 @@ public final class  HeatNetworkHandler {
     public void registerUnassigned(BlockPos pos, Cable c) {
         c.setNetwork(null);
         unassigned.put(pos, c);
-    }
-
-    private void updateCables() {
-        for(Map.Entry<BlockPos, Pair<Cable, Direction>> entry : needUpdate.entrySet()) {
-            BlockPos pos = entry.getKey();
-            Cable c = entry.getValue().getFirst();
-            Direction dir = entry.getValue().getSecond();
-            if (c.updateDirection(dir)) {
-                ThermoCraft.LOGGER.debug("Cable connection " + dir + " changed");
-                sendCableChangesToClient(c, UpdateCablePacket.UpdateType.CONNECTIONS);
-                if(c.hasNetwork()) c.getNetwork().requestRefresh(pos, c);
-            }
-        }
     }
 
     private void updateUnassigned() {
@@ -201,10 +189,6 @@ public final class  HeatNetworkHandler {
         if(!c.getWorld().isClientSide()) sendCableChangesToClient(c, UpdateCablePacket.UpdateType.NETWORK);
     }
 
-    public void onNeighborChange(@Nonnull Cable c, Direction dir) {
-        needUpdate.put(c.getPos(), new Pair<>(c, dir));
-    }
-
     public void addToNetwork(HeatNetwork net, @Nonnull Cable c) {
         if(net != null) net.addPosition(c);
         if(c.hasNetwork()) removeFromNetwork(c.getNetwork(), c);
@@ -231,7 +215,7 @@ public final class  HeatNetworkHandler {
                 net.addPosition(c);
                 changeCableNetwork(net, c);
             }
-            net.setInternalEnergy(net.getInternalEnergy() + other.getInternalEnergy());
+            net.setInternalEnergy(net.getInternalEnergy().add(other.getInternalEnergy()));
             invalidateNetwork(other);
             ThermoCraft.LOGGER.debug("Merged networks");
         }
@@ -261,7 +245,6 @@ public final class  HeatNetworkHandler {
         }
 
         network.invalidate();
-        NetworkHandler.getInstance(network.getWorld()).remove(this);
         network.lazy.invalidate();
         network.nodes.forEach((p, n) -> n.invalidate());
         network.nodes.clear();
@@ -284,13 +267,13 @@ public final class  HeatNetworkHandler {
         if(e.phase != TickEvent.Phase.END || e.side.isClient()) return;
         for(HeatNetwork net : networks.values()) {
              net.tick();
+             net.broadcastChanges();
         }
 
         for(HeatNetwork net : invalid) {
             invalidateNetwork(net);
         }
         invalid.clear();
-        updateCables();
         updateUnassigned();
     }
 

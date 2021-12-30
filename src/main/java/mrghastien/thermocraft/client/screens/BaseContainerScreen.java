@@ -4,7 +4,6 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import mrghastien.thermocraft.client.screens.widgets.Widget;
 import mrghastien.thermocraft.common.ThermoCraft;
 import mrghastien.thermocraft.common.inventory.containers.BaseContainer;
-import mrghastien.thermocraft.common.inventory.containers.IThermocraftContainerProvider;
 import mrghastien.thermocraft.common.tileentities.BaseTile;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.entity.player.PlayerInventory;
@@ -15,7 +14,7 @@ import net.minecraft.util.text.ITextComponent;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BaseContainerScreen<T extends BaseContainer<U>, U extends TileEntity & IThermocraftContainerProvider> extends ContainerScreen<T> {
+public abstract class BaseContainerScreen<T extends BaseContainer, U extends TileEntity> extends ContainerScreen<T> {
 
     protected final ResourceLocation guiTexture;
     public final List<Widget> widgets = new ArrayList<>();
@@ -23,7 +22,7 @@ public abstract class BaseContainerScreen<T extends BaseContainer<U>, U extends 
 
     public BaseContainerScreen(T container, PlayerInventory playerInventory, ITextComponent title) {
         super(container, playerInventory, title);
-        tileEntity = container.tileEntity;
+        tileEntity = (U) container.tileEntity;
         guiTexture = new ResourceLocation(ThermoCraft.MODID, "textures/gui/" + tileEntity.getType().getRegistryName().getPath() + "_gui.png");
     }
 

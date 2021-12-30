@@ -1,22 +1,24 @@
 package mrghastien.thermocraft.common.tileentities;
 
 import mrghastien.thermocraft.api.heat.TransferType;
+import mrghastien.thermocraft.common.ThermoCraft;
 import mrghastien.thermocraft.common.capabilities.Capabilities;
 import mrghastien.thermocraft.common.capabilities.heat.HeatHandler;
 import mrghastien.thermocraft.common.capabilities.heat.SidedHeatHandler;
 import mrghastien.thermocraft.common.capabilities.item.ModItemStackHandler;
-import mrghastien.thermocraft.common.inventory.containers.BaseContainer;
 import mrghastien.thermocraft.common.inventory.containers.SolidHeaterContainer;
-import mrghastien.thermocraft.common.network.NetworkDataType;
-import mrghastien.thermocraft.common.network.packets.PacketHandler;
+import mrghastien.thermocraft.common.network.data.DataType;
+import mrghastien.thermocraft.common.network.data.IDataHolder;
 import mrghastien.thermocraft.common.registries.ModTileEntities;
 import mrghastien.thermocraft.util.MathUtils;
+import mrghastien.thermocraft.util.math.FixedPointNumber;
 import net.minecraft.block.AbstractFurnaceBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.AbstractFurnaceTileEntity;
@@ -25,7 +27,6 @@ import net.minecraft.util.Direction;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.items.CapabilityItemHandler;
 
 import javax.annotation.Nonnull;
@@ -33,7 +34,7 @@ import javax.annotation.Nullable;
 
 public class SolidHeaterTile extends BaseTile {
 
-    private static final int ENERGY_PRODUCTION = 32;
+    private static final int ENERGY_PRODUCTION = 320;
     private static final double FURNACE_LIT_TEMPERATURE = 360;
 
     private int burnTime = 0;
@@ -57,12 +58,21 @@ public class SolidHeaterTile extends BaseTile {
     }
 
     @Override
-    public void tick() {
-        if(level.isClientSide()) return;
+    public void registerSyncData(IDataHolder holder) {
+        super.registerSyncData(holder);
+        if(holder.getCategory() != IDataHolder.DataHolderCategory.CONTAINER) return;
+        heatHandler.gatherData(holder);
+        holder.addData(DataType.INT, ThermoCraft.modLoc("burn_time"), this::getBurnTime, this::setBurnTime);
+        holder.addData(DataType.INT, ThermoCraft.modLoc("total_burn_time"), this::getTotalBurnTime, this::setTotalBurnTime);
+    }
+
+    @Override
+    public void serverTick() {
         if (burnTime <= 0 && containsFuel()) {
             consumeFuel();
             setActiveState();
         }
+
         heatHandler.ambient();
         if (burnTime > 0) {
             burnTime--;
@@ -70,6 +80,7 @@ public class SolidHeaterTile extends BaseTile {
         } else {
             setInactiveState();
         }
+
         TileEntity te = level.getBlockEntity(worldPosition.above());
         if(te == null) return;
         if(te instanceof AbstractFurnaceTileEntity) {
@@ -82,22 +93,13 @@ public class SolidHeaterTile extends BaseTile {
             }
         } else {
             te.getCapability(Capabilities.HEAT_HANDLER_CAPABILITY, Direction.DOWN).ifPresent(h -> {
-                long energy = (long) (Math.min(heatHandler.getConductionCoefficient(), h.getConductionCoefficient()) * (h.getTemperature() - heatHandler.getTemperature()));
-                if(energy < 0) {
-                    h.transferEnergy(-energy);
-                    heatHandler.transferEnergy(Direction.UP, energy);
+                FixedPointNumber energy = FixedPointNumber.valueOf(Math.min(heatHandler.getConductionCoefficient(), h.getConductionCoefficient()) * (heatHandler.getTemperature() - h.getTemperature()));
+                if(energy.isGreaterThan(0))  {
+                    h.transferEnergy(energy);
+                    heatHandler.transferEnergy(Direction.UP, energy.negate());
                 }
             });
         }
-        super.tick();
-    }
-
-    @Override
-    public void registerContainerUpdatedData(BaseContainer c) {
-        PacketDistributor.PacketTarget target = PacketHandler.CONTAINER_LISTENERS.with(() -> c);
-        heatHandler.gatherData(c, target, level);
-        c.registerData(NetworkDataType.INT, this::getBurnTime, v -> setBurnTime((int) v));
-        c.registerData(NetworkDataType.INT, this::getTotalBurnTime, v -> setTotalBurnTime((int) v));
     }
 
     protected BlockState getInactiveState(BlockState state) {
@@ -129,7 +131,7 @@ public class SolidHeaterTile extends BaseTile {
 
     private boolean containsFuel() {
         for(int i = 0; i < inputInv.getSlots(); i++) {
-            if(ForgeHooks.getBurnTime(inputInv.getStackInSlot(i)) > 0) {
+            if(ForgeHooks.getBurnTime(inputInv.getStackInSlot(i), IRecipeType.SMELTING) > 0) {
                 return true;
             }
         }
@@ -161,11 +163,7 @@ public class SolidHeaterTile extends BaseTile {
 					Size:...
 					...
 				}
-				Batteries:{
-					Items:...
-					Size:...
-				}
-				Temperature:{
+				Heat:{
 					InternalEnergy:...
 					HeatCapacity:...
 				}
@@ -183,7 +181,7 @@ public class SolidHeaterTile extends BaseTile {
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if(cap == Capabilities.HEAT_HANDLER_CAPABILITY) return heatHandler.getLazy(side).cast();
+        if(cap == Capabilities.HEAT_HANDLER_CAPABILITY) return (side == null ? heatHandler.getLazy() : heatHandler.getLazy(side)).cast();
         if(cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
             return inputInv.getLazy().cast();
         }

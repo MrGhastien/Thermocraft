@@ -9,9 +9,8 @@ import mrghastien.thermocraft.common.capabilities.heat.HeatHandler;
 import mrghastien.thermocraft.common.capabilities.heat.SidedHeatHandler;
 import mrghastien.thermocraft.common.crafting.BoilingRecipe;
 import mrghastien.thermocraft.common.crafting.ModRecipeType;
-import mrghastien.thermocraft.common.inventory.containers.BaseContainer;
 import mrghastien.thermocraft.common.inventory.containers.BoilerContainer;
-import mrghastien.thermocraft.common.network.packets.PacketHandler;
+import mrghastien.thermocraft.common.network.data.IDataHolder;
 import mrghastien.thermocraft.common.registries.ModTileEntities;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
@@ -58,13 +57,12 @@ public class BoilerTile extends BaseTile {
     }
 
     @Override
-    public void tick() {
+    public void serverTick() {
         //If fluid in input, and the temperature is high enough, consume a certain amount of input per tick
         //depending on the temperature (higher = faster boiling)
         //Also extract energy from the heat handler
         //Finally fill the output tank.
 
-        if(level.isClientSide()) return;
         this.inputHandler.fill(new FluidStack(Fluids.WATER, 10), IFluidHandler.FluidAction.EXECUTE);
         heatHandler.transferEnergy(heatHandler.getInsulationCoefficient() * (IHeatHandler.AIR_TEMPERATURE - heatHandler.getTemperature()));
         if(canRun()) {
@@ -81,7 +79,6 @@ public class BoilerTile extends BaseTile {
             currentRecipe = null;
             setInactiveState();
         }
-        super.tick();
     }
 
     private FluidStack consumeInput() {
@@ -163,16 +160,19 @@ public class BoilerTile extends BaseTile {
     }
 
     @Override
-    public void registerContainerUpdatedData(BaseContainer c) {
-        heatHandler.gatherData(c, PacketHandler.CONTAINER_LISTENERS.with(() -> c), level);
-        inputHandler.gatherData(c, PacketHandler.CONTAINER_LISTENERS.with(() -> c), level);
-        outputHandler.gatherData(c, PacketHandler.CONTAINER_LISTENERS.with(() -> c), level);
+    public void registerSyncData(IDataHolder holder) {
+        super.registerSyncData(holder);
+        if(holder.getCategory() != IDataHolder.DataHolderCategory.CONTAINER) return;
+
+        heatHandler.gatherData(holder);
+        inputHandler.gatherData("input", holder);
+        outputHandler.gatherData("output", holder);
     }
 
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if(cap == Capabilities.HEAT_HANDLER_CAPABILITY) return heatHandler.getLazy(side).cast();
+        if(cap == Capabilities.HEAT_HANDLER_CAPABILITY) return (side == null ? heatHandler.getLazy() : heatHandler.getLazy(side)).cast();
         if(cap == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
             if(side == Direction.WEST) return inputHandler.getLazy().cast();
             if(side == Direction.UP) return outputHandler.getLazy().cast();

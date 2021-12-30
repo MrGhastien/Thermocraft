@@ -10,13 +10,12 @@ import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.util.INBTSerializable;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class Capabilities {
 
     @CapabilityInject(IHeatHandler.class)
-    public static final Capability<IHeatHandler> HEAT_HANDLER_CAPABILITY = null;
+    public static Capability<IHeatHandler> HEAT_HANDLER_CAPABILITY = null;
 
     public static void registerAll() {
         CapabilityManager.INSTANCE.register(IHeatHandler.class, new NBTSerializableStorage<>(), () -> new HeatHandler(1000, 40, 10, () -> {}));

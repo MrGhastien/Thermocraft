@@ -6,15 +6,10 @@ import mrghastien.thermocraft.common.crafting.FluidIngredient;
 import mrghastien.thermocraft.common.crafting.StackIngredient;
 import net.minecraft.data.IFinishedRecipe;
 import net.minecraft.fluid.Fluid;
-import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.ShapedRecipe;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.tags.ITag;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.fluids.FluidStack;
 
 import java.util.function.Consumer;

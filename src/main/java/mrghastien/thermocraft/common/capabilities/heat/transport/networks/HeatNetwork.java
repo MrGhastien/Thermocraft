@@ -4,26 +4,36 @@ import mrghastien.thermocraft.api.heat.IHeatHandler;
 import mrghastien.thermocraft.api.heat.TransferType;
 import mrghastien.thermocraft.common.capabilities.Capabilities;
 import mrghastien.thermocraft.common.capabilities.heat.transport.cables.Cable;
-import mrghastien.thermocraft.common.network.NetworkDataType;
-import mrghastien.thermocraft.common.network.NetworkHandler;
+import mrghastien.thermocraft.common.network.*;
+import mrghastien.thermocraft.common.network.data.DataReference;
+import mrghastien.thermocraft.common.network.data.DataType;
+import mrghastien.thermocraft.common.network.data.IDataHolder;
+import mrghastien.thermocraft.common.network.packets.PacketHandler;
+import mrghastien.thermocraft.common.network.packets.UpdateHeatNetworkPacket;
 import mrghastien.thermocraft.common.tileentities.cables.HeatTransmitterTile;
 import mrghastien.thermocraft.util.Constants;
+import mrghastien.thermocraft.util.math.FixedPointNumber;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fml.network.PacketDistributor;
 
+import javax.annotation.Nonnull;
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public abstract class HeatNetwork implements IHeatHandler{
 
     protected boolean needsRefresh;
 
     private double heatCapacity;
-    private long internalEnergy;
+    private FixedPointNumber.Mutable internalEnergy;
     private double conductionCoefficient;
     private double insulationCoefficient;
 
@@ -35,30 +45,32 @@ public abstract class HeatNetwork implements IHeatHandler{
     final Map<BlockPos, Cable> cables;
     final Map<BlockPos, Cable> refreshMap;
     final Map<BlockPos, TransferPoint> nodes;
+    final Set<Chunk> chunks;
     protected int receiverCount;
     final long id;
+
+    protected final IDataHolder dataHolder;
 
     protected HeatNetwork(long id, World world) {
         this.world = world;
         this.nodes = new HashMap<>();
         this.cables = new HashMap<>();
         this.refreshMap = new HashMap<>();
+        this.chunks = new HashSet<>();
         this.heatCapacity = 1000;
         this.conductionCoefficient = 40;
         this.insulationCoefficient = 0;
         this.receiverCount = 0;
-        internalEnergy = (long) (heatCapacity * IHeatHandler.AIR_TEMPERATURE);
+        this.internalEnergy = FixedPointNumber.Mutable.valueOf(heatCapacity * IHeatHandler.AIR_TEMPERATURE);
         this.lazy = LazyOptional.of(() -> this);
         this.id = id;
+        this.dataHolder = new DataHolder();
 
-        NetworkHandler netHandler = NetworkHandler.getInstance(world);
-        PacketDistributor.PacketTarget target = PacketDistributor.DIMENSION.with(world::dimension);
-        //Not using setters to avoid triggering "onChanged"
-        netHandler.add(NetworkDataType.LONG, target, this, this::getInternalEnergy, v -> internalEnergy = (long) v);
-        netHandler.add(NetworkDataType.DOUBLE, target, this, this::getHeatCapacity, v -> heatCapacity = (double) v);
-        netHandler.add(NetworkDataType.DOUBLE, target, this, this::getConductionCoefficient, v -> conductionCoefficient = (double) v);
-        netHandler.add(NetworkDataType.DOUBLE, target, this, this::getInsulationCoefficient, v -> insulationCoefficient = (double) v);
-        netHandler.add(NetworkDataType.BOOLEAN, target, this, this::canWork, v -> canWork = (boolean) v);
+        dataHolder.addData(DataType.FIXED_POINT, "internal_energy_" + id, this::getInternalEnergy, this::setInternalEnergy);
+        dataHolder.addData(DataType.DOUBLE, "heat_capacity_" + id, this::getHeatCapacity, v -> this.setHeatCapacity(v, false));
+        dataHolder.addData(DataType.DOUBLE, "conduction_" + id, this::getConductionCoefficient, this::setConductionCoefficient);
+        dataHolder.addData(DataType.DOUBLE, "insulation_" + id, this::getInsulationCoefficient, this::setInsulationCoefficient);
+        dataHolder.addData(DataType.BOOL, "can_work_" + id, this::canWork, v -> canWork = v);
 
         //"Cable" placed : Creates a new network, or if there is another cable block nearby, register itself on this network instead.
         //Cable updated (other cable is placed nearby) : Tell the network to refresh the current block position.
@@ -75,12 +87,23 @@ public abstract class HeatNetwork implements IHeatHandler{
 
     void addPosition(Cable cable) {
         this.cables.put(cable.getPos(), cable);
+        chunks.add(world.getChunkAt(cable.getPos()));
         requestRefresh(cable.getPos(), cable);
     }
 
     boolean remove(BlockPos pos) {
         Cable removed = this.cables.remove(pos);
-        return removed != null;
+        if(removed == null) return false;
+        boolean canRemove = true;
+        Chunk c = world.getChunkAt(pos);
+        for(BlockPos p : c.getBlockEntitiesPos()) {
+            if(HeatNetworkHandler.instance().get(pos, world, type()) == this) {
+                canRemove = false;
+                break;
+            }
+        }
+        if(canRemove) chunks.remove(c);
+        return true;
     }
 
     public Set<BlockPos> getCablePositions() {
@@ -109,10 +132,9 @@ public abstract class HeatNetwork implements IHeatHandler{
         requestRefresh(pos, cables.get(pos));
     }
 
-    abstract void requestRefresh(BlockPos pos, Cable cable);
+    public abstract void requestRefresh(BlockPos pos, Cable cable);
 
-    protected void refresh() {
-    }
+    protected abstract void refresh();
 
     public boolean isClientSide() {
         return world.isClientSide();
@@ -124,7 +146,7 @@ public abstract class HeatNetwork implements IHeatHandler{
 
     public void tick() {
         //Send heat to connected blocks
-        if(needsRefresh && nodes.size() > 0) {
+        if(needsRefresh) {
             refresh();
             needsRefresh = false;
         }
@@ -132,21 +154,23 @@ public abstract class HeatNetwork implements IHeatHandler{
             pushEnergyOut();
     }
 
-    protected TransferPoint refreshTransferPoint(BlockPos pos, Cable c) {
+    void broadcastChanges() {
+        if(dataHolder.getBinding().hasChanged()) {
+            PacketHandler.MAIN_CHANNEL.send(PacketHandler.CONTAINER_LISTENERS.with(() -> chunks), new UpdateHeatNetworkPacket(this));
+        }
+    }
+
+    protected void refreshTransferPoint(BlockPos pos, @Nonnull Cable c) {
         boolean hasConnections = c.hasTransferConnections();
         TransferPoint n = nodes.get(pos);
         if(n == null) {
-            if(!hasConnections) return null;
+            if(!hasConnections) return;
             n = new TransferPoint(c);
             nodes.put(pos, n);
         } else {
-            if(!hasConnections) {
-                nodes.remove(pos).invalidate();
-                return null;
-            }
-            n.recheckConnections();
+            if (hasConnections) n.recheckConnections();
+            else nodes.remove(pos).invalidate();
         }
-        return n;
     }
 
     public LazyOptional<IHeatHandler> getLazy() {
@@ -189,11 +213,11 @@ public abstract class HeatNetwork implements IHeatHandler{
     //================== HeatHandler Implementation ==================
     @Override
     public double getTemperature() {
-        return internalEnergy / getHeatCapacity();
+        return internalEnergy.doubleValue() / getHeatCapacity();
     }
 
     @Override
-    public long getInternalEnergy() {
+    public FixedPointNumber getInternalEnergy() {
         return internalEnergy;
     }
 
@@ -204,8 +228,15 @@ public abstract class HeatNetwork implements IHeatHandler{
 
     @Override
     public void setInternalEnergy(long energy) {
-        this.internalEnergy = energy;
-        if(internalEnergy < 0) internalEnergy = 0;
+        this.internalEnergy.set(energy);
+        if(internalEnergy.isLessThan(0)) internalEnergy.set(0);
+        onChanged();
+    }
+
+    @Override
+    public void setInternalEnergy(FixedPointNumber energy) {
+        this.internalEnergy.set(energy);
+        if(internalEnergy.isLessThan(0)) internalEnergy.set(0);
         onChanged();
     }
 
@@ -217,7 +248,7 @@ public abstract class HeatNetwork implements IHeatHandler{
     @Override
     public void setHeatCapacity(double capacity, boolean updateEnergy) {
         if(updateEnergy) {
-            setInternalEnergy((long) (getInternalEnergy() + (capacity - getHeatCapacity()) * IHeatHandler.AIR_TEMPERATURE));
+            setInternalEnergy((long) (getInternalEnergy().doubleValue() + (capacity - getHeatCapacity()) * IHeatHandler.AIR_TEMPERATURE));
         } else onChanged();
         this.heatCapacity = capacity;
     }
@@ -243,7 +274,14 @@ public abstract class HeatNetwork implements IHeatHandler{
     }
 
     public void transferEnergy(long energy) {
-        setInternalEnergy(internalEnergy + energy);
+        this.internalEnergy.add(energy);
+        onChanged();
+    }
+
+    @Override
+    public void transferEnergy(FixedPointNumber energy) {
+        this.internalEnergy.add(energy);
+        onChanged();
     }
 
     @Override
@@ -259,7 +297,7 @@ public abstract class HeatNetwork implements IHeatHandler{
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
-        nbt.putLong("internalEnergy", getInternalEnergy());
+        nbt.putLong("internalEnergy", getInternalEnergy().longValue());
         nbt.putDouble("heatCapacity", getHeatCapacity());
         return nbt;
     }
@@ -268,6 +306,10 @@ public abstract class HeatNetwork implements IHeatHandler{
     public void deserializeNBT(CompoundNBT nbt) {
         setInternalEnergy(nbt.getLong("internalEnergy"));
         setHeatCapacity(nbt.getDouble("heatCapacity"), false);
+    }
+
+    public INetworkBinding getBinding() {
+        return dataHolder.getBinding();
     }
 
     public class TransferPoint {
@@ -286,22 +328,20 @@ public abstract class HeatNetwork implements IHeatHandler{
 
         protected void recheckConnections() {
             this.globalTransferType = TransferType.NONE;
-            for (Direction dir : cable.getCableConnections()) {
-                globalTransferType.or(cable.getConnections().get(dir));
-                TileEntity tile = world.getBlockEntity(cable.getPos());
-                if (tile != null && !(tile instanceof HeatTransmitterTile)) {
-                    LazyOptional<IHeatHandler> handler = tile.getCapability(Capabilities.HEAT_HANDLER_CAPABILITY, dir.getOpposite());
-                    if(handler.isPresent()) {
-                        TransferType type = handler.map(h -> TransferType.get(h.canReceive(), h.canExtract())).orElse(TransferType.NONE);
-                        if(type.canTransfer()) {
-                            handler.addListener(lazy -> invalidateConnection(dir));
-                            connectedHandlers.put(dir, handler);
-                            if(type.canReceive()) {
-                                receivers.put(dir, handler);
-                                receiverCount++;
-                            }
-                        }
-                    }
+            for (Map.Entry<Direction, TransferType> entry : cable.getConnections().entrySet()) {
+                Direction dir = entry.getKey();
+                TransferType transferType = entry.getValue();
+                if(!transferType.canTransfer()) continue;
+
+                globalTransferType = globalTransferType.or(transferType);
+                TileEntity tile = world.getBlockEntity(cable.getPos().relative(dir));
+                if (tile == null || tile instanceof HeatTransmitterTile) continue;
+
+                LazyOptional<IHeatHandler> handler = tile.getCapability(Capabilities.HEAT_HANDLER_CAPABILITY, dir.getOpposite());
+                if(handler.map(IHeatHandler::canReceive).orElse(false)) {
+                    handler.addListener(lazy -> invalidateConnection(dir));
+                    receivers.put(dir, handler);
+                    receiverCount++;
                 }
             }
         }
@@ -324,7 +364,6 @@ public abstract class HeatNetwork implements IHeatHandler{
         }
 
         protected void invalidateConnection(Direction dir) {
-            connectedHandlers.remove(dir);
             if(receivers.remove(dir) != null) {
                 receiverCount--;
             }
@@ -335,6 +374,51 @@ public abstract class HeatNetwork implements IHeatHandler{
             connectedHandlers.clear();
             receiverCount -= receivers.size();
             receivers.clear();
+        }
+    }
+
+    public class DataHolder implements IDataHolder {
+
+        private final Map<ResourceLocation, DataReference<?>> references;
+
+        private final INetworkBinding binding;
+
+        public DataHolder() {
+            this.references = new HashMap<>();
+            binding = new CompositeDataNetworkBinding(this);
+        }
+
+        @Override
+        public INetworkBinding getBinding() {
+            return binding;
+        }
+
+        @Override
+        public DataHolderCategory getCategory() {
+            return DataHolderCategory.HEAT_NETWORK;
+        }
+
+        @Override
+        public DataReference<?> getData(ResourceLocation id) {
+            return references.get(id);
+        }
+
+        @Override
+        public void forEach(BiConsumer<ResourceLocation, DataReference<?>> action) {
+            references.forEach(action);
+        }
+
+        @Override
+        public <T> void addData(DataReference<T> data) {
+            references.put(data.getId(), data);
+        }
+
+        @Override
+        public <T> void addData(DataType<T> type, ResourceLocation key, Supplier<T> getter, Consumer<T> setter) {
+            addData(new DataReference<>(type, key, getter, v -> {
+                setter.accept(v);
+                onChanged();
+            }));
         }
     }
 }

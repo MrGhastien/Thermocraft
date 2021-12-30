@@ -2,30 +2,33 @@ package mrghastien.thermocraft.common.network.packets;
 
 import mrghastien.thermocraft.common.ThermoCraft;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.IContainerListener;
 import net.minecraft.network.IPacket;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class PacketHandler {
 
-    public static final PacketDistributor<Container> CONTAINER_LISTENERS = new PacketDistributor<>(PacketHandler::playerListContainerConsumer, NetworkDirection.PLAY_TO_CLIENT);
+    public static final PacketDistributor<Collection<Chunk>> CONTAINER_LISTENERS = new PacketDistributor<>(PacketHandler::trackingAnyChunkConsumer, NetworkDirection.PLAY_TO_CLIENT);
 
     public static final String PROTOCOL_VERSION = String.valueOf(1);
     private static int ID = 0;
 
     private static int nextID() {
-        return ID++ - 1;
+        return ID++;
     }
 
     public static final SimpleChannel MAIN_CHANNEL = NetworkRegistry.ChannelBuilder
@@ -37,10 +40,10 @@ public class PacketHandler {
 
     public static void registerNetworkPackets() {
 
-        MAIN_CHANNEL.messageBuilder(UpdateValuePacket.class, nextID())
-                .encoder(UpdateValuePacket::encode)
-                .decoder(UpdateValuePacket::new)
-                .consumer(UpdateValuePacket::handle)
+        MAIN_CHANNEL.messageBuilder(UpdateClientContainerPacket.class, nextID())
+                .encoder(UpdateClientContainerPacket::encode)
+                .decoder(UpdateClientContainerPacket::new)
+                .consumer(UpdateClientContainerPacket::handle)
                 .add();
 
         MAIN_CHANNEL.messageBuilder(CreateClientHeatNetworkPacket.class, nextID())
@@ -66,6 +69,12 @@ public class PacketHandler {
                 .decoder(ModUpdateTileEntityPacket::new)
                 .consumer(ModUpdateTileEntityPacket::handle)
                 .add();
+
+        MAIN_CHANNEL.messageBuilder(UpdateHeatNetworkPacket.class, nextID())
+                .encoder(UpdateHeatNetworkPacket::encode)
+                .decoder(UpdateHeatNetworkPacket::new)
+                .consumer(UpdateHeatNetworkPacket::handle)
+                .add();
     }
 
     public static void sendToPlayer(Object message, ServerPlayerEntity listener) {
@@ -84,18 +93,18 @@ public class PacketHandler {
         MAIN_CHANNEL.sendToServer(message);
     }
 
-    private static Consumer<IPacket<?>> playerListContainerConsumer(final PacketDistributor<Container> distributor, final Supplier<Container> containerSupplier) {
+    private static Consumer<IPacket<?>> trackingAnyChunkConsumer(final PacketDistributor<Collection<Chunk>> distributor, final Supplier<Collection<Chunk>> supplier) {
         return p -> {
-            Container c = containerSupplier.get();
-            for(IContainerListener listener : c.containerListeners) {
-                if (listener instanceof ServerPlayerEntity)
-                    ((ServerPlayerEntity)listener).connection.connection.send(p);
+            Set<ServerPlayerEntity> alreadySentTargets = new HashSet<>();
+            for (Chunk chunk : supplier.get()) {
+                ((ServerChunkProvider)chunk.getLevel().getChunkSource()).chunkMap.getPlayers(chunk.getPos(), false)
+                        .filter(player -> !alreadySentTargets.contains(player))
+                        .forEach(e -> {
+                    e.connection.send(p);
+                    alreadySentTargets.add(e);
+                });
             }
         };
-    }
-
-    public static PacketDistributor.PacketTarget containerListenersTarget(Container c) {
-        return CONTAINER_LISTENERS.with(() -> c);
     }
 
 }

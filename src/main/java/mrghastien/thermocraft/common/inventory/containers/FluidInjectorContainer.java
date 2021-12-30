@@ -9,7 +9,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.items.SlotItemHandler;
 
-public class FluidInjectorContainer extends BaseContainer<FluidInjectorTile> {
+public class FluidInjectorContainer extends BaseContainer {
 
 
     public FluidInjectorContainer(FluidInjectorTile tileEntity, int id, PlayerInventory playerInventory) {

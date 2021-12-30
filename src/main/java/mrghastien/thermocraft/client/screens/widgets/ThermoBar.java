@@ -6,7 +6,6 @@ import mrghastien.thermocraft.util.Constants;
 import mrghastien.thermocraft.util.RenderUtils;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.text.TextFormatting;
-import sun.management.counter.Units;
 
 import java.awt.*;
 import java.util.function.Supplier;
@@ -47,7 +46,7 @@ public class ThermoBar extends Widget {
     protected void onHovered(Screen screen, MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         IHeatHandler handler = getHandler();
         setTooltips(String.format("Heat : %3.2f " + Constants.TEMPERATURE_UNIT, handler.getTemperature()),
-                TextFormatting.DARK_GRAY + "Energy : " + handler.getInternalEnergy() + " " + Constants.ENERGY_UNIT,
+                TextFormatting.DARK_GRAY + "Energy : " + handler.getInternalEnergy().longValue() + " " + Constants.ENERGY_UNIT,
                 String.format("%sDissipation : %.2f %s/t", TextFormatting.DARK_GRAY, Math.max(0, -handler.getDissipation()), Constants.ENERGY_UNIT));
         super.onHovered(screen, stack, mouseX, mouseY, partialTicks);
     }

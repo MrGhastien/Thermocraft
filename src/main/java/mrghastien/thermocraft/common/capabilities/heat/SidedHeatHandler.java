@@ -4,6 +4,7 @@ import mrghastien.thermocraft.api.IChangeListener;
 import mrghastien.thermocraft.api.heat.IHeatHandler;
 import mrghastien.thermocraft.api.heat.TransferType;
 import mrghastien.thermocraft.util.Constants;
+import mrghastien.thermocraft.util.math.FixedPointNumber;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.util.LazyOptional;
@@ -18,14 +19,14 @@ public class SidedHeatHandler extends HeatHandler implements mrghastien.thermocr
     private final EnumMap<Direction, LazyOptional<Interface>> interfaces = new EnumMap<>(Direction.class);
 
     public SidedHeatHandler(double heatCapacity, long internalEnergy, double conductionCoefficient, double insulationCoefficient) {
-        this(heatCapacity, internalEnergy, conductionCoefficient, insulationCoefficient, null, d -> TransferType.BOTH);
+        this(heatCapacity, FixedPointNumber.valueOf(internalEnergy), conductionCoefficient, insulationCoefficient, null, d -> TransferType.BOTH);
     }
 
     public SidedHeatHandler(double heatCapacity, double conductionCoefficient, double insulationCoefficient, @Nullable IChangeListener listener, Function<Direction, TransferType> transferTypeFunction) {
-        this(heatCapacity, (long) (heatCapacity * IHeatHandler.AIR_TEMPERATURE), conductionCoefficient, insulationCoefficient, listener, transferTypeFunction);
+        this(heatCapacity, FixedPointNumber.valueOf(heatCapacity * IHeatHandler.AIR_TEMPERATURE), conductionCoefficient, insulationCoefficient, listener, transferTypeFunction);
     }
 
-    public SidedHeatHandler(double heatCapacity, long internalEnergy, double conductionCoefficient, double insulationCoefficient, @Nullable IChangeListener listener, Function<Direction, TransferType> transferTypeFunction) {
+    public SidedHeatHandler(double heatCapacity, FixedPointNumber internalEnergy, double conductionCoefficient, double insulationCoefficient, @Nullable IChangeListener listener, Function<Direction, TransferType> transferTypeFunction) {
         super(heatCapacity, internalEnergy, conductionCoefficient, insulationCoefficient, listener);
         this.transferTypeFunction = transferTypeFunction;
         for(Direction dir : Constants.DIRECTIONS) {
@@ -60,6 +61,13 @@ public class SidedHeatHandler extends HeatHandler implements mrghastien.thermocr
             transferEnergy(energy);
     }
 
+    @Override
+    public void transferEnergy(Direction dir, FixedPointNumber energy) {
+        TransferType type = getTransferType(dir);
+        if(type.canReceive() && energy.isGreaterThan(0) || type.canExtract() && energy.isLessThan(0))
+            transferEnergy(energy);
+    }
+
     public class Interface implements IHeatHandler {
 
         private final TransferType type;
@@ -79,7 +87,7 @@ public class SidedHeatHandler extends HeatHandler implements mrghastien.thermocr
         }
 
         @Override
-        public long getInternalEnergy() {
+        public FixedPointNumber getInternalEnergy() {
             return SidedHeatHandler.this.getInternalEnergy();
         }
 
@@ -94,13 +102,18 @@ public class SidedHeatHandler extends HeatHandler implements mrghastien.thermocr
         }
 
         @Override
+        public void setInternalEnergy(FixedPointNumber energy) {
+            SidedHeatHandler.this.setInternalEnergy(energy);
+        }
+
+        @Override
         public double getHeatCapacity() {
             return SidedHeatHandler.this.getHeatCapacity();
         }
 
         @Override
         public void setHeatCapacity(double capacity, boolean updateEnergy) {
-            SidedHeatHandler.this.setHeatCapacity(capacity);
+            SidedHeatHandler.this.setHeatCapacity(capacity, updateEnergy);
         }
 
         @Override
@@ -126,6 +139,12 @@ public class SidedHeatHandler extends HeatHandler implements mrghastien.thermocr
         @Override
         public void transferEnergy(long energy) {
             if(energy > 0 && type.canReceive() || energy < 0 && type.canExtract())
+                SidedHeatHandler.this.transferEnergy(energy);
+        }
+
+        @Override
+        public void transferEnergy(FixedPointNumber energy) {
+            if(energy.isGreaterThan(0) && type.canReceive() || energy.isLessThan(0) && type.canExtract())
                 SidedHeatHandler.this.transferEnergy(energy);
         }
 

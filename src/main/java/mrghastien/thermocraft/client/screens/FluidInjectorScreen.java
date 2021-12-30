@@ -6,12 +6,7 @@ import mrghastien.thermocraft.common.inventory.containers.FluidInjectorContainer
 import mrghastien.thermocraft.common.tileentities.FluidInjectorTile;
 import mrghastien.thermocraft.util.MathUtils;
 import mrghastien.thermocraft.util.RenderUtils;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.renderer.Atlases;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fluids.FluidStack;
 

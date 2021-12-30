@@ -5,14 +5,20 @@ import mrghastien.thermocraft.common.capabilities.Capabilities;
 import mrghastien.thermocraft.common.capabilities.heat.transport.cables.Cable;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetwork;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetworkHandler;
+import net.minecraft.block.BlockState;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.client.model.data.ModelProperty;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.LazyOptional;
 
 import javax.annotation.Nonnull;
@@ -47,23 +53,50 @@ public abstract class HeatTransmitterTile<C extends Cable> extends TileEntity {
     @Override
     public void onLoad() {
         super.onLoad();
-        this.cable = createCable();
+        if(cable == null)
+            this.cable = createCable();
     }
 
-    public void onNeighborChange(Direction dir) {
-        HeatNetworkHandler.instance().onNeighborChange(cable, dir);
+    @Nonnull
+    @Override
+    public CompoundNBT getUpdateTag() {
+        if(cable.updateDirections() && cable.hasNetwork()) {
+            cable.getNetwork().requestRefresh(worldPosition, cable);
+        }
+        CompoundNBT tag = super.getUpdateTag();
+        cable.writeToNbt(tag);
+        return tag;
+    }
+
+    @Nullable
+    @Override
+    public SUpdateTileEntityPacket getUpdatePacket() {
+        return new SUpdateTileEntityPacket(getBlockPos(), -1, getUpdateTag());
+    }
+
+    @Override
+    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
+        handleUpdateTag(getBlockState(), pkt.getTag());
+    }
+
+    @Override
+    public void handleUpdateTag(BlockState state, CompoundNBT tag) {
+        if(cable.handleUpdateTag(tag))
+            requestModelDataUpdate();
     }
 
     @Override
     public void onChunkUnloaded() {
         super.onChunkUnloaded();
         cable.onChunkUnload();
+        cable = null;
     }
 
     @Override
     public void setRemoved() {
         super.setRemoved();
         cable.onRemoved();
+        cable = null;
     }
 
     @Nonnull
@@ -87,7 +120,7 @@ public abstract class HeatTransmitterTile<C extends Cable> extends TileEntity {
         if(cap == Capabilities.HEAT_HANDLER_CAPABILITY) {
             HeatNetwork net = getNetwork();
             if(net != null)
-                return net.getConnection(worldPosition, side).cast();
+                return net.getLazy().cast();
         }
         return super.getCapability(cap, side);
     }
@@ -107,5 +140,10 @@ public abstract class HeatTransmitterTile<C extends Cable> extends TileEntity {
 
     public boolean hasNetwork() {
         return getNetwork() != null;
+    }
+
+    public void OnNeighborChanged(Direction dir) {
+        BlockPos neighbor = getBlockPos().relative(dir);
+        if(hasLevel()) getLevel().sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Constants.BlockFlags.DEFAULT);
     }
 }

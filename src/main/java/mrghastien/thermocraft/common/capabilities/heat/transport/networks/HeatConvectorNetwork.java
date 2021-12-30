@@ -4,23 +4,22 @@ import mrghastien.thermocraft.common.ThermoCraft;
 import mrghastien.thermocraft.common.capabilities.heat.transport.cables.Cable;
 import mrghastien.thermocraft.common.capabilities.heat.transport.cables.ConvectorCable;
 import mrghastien.thermocraft.common.capabilities.heat.transport.cables.Pump;
-import mrghastien.thermocraft.common.network.NetworkDataType;
-import mrghastien.thermocraft.common.network.NetworkHandler;
+import mrghastien.thermocraft.common.network.data.DataType;
 import mrghastien.thermocraft.util.MathUtils;
 import mrghastien.thermocraft.util.Pair;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidAttributes;
-import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 public class HeatConvectorNetwork extends HeatNetwork {
 
@@ -33,11 +32,12 @@ public class HeatConvectorNetwork extends HeatNetwork {
 
     HeatConvectorNetwork(long id, World world) {
         super(id, world);
-        this.validCache = new HashMap<>();
+        validCache = new HashMap<>();
         controllerCache = new HashMap<>();
-        NetworkHandler.getInstance(world).add(NetworkDataType.STRING, PacketDistributor.DIMENSION.with(world::dimension), this,
-                fluid.getRegistryName()::toString,
-                v -> setFluid(ForgeRegistries.FLUIDS.getValue(new ResourceLocation((String) v))));
+
+        dataHolder.addData(DataType.STRING, "fluid_" + id,
+                () -> Objects.requireNonNull(fluid.getRegistryName()).toString(),
+                v -> setFluid(ForgeRegistries.FLUIDS.getValue(new ResourceLocation(v))));
     }
 
     public void setFluid(Fluid fluid) {
@@ -73,6 +73,7 @@ public class HeatConvectorNetwork extends HeatNetwork {
                 return;
             }
         }
+        canWork = true;
     }
 
     @Override

@@ -1,13 +1,9 @@
 package mrghastien.thermocraft.common.capabilities.heat.transport.networks;
 
-import mrghastien.thermocraft.api.heat.TransferType;
 import mrghastien.thermocraft.common.capabilities.heat.transport.cables.Cable;
-import mrghastien.thermocraft.util.Constants;
 import mrghastien.thermocraft.util.MathUtils;
-import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.LazyOptional;
 
 import java.util.Map;
 
@@ -25,7 +21,9 @@ public class HeatConductorNetwork extends HeatNetwork {
     @Override
     protected void pushEnergyOut() {
         for (Map.Entry<BlockPos, TransferPoint> e : nodes.entrySet()) {
-            e.getValue().pushEnergyOut(MathUtils.clampedMap(distanceToNearestAcceptor(e.getKey()), 100d, 1600d, 1d, 0.01d));
+            TransferPoint point = e.getValue();
+            if(point.getGlobalType().canExtract())
+                e.getValue().pushEnergyOut(MathUtils.clampedMap(distanceToNearestAcceptor(e.getKey()), 100d, 1600d, 1d, 0.1d));
         }
     }
 
@@ -51,7 +49,7 @@ public class HeatConductorNetwork extends HeatNetwork {
     }
 
     @Override
-    protected void requestRefresh(BlockPos pos, Cable cable) {
+    public void requestRefresh(BlockPos pos, Cable cable) {
         if(!world.isClientSide() && contains(pos)) {
             needsRefresh = true;
             refreshMap.put(pos, cable);

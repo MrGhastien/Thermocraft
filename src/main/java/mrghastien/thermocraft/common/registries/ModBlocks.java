@@ -29,6 +29,9 @@ public class ModBlocks {
         return () -> new BlockItem(block.get(), new Item.Properties().tab(ModItems.Tabs.MAIN));
     }
 
+    //Standard blocks
+    //public static final RegistryObject<>
+
     //Machines
     public static final RegistryObject<SolidHeaterBlock> SOLID_HEATER = registerWithItem("solid_heater", SolidHeaterBlock::new);
     public static final RegistryObject<BoilerBlock> BOILER = registerWithItem("boiler", BoilerBlock::new);

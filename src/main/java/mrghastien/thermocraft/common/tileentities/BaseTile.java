@@ -1,39 +1,45 @@
 package mrghastien.thermocraft.common.tileentities;
 
-import mrghastien.thermocraft.common.inventory.containers.IThermocraftContainerProvider;
-import mrghastien.thermocraft.common.network.NetworkDataType;
-import mrghastien.thermocraft.common.network.NetworkHandler;
+import mrghastien.thermocraft.common.network.data.IDataHolder;
+import mrghastien.thermocraft.common.network.data.TileEntityDataHolder;
+import mrghastien.thermocraft.common.network.data.DataReference;
 import net.minecraft.block.BlockState;
+import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraftforge.fml.network.PacketDistributor;
+
+import javax.annotation.Nullable;
 
 /**
- * Base class for all the tile entities of the Thermo Craft mod.
+ * Base class for all the tile entities of the ThermoCraft mod.
  */
-public abstract class BaseTile extends TileEntity implements IThermocraftContainerProvider, ITickableTileEntity {
+public abstract class BaseTile extends TileEntity implements INamedContainerProvider, ITickableTileEntity {
 
-    protected long tickCount;
+    @Nullable
+    private final IDataHolder holder;
 
-    public BaseTile(TileEntityType<?> type) {
+    public BaseTile(TileEntityType<?> type, boolean syncDirectly) {
         super(type);
+        if(syncDirectly)
+            holder = new TileEntityDataHolder(this);
+        else holder = null;
     }
 
-    @Override
-    public void onChunkUnloaded() {
-        super.onChunkUnloaded();
-        NetworkHandler.getInstance(level).remove(this);
+    public BaseTile(TileEntityType<?> type) {
+        this(type, false);
     }
 
     @Override
     public void onLoad() {
         super.onLoad();
-        registerTEUpdatedInfo();
+        if(holder != null) registerSyncData(holder);
     }
 
     @Override
@@ -46,10 +52,28 @@ public abstract class BaseTile extends TileEntity implements IThermocraftContain
     protected abstract void saveInternal(CompoundNBT nbt);
 
     @Override
-    public void tick() {
-        if(level.isClientSide) return;
-        tickCount++;
+    public final void tick() {
+        if(level.isClientSide)
+            clientTick();
+        else
+            serverTick();
     }
+
+    @Nullable
+    @Override
+    public SUpdateTileEntityPacket getUpdatePacket() {
+        return null;
+    }
+
+    @Override
+    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
+        CompoundNBT tag = pkt.getTag();
+
+    }
+
+    protected void clientTick() {}
+
+    protected void serverTick() {}
 
     protected void updateBlockState(BlockState newState) {
         if (level == null) return;
@@ -58,12 +82,6 @@ public abstract class BaseTile extends TileEntity implements IThermocraftContain
             level.setBlock(worldPosition, newState, 3);
             //level.notifyBlockUpdate(worldPosition, oldState, newState, 3);
         }
-    }
-
-    @Override
-    public void setRemoved() {
-        super.setRemoved();
-        NetworkHandler.getInstance(level).remove(this);
     }
 
     @Override
@@ -79,15 +97,15 @@ public abstract class BaseTile extends TileEntity implements IThermocraftContain
         return nbt;
     }
 
-    public long getTickCount() {
-        return tickCount;
-    }
-
     public Chunk getChunk() {
         return level.getChunkAt(worldPosition);
     }
 
-    public void registerTEUpdatedInfo() {
-        NetworkHandler.getInstance(level).add(NetworkDataType.LONG, PacketDistributor.TRACKING_CHUNK.with(this::getChunk), this, this::getTickCount, v -> tickCount = (long) v);
-    }
+    /**
+     * Used to register data references (mainly for client-server sync)
+     * @param holder The {@link IDataHolder} holding data references
+     *
+     * @see DataReference
+     */
+    public void registerSyncData(IDataHolder holder) {}
 }

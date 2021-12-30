@@ -29,7 +29,7 @@ public abstract class Cable {
     protected World world;
     protected final EnumMap<Direction, TransferType> connections;
     private final EnumSet<Direction> cableConnections;
-    private final EnumSet<Direction> otherConnections;
+    private final EnumSet<Direction> otherConnections; //Cache
     protected final BlockPos pos;
     protected final Supplier<BlockState> stateSupplier;
     protected final HeatTransmitterTile<?> tileEntity;
@@ -45,7 +45,6 @@ public abstract class Cable {
         this.tileEntity = tileEntity;
         if(!world.isClientSide()) {
             final HeatNetworkHandler instance = HeatNetworkHandler.instance();
-            if(updateDirections()) instance.sendCableChangesToClient(this, UpdateCablePacket.UpdateType.CONNECTIONS);
             instance.registerUnassigned(pos, this);
         }
     }
@@ -113,7 +112,7 @@ public abstract class Cable {
                 LazyOptional<IHeatHandler> handler = te.getCapability(Capabilities.HEAT_HANDLER_CAPABILITY, dir.getOpposite());
                 boolean canReceive = handler.map(IHeatHandler::canReceive).orElse(false);
                 boolean canExtract = handler.map(IHeatHandler::canExtract).orElse(false);
-                TransferType type = TransferType.get(canReceive, canExtract);
+                TransferType type = TransferType.get(canExtract, canReceive);
                 return changeConnection(dir, type);
             } else return changeConnection(dir, TransferType.NONE);
         }
@@ -138,11 +137,12 @@ public abstract class Cable {
         if(previous != type) {
             if(previous == TransferType.NEUTRAL)  {
                 getCableConnections().remove(dir);
-                if(previous.canTransfer()) getOtherConnections().add(dir);
             }
-            else if(type == TransferType.NEUTRAL) {
+
+            if(type == TransferType.NEUTRAL) {
                 getCableConnections().add(dir);
-                if(type.canTransfer()) getOtherConnections().remove(dir);
+            } else if(type != TransferType.NONE){
+                getOtherConnections().add(dir);
             }
             return true;
         }
@@ -162,10 +162,12 @@ public abstract class Cable {
         }
     }
 
-    public void handleUpdateTag(CompoundNBT nbt) {
+    public boolean handleUpdateTag(CompoundNBT nbt) {
+        boolean result = false;
         for(Direction dir : Constants.DIRECTIONS) {
-            changeConnection(dir, TransferType.fromString(nbt.getString(dir.getName())));
+            result |= changeConnection(dir, TransferType.fromString(nbt.getString(dir.getName())));
         }
+        return result;
     }
 
     public void onRemoved() {

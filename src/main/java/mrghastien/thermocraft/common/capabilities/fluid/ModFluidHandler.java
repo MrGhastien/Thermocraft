@@ -1,21 +1,17 @@
 package mrghastien.thermocraft.common.capabilities.fluid;
 
 import mrghastien.thermocraft.api.fluid.IModFluidTank;
-import mrghastien.thermocraft.common.network.NetworkDataType;
-import mrghastien.thermocraft.common.network.NetworkHandler;
-import net.minecraft.world.World;
+import mrghastien.thermocraft.common.ThermoCraft;
+import mrghastien.thermocraft.common.network.data.DataType;
+import mrghastien.thermocraft.common.network.data.IDataHolder;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidTank;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 public class ModFluidHandler implements IDelegateFluidHandler {
 
@@ -137,11 +133,16 @@ public class ModFluidHandler implements IDelegateFluidHandler {
         return lazy;
     }
 
-    public void gatherData(Object key, PacketDistributor.PacketTarget target, World world) {
-        NetworkHandler handler = NetworkHandler.getInstance(world);
-        for(IModFluidTank tank : tanks) {
-            handler.add(NetworkDataType.FLUIDSTACK, target, key, tank::getFluid, v -> tank.setFluid((FluidStack) v));
-            handler.add(NetworkDataType.INT, target, key, tank::getCapacity, v -> tank.setCapacity((int) v));
+    public void gatherData(String handlerName, IDataHolder holder) {
+        if(!Objects.equals(handlerName, "")) handlerName += "_";
+        for(int i = 0; i < tanks.length; i++) {
+            IModFluidTank tank = tanks[i];
+            holder.addData(DataType.FLUID_STACK,handlerName + "fluid_" + i, () -> tank.getFluid().copy(), tank::setFluid);
+            holder.addData(DataType.INT, handlerName + "capacity_" + i, tank::getCapacity, tank::setCapacity);
         }
+    }
+
+    public void gatherData(IDataHolder holder) {
+        gatherData("", holder);
     }
 }

@@ -2,20 +2,20 @@ package mrghastien.thermocraft.common.capabilities.heat;
 
 import mrghastien.thermocraft.api.IChangeListener;
 import mrghastien.thermocraft.api.heat.IHeatHandler;
-import mrghastien.thermocraft.common.network.NetworkDataType;
-import mrghastien.thermocraft.common.network.NetworkHandler;
+import mrghastien.thermocraft.common.ThermoCraft;
+import mrghastien.thermocraft.common.network.data.DataType;
+import mrghastien.thermocraft.common.network.data.IDataHolder;
+import mrghastien.thermocraft.util.math.FixedPointNumber;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.world.World;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.network.PacketDistributor;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class HeatHandler implements IHeatHandler {
 
     protected double heatCapacity;
-    protected long internalEnergy;
+    protected FixedPointNumber.Mutable internalEnergy;
     protected double conductionCoefficient;
     protected double insulationCoefficient;
 
@@ -23,16 +23,16 @@ public class HeatHandler implements IHeatHandler {
     private final IChangeListener changeListener;
 
     public HeatHandler(double heatCapacity, long internalEnergy, double conductionCoefficient, double insulationCoefficient) {
-        this(heatCapacity, internalEnergy, conductionCoefficient, insulationCoefficient, () -> {});
+        this(heatCapacity, FixedPointNumber.valueOf(internalEnergy), conductionCoefficient, insulationCoefficient, () -> {});
     }
 
     public HeatHandler(double heatCapacity, double conductionCoefficient, double insulationCoefficient, @Nullable IChangeListener listener) {
-        this(heatCapacity, (long) (heatCapacity * IHeatHandler.AIR_TEMPERATURE), conductionCoefficient, insulationCoefficient, listener);
+        this(heatCapacity, FixedPointNumber.valueOf(heatCapacity * IHeatHandler.AIR_TEMPERATURE), conductionCoefficient, insulationCoefficient, listener);
     }
 
-    public HeatHandler(double heatCapacity, long internalEnergy, double conductionCoefficient, double insulationCoefficient, @Nullable IChangeListener listener) {
+    public HeatHandler(double heatCapacity, FixedPointNumber internalEnergy, double conductionCoefficient, double insulationCoefficient, @Nullable IChangeListener listener) {
         this.heatCapacity = heatCapacity;
-        this.internalEnergy = internalEnergy;
+        this.internalEnergy = new FixedPointNumber.Mutable(internalEnergy);
         this.changeListener = listener;
         this.conductionCoefficient = conductionCoefficient * 0.05; //Multiplying by 0.05 because 1 tick is 0.05 second
         this.insulationCoefficient = insulationCoefficient * 0.05;
@@ -41,12 +41,16 @@ public class HeatHandler implements IHeatHandler {
 
     @Override
     public double getTemperature() {
-        return getInternalEnergy() / getHeatCapacity();
+        return getInternalEnergy().doubleValue() / getHeatCapacity();
     }
 
     @Override
-    public long getInternalEnergy() {
-        return internalEnergy;
+    public FixedPointNumber getInternalEnergy() {
+        return internalEnergy.copy();
+    }
+
+    public long getInternalEnergyFloored() {
+        return internalEnergy.longValue();
     }
 
     @Override
@@ -56,7 +60,12 @@ public class HeatHandler implements IHeatHandler {
 
     @Override
     public void setInternalEnergy(long energy) {
-        if(energy >= 0) this.internalEnergy = energy;
+        if(energy >= 0) internalEnergy.set(energy, (short) 0);
+    }
+
+    @Override
+    public void setInternalEnergy(FixedPointNumber internalEnergy) {
+        this.internalEnergy.set(internalEnergy);
     }
 
     @Override
@@ -71,7 +80,7 @@ public class HeatHandler implements IHeatHandler {
     @Override
     public void setHeatCapacity(double capacity, boolean updateEnergy) {
         if(updateEnergy) {
-            setInternalEnergy((long) (getInternalEnergy() + (capacity - getHeatCapacity()) * IHeatHandler.AIR_TEMPERATURE));
+            setInternalEnergy((long) (getInternalEnergy().doubleValue() + (capacity - getHeatCapacity()) * IHeatHandler.AIR_TEMPERATURE));
         }
         this.heatCapacity = capacity;
     }
@@ -101,17 +110,26 @@ public class HeatHandler implements IHeatHandler {
     }
 
     public void transferEnergy(long energy) {
-        setInternalEnergy(getInternalEnergy() + energy);
+        internalEnergy.add(energy);
+        if(internalEnergy.isLessThan(0)) internalEnergy.set(0);
+    }
+
+    @Override
+    public void transferEnergy(FixedPointNumber energy) {
+        internalEnergy.add(energy);
+        if(internalEnergy.isLessThan(0)) internalEnergy.set(0);
+
     }
 
     public void transferEnergy(double energy) {
-        transferEnergy((long)energy);
+        internalEnergy.add(energy);
+        if(internalEnergy.isLessThan(0)) internalEnergy.set(0);
     }
 
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
-        nbt.putLong("internalEnergy", getInternalEnergy());
+        nbt.putLong("internalEnergy", getInternalEnergyFloored());
         nbt.putDouble("heatCapacity", getHeatCapacity());
         return nbt;
     }
@@ -141,11 +159,14 @@ public class HeatHandler implements IHeatHandler {
         return true;
     }
 
-    public void gatherData(Object key, PacketDistributor.PacketTarget target, World world) {
-        NetworkHandler handler = NetworkHandler.getInstance(world);
-        handler.add(NetworkDataType.DOUBLE, target, key, this::getHeatCapacity, v -> this.setHeatCapacity((double) v, true));
-        handler.add(NetworkDataType.LONG, target, key, this::getInternalEnergy, v -> this.setInternalEnergy((long) v));
-        handler.add(NetworkDataType.DOUBLE, target, key, this::getConductionCoefficient, v -> this.setConductionCoefficient((double) v));
-        handler.add(NetworkDataType.DOUBLE, target, key, this::getInsulationCoefficient, v -> this.setInsulationCoefficient((double) v));
+    public void gatherData(String handlerName, @Nonnull IDataHolder holder) {
+        holder.addData(DataType.DOUBLE, handlerName + "heat_capacity", this::getHeatCapacity, v -> this.setHeatCapacity(v, true));
+        holder.addData(DataType.FIXED_POINT, handlerName + "internal_energy", this::getInternalEnergy, this::setInternalEnergy);
+        holder.addData(DataType.DOUBLE, handlerName + "conduction", this::getConductionCoefficient, this::setConductionCoefficient);
+        holder.addData(DataType.DOUBLE, handlerName + "insulation", this::getInsulationCoefficient, this::setInsulationCoefficient);
+    }
+
+    public void gatherData(@Nonnull IDataHolder holder) {
+        gatherData("", holder);
     }
 }

@@ -1,13 +1,14 @@
 package mrghastien.thermocraft.common.tileentities;
 
+import mrghastien.thermocraft.common.ThermoCraft;
 import mrghastien.thermocraft.common.capabilities.fluid.ModFluidTank;
 import mrghastien.thermocraft.common.capabilities.fluid.SingletonFluidHandler;
 import mrghastien.thermocraft.common.capabilities.item.ModItemStackHandler;
 import mrghastien.thermocraft.common.crafting.FluidInjectionRecipe;
 import mrghastien.thermocraft.common.crafting.ModRecipeType;
-import mrghastien.thermocraft.common.inventory.containers.BaseContainer;
 import mrghastien.thermocraft.common.inventory.containers.FluidInjectorContainer;
-import mrghastien.thermocraft.common.network.NetworkDataType;
+import mrghastien.thermocraft.common.network.data.DataType;
+import mrghastien.thermocraft.common.network.data.IDataHolder;
 import mrghastien.thermocraft.common.registries.ModTileEntities;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
@@ -52,26 +53,23 @@ public class FluidInjectorTile extends BaseTile {
     }
 
     @Override
-    public void tick() {
-        if(!level.isClientSide()) {
-            if(canRun()) {
-                if(changed) {
-                    searchRecipe();
-                    changed = false;
+    public void serverTick() {
+        if(canRun()) {
+            if(changed) {
+                searchRecipe();
+                changed = false;
+            }
+            if(currentRecipe != null) {
+                if (progress < maxProgress) {
+                    setActiveState();
+                    progress++;
+                } else {
+                    consumeInput();
+                    storeResult();
+                    progress = 0;
                 }
-                if(currentRecipe != null) {
-                    if (progress < maxProgress) {
-                        setActiveState();
-                        progress++;
-                    } else {
-                        consumeInput();
-                        storeResult();
-                        progress = 0;
-                    }
-                } else setInactiveState();
             } else setInactiveState();
-        }
-        super.tick();
+        } else setInactiveState();
     }
 
     private void consumeInput() {
@@ -144,11 +142,14 @@ public class FluidInjectorTile extends BaseTile {
     }
 
     @Override
-    public void registerContainerUpdatedData(BaseContainer c) {
-        c.registerData(NetworkDataType.INT, this::getProgress, v -> progress = (int) v);
-        c.registerData(NetworkDataType.INT, this::getMaxProgress, v -> maxProgress = (int) v);
-        c.registerData(NetworkDataType.BOOLEAN, this::isRunning, v -> running = (boolean) v);
-        tank.gatherContainerData(c);
+    public void registerSyncData(IDataHolder holder) {
+        super.registerSyncData(holder);
+        if(holder.getCategory() != IDataHolder.DataHolderCategory.CONTAINER) return;
+
+        holder.addData(DataType.INT, ThermoCraft.modLoc("progress"), this::getProgress, v -> progress = v);
+        holder.addData(DataType.INT, ThermoCraft.modLoc("max_progress"), this::getMaxProgress, v -> maxProgress = v);
+        holder.addData(DataType.BOOL, ThermoCraft.modLoc("running"), this::isRunning, v -> running = v);
+        tank.gatherData(holder);
     }
 
     public int getProgress() {

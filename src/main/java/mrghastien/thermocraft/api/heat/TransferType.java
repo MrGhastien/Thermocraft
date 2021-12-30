@@ -6,7 +6,11 @@ import java.util.Locale;
 
 //Neutral is for connections between cables.
 public enum TransferType implements IStringSerializable {
-    NONE, INPUT, OUTPUT, BOTH, NEUTRAL;
+    NONE, INPUT, OUTPUT, BOTH,
+    /**
+     * For connections between cables only.
+     */
+    NEUTRAL;
 
     public static final TransferType[] VALUES = TransferType.values();
 

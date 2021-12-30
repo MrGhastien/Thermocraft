@@ -1,20 +1,23 @@
 package mrghastien.thermocraft.api.heat;
 
 import mrghastien.thermocraft.api.IChangeListener;
+import mrghastien.thermocraft.util.math.FixedPointNumber;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.common.util.INBTSerializable;
 
 public interface IHeatHandler extends INBTSerializable<CompoundNBT>, IChangeListener {
 
-    double AIR_TEMPERATURE = 293;
+    double AIR_TEMPERATURE = 293.0;
 
     double getTemperature();
 
-    long getInternalEnergy();
+    FixedPointNumber getInternalEnergy();
 
     void setTemperature(double temperature);
 
     void setInternalEnergy(long energy);
+
+    void setInternalEnergy(FixedPointNumber energy);
 
     /**
      * The heat capacity of an object represents the amount of energy per temperature degree
@@ -50,6 +53,8 @@ public interface IHeatHandler extends INBTSerializable<CompoundNBT>, IChangeList
      * @param energy The energy transferred to the handler (can be negative)
      */
     void transferEnergy(long energy);
+
+    void transferEnergy(FixedPointNumber energy);
 
     boolean canReceive();
 

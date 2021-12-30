@@ -2,11 +2,11 @@ package mrghastien.thermocraft.common.tileentities.cables;
 
 import mrghastien.thermocraft.common.capabilities.heat.transport.cables.Pump;
 import mrghastien.thermocraft.common.inventory.containers.ConvectorControllerContainer;
-import mrghastien.thermocraft.common.inventory.containers.IThermocraftContainerProvider;
 import mrghastien.thermocraft.common.registries.ModTileEntities;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.Direction;
 import net.minecraft.util.text.ITextComponent;
@@ -18,7 +18,7 @@ import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class HeatConvectorPumpTile extends HeatTransmitterTile<Pump> implements IThermocraftContainerProvider {
+public class HeatConvectorPumpTile extends HeatTransmitterTile<Pump> implements INamedContainerProvider {
 
     public HeatConvectorPumpTile() {
         super(ModTileEntities.HEAT_CONVECTOR_PUMP.get());
@@ -47,11 +47,6 @@ public class HeatConvectorPumpTile extends HeatTransmitterTile<Pump> implements 
             }
         }
         return LazyOptional.empty();
-    }
-
-    @Override
-    public void onNeighborChange(Direction dir) {
-        super.onNeighborChange(dir);
     }
 
     @Override

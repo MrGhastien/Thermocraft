@@ -1,13 +1,16 @@
 package mrghastien.thermocraft.common.inventory.containers;
 
-import mrghastien.thermocraft.common.network.NetworkDataType;
-import mrghastien.thermocraft.common.network.NetworkHandler;
+import mrghastien.thermocraft.common.network.*;
+import mrghastien.thermocraft.common.network.data.ContainerDataHolder;
 import mrghastien.thermocraft.common.network.packets.PacketHandler;
+import mrghastien.thermocraft.common.network.packets.UpdateClientContainerPacket;
 import mrghastien.thermocraft.common.tileentities.BaseTile;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.ContainerType;
+import net.minecraft.inventory.container.IContainerListener;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -18,26 +21,27 @@ import net.minecraftforge.items.SlotItemHandler;
 import net.minecraftforge.items.wrapper.InvWrapper;
 
 import javax.annotation.Nullable;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
-public abstract class BaseContainer<T extends TileEntity & IThermocraftContainerProvider> extends Container {
+public abstract class BaseContainer extends Container {
 
-    public final T tileEntity;
+    public final TileEntity tileEntity;
     protected final IItemHandler playerInventory;
     protected final BlockPos pos;
     protected final World world;
     protected final int size;
 
-    protected BaseContainer(@Nullable ContainerType<?> containerType, int id, PlayerInventory playerInventory, T tileEntity, int size) {
+    protected final ContainerDataHolder dataHolder;
+
+    protected BaseContainer(@Nullable ContainerType<?> containerType, int id, PlayerInventory playerInventory, TileEntity tileEntity, int size) {
         super(containerType, id);
         this.tileEntity = tileEntity;
         this.world = tileEntity.getLevel();
         this.pos = tileEntity.getBlockPos();
         this.size = size;
         this.playerInventory = new InvWrapper(playerInventory);
-        assert world != null;
-        tileEntity.registerContainerUpdatedData(this);
+        this.dataHolder = new ContainerDataHolder(this);
+        if(tileEntity instanceof BaseTile)
+            ((BaseTile) tileEntity).registerSyncData(dataHolder);
     }
 
     protected int addSlotRange(IItemHandler handler, int index, int x, int y, int amount, int dx) {
@@ -93,17 +97,24 @@ public abstract class BaseContainer<T extends TileEntity & IThermocraftContainer
     }
 
     @Override
-    public boolean stillValid(PlayerEntity player) {
-        return player.blockPosition().distSqr(tileEntity.getBlockPos()) < 64;
+    public void broadcastChanges() {
+        super.broadcastChanges();
+
+        INetworkBinding binding = dataHolder.getBinding();
+        if(binding.hasChanged()) {
+            for (IContainerListener listener : containerListeners) {
+                if(listener instanceof ServerPlayerEntity)
+                PacketHandler.sendToPlayer(new UpdateClientContainerPacket(binding), (ServerPlayerEntity) listener);
+            }
+        }
     }
 
-    public void registerData(NetworkDataType type, Supplier<Object> getter, Consumer<Object> setter) {
-        NetworkHandler.getInstance(world).add(type, PacketHandler.CONTAINER_LISTENERS.with(() -> this), this, getter, setter);
+    public ContainerDataHolder getDataHolder() {
+        return dataHolder;
     }
 
     @Override
-    public void removed(PlayerEntity player) {
-        NetworkHandler.getInstance(world).remove(this);
-        super.removed(player);
+    public boolean stillValid(PlayerEntity player) {
+        return player.blockPosition().distSqr(tileEntity.getBlockPos()) < 64;
     }
 }
