@@ -2,14 +2,14 @@ package mrghastien.thermocraft.common.capabilities.heat.transport.networks;
 
 import mrghastien.thermocraft.common.capabilities.heat.transport.cables.Cable;
 import mrghastien.thermocraft.util.MathUtils;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 import java.util.Map;
 
 public class HeatConductorNetwork extends HeatNetwork {
 
-    HeatConductorNetwork(long id, World world) {
+    HeatConductorNetwork(long id, Level world) {
         super(id, world);
     }
 

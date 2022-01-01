@@ -1,25 +1,26 @@
 package mrghastien.thermocraft.util;
 
-import net.minecraft.util.Direction;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
+
 
 public class DimPos {
 
     protected final BlockPos pos;
-    protected final RegistryKey<World> dimension;
+    protected final ResourceKey<Level> dimension;
 
-    public DimPos(BlockPos pos, RegistryKey<World> dimension) {
+    public DimPos(BlockPos pos, ResourceKey<Level> dimension) {
         this.pos = pos;
         this.dimension = dimension;
     }
 
-    public DimPos(BlockPos pos, World world) {
+    public DimPos(BlockPos pos, Level world) {
         this(pos.immutable(), world.dimension());
     }
 
-    public DimPos(int x, int y, int z, RegistryKey<World> dimension) {
+    public DimPos(int x, int y, int z, ResourceKey<Level> dimension) {
         this(new BlockPos(x, y, z), dimension);
     }
 
@@ -61,7 +62,7 @@ public class DimPos {
         return pos;
     }
 
-    public RegistryKey<World> dimension() {
+    public ResourceKey<Level> dimension() {
         return dimension;
     }
 

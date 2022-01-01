@@ -1,13 +1,13 @@
 package mrghastien.thermocraft.client.screens.widgets;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import mrghastien.thermocraft.util.MathUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +18,7 @@ public abstract class Widget {
 		
 	private boolean isHovered = false;
 	private String name;
-	protected ArrayList<ITextComponent> tooltips;
+	protected ArrayList<Component> tooltips;
 	public int index = - 1;
 
 	public Widget(int posX, int posY, int width, int height) {
@@ -26,7 +26,7 @@ public abstract class Widget {
 		this.mc = Minecraft.getInstance();
 	}
 	
-	public void render(Screen screen, MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void render(Screen screen, PoseStack stack, int mouseX, int mouseY, float partialTicks) {
 		renderBg(screen, stack, mouseX, mouseY, partialTicks);
 		renderFg(screen, stack, mouseX, mouseY, partialTicks);
 		isHovered = isHovered(mouseX, mouseY);
@@ -37,17 +37,17 @@ public abstract class Widget {
 		return mouseX > bounds.x && mouseX < bounds.width + bounds.x && mouseY > bounds.y && mouseY < bounds.height + bounds.y;
 	}
 	
-	protected void onHovered(Screen screen, MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+	protected void onHovered(Screen screen, PoseStack stack, int mouseX, int mouseY, float partialTicks) {
 		screen.renderComponentTooltip(stack, getTooltips(), mouseX, mouseY);
 	}
 
-	protected void onClicked(Screen screen, MatrixStack stack, int mouseX, int mouseY, float partialTicks) {}
+	protected void onClicked(Screen screen, PoseStack stack, int mouseX, int mouseY, float partialTicks) {}
 
-	protected void onMouseReleased(Screen screen, MatrixStack stack, int mouseX, int mouseY, float partialTicks) {}
+	protected void onMouseReleased(Screen screen, PoseStack stack, int mouseX, int mouseY, float partialTicks) {}
 
-	protected abstract void renderBg(Screen screen, MatrixStack stack, int mouseX, int mouseY, float partialTicks);
+	protected abstract void renderBg(Screen screen, PoseStack stack, int mouseX, int mouseY, float partialTicks);
 
-	protected void renderFg(Screen screen, MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+	protected void renderFg(Screen screen, PoseStack stack, int mouseX, int mouseY, float partialTicks) {
 
 	}
 	//onHovered, onClicked, onMouseReleased, renderBG, renderFG + getters
@@ -64,22 +64,22 @@ public abstract class Widget {
 		return isHovered;
 	}
 
-	public List<ITextComponent> getTooltips() {
+	public List<Component> getTooltips() {
 		return tooltips;
 	}
 
 	public void addTooltip(String tooltip) {
-		this.tooltips.add(new StringTextComponent(tooltip));
+		this.tooltips.add(new TextComponent(tooltip));
 	}
 
-	public void addTooltip(ITextComponent tooltip) {
+	public void addTooltip(Component tooltip) {
 		this.tooltips.add(tooltip);
 	}
 
 	public void setTooltips(String... tooltips) {
 		this.tooltips = new ArrayList<>(tooltips.length);
 		for (String tooltip : tooltips) {
-			this.tooltips.add(new StringTextComponent(tooltip));
+			this.tooltips.add(new TextComponent(tooltip));
 		}
 	}
 

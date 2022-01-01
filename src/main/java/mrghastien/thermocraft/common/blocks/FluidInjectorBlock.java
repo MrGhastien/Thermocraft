@@ -1,16 +1,17 @@
 package mrghastien.thermocraft.common.blocks;
 
 import mrghastien.thermocraft.common.tileentities.FluidInjectorTile;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.common.util.ForgeSoundType;
 import net.minecraftforge.fluids.FluidActionResult;
 import net.minecraftforge.fluids.FluidUtil;
@@ -26,24 +27,30 @@ public class FluidInjectorBlock extends BaseMachineBlock {
         super(Properties.of(Material.METAL).sound(ForgeSoundType.METAL));
     }
 
-    @Nullable
     @Override
-    public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-        return new FluidInjectorTile();
-    }
-
-    @Override
-    public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
+    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if(!world.isClientSide()) {
-            TileEntity te = world.getBlockEntity(pos);
+            BlockEntity te = world.getBlockEntity(pos);
             if(te instanceof FluidInjectorTile) {
                 AtomicReference<FluidActionResult> result = new AtomicReference<>();
                 te.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY).ifPresent(h -> 
                         player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(p ->
                                 result.set(FluidUtil.tryEmptyContainerAndStow(player.getItemInHand(hand), h, p, 1000, player, true))));
-                if(result.get().isSuccess()) return ActionResultType.SUCCESS;
+                if(result.get().isSuccess()) return InteractionResult.SUCCESS;
             }
         }
         return super.use(state, world, pos, player, hand, hit);
+    }
+
+    @Nullable
+    @Override
+    public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level p_153212_, BlockState p_153213_, BlockEntityType<T> p_153214_) {
+        return super.getTicker(p_153212_, p_153213_, p_153214_);
     }
 }

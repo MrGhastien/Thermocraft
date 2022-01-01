@@ -1,18 +1,18 @@
 package mrghastien.thermocraft.common.network.packets;
 
 import mrghastien.thermocraft.common.ThermoCraft;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.IPacket;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.server.ServerChunkProvider;
-import net.minecraftforge.fml.network.NetworkDirection;
-import net.minecraftforge.fml.network.NetworkRegistry;
-import net.minecraftforge.fml.network.PacketDistributor;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerChunkCache;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraftforge.fmllegacy.network.NetworkDirection;
+import net.minecraftforge.fmllegacy.network.NetworkRegistry;
+import net.minecraftforge.fmllegacy.network.PacketDistributor;
+import net.minecraftforge.fmllegacy.network.simple.SimpleChannel;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 
 public class PacketHandler {
 
-    public static final PacketDistributor<Collection<Chunk>> CONTAINER_LISTENERS = new PacketDistributor<>(PacketHandler::trackingAnyChunkConsumer, NetworkDirection.PLAY_TO_CLIENT);
+    public static final PacketDistributor<Collection<LevelChunk>> CONTAINER_LISTENERS = new PacketDistributor<>(PacketHandler::trackingAnyChunkConsumer, NetworkDirection.PLAY_TO_CLIENT);
 
     public static final String PROTOCOL_VERSION = String.valueOf(1);
     private static int ID = 0;
@@ -77,15 +77,15 @@ public class PacketHandler {
                 .add();
     }
 
-    public static void sendToPlayer(Object message, ServerPlayerEntity listener) {
+    public static void sendToPlayer(Object message, ServerPlayer listener) {
         MAIN_CHANNEL.send(PacketDistributor.PLAYER.with(() -> listener), message);
     }
 
-    public static void sendToPlayers(Object message, BlockPos pos, double radius, RegistryKey<World> dim) {
+    public static void sendToPlayers(Object message, BlockPos pos, double radius, ResourceKey<Level> dim) {
         MAIN_CHANNEL.send(PacketDistributor.NEAR.with(PacketDistributor.TargetPoint.p(pos.getX(), pos.getY(), pos.getZ(), radius, dim)), message);
     }
 
-    public static void sendToDimension(Object message, RegistryKey<World> dimension) {
+    public static void sendToDimension(Object message, ResourceKey<Level> dimension) {
         MAIN_CHANNEL.send(PacketDistributor.DIMENSION.with(() -> dimension), message);
     }
 
@@ -93,11 +93,11 @@ public class PacketHandler {
         MAIN_CHANNEL.sendToServer(message);
     }
 
-    private static Consumer<IPacket<?>> trackingAnyChunkConsumer(final PacketDistributor<Collection<Chunk>> distributor, final Supplier<Collection<Chunk>> supplier) {
+    private static Consumer<Packet<?>> trackingAnyChunkConsumer(final PacketDistributor<Collection<LevelChunk>> distributor, final Supplier<Collection<LevelChunk>> supplier) {
         return p -> {
-            Set<ServerPlayerEntity> alreadySentTargets = new HashSet<>();
-            for (Chunk chunk : supplier.get()) {
-                ((ServerChunkProvider)chunk.getLevel().getChunkSource()).chunkMap.getPlayers(chunk.getPos(), false)
+            Set<ServerPlayer> alreadySentTargets = new HashSet<>();
+            for (LevelChunk chunk : supplier.get()) {
+                ((ServerChunkCache)chunk.getLevel().getChunkSource()).chunkMap.getPlayers(chunk.getPos(), false)
                         .filter(player -> !alreadySentTargets.contains(player))
                         .forEach(e -> {
                     e.connection.send(p);

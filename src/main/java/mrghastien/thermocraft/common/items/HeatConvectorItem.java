@@ -2,16 +2,16 @@ package mrghastien.thermocraft.common.items;
 
 import mrghastien.thermocraft.common.registries.ModBlocks;
 import mrghastien.thermocraft.common.registries.ModItems;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
@@ -24,14 +24,14 @@ public class HeatConvectorItem extends BlockItem {
 
     @Nonnull
     @Override
-    public ITextComponent getName(ItemStack itemStack) {
-        CompoundNBT nbt = itemStack.getTag();
-        IFormattableTextComponent name = (IFormattableTextComponent) super.getName(itemStack);
+    public Component getName(ItemStack itemStack) {
+        CompoundTag nbt = itemStack.getTag();
+        MutableComponent name = (MutableComponent) super.getName(itemStack);
         if(nbt == null || !nbt.contains("fluid") || nbt.getString("fluid").equals(Fluids.EMPTY.getRegistryName().getPath()))
             return name.append(" (Empty)");
         else {
             Fluid f = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(nbt.getString("fluid")));
-            return name.append(" (").append(new TranslationTextComponent(f.getAttributes().getTranslationKey())).append(")");
+            return name.append(" (").append(new TranslatableComponent(f.getAttributes().getTranslationKey())).append(")");
         }
     }
 }

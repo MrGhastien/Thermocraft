@@ -3,13 +3,13 @@ package mrghastien.thermocraft.common.crafting;
 import com.google.gson.JsonObject;
 import mrghastien.thermocraft.common.capabilities.fluid.ModFluidHandler;
 import mrghastien.thermocraft.common.registries.ModRecipeSerializers;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.core.NonNullList;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -66,12 +66,12 @@ public class BoilingRecipe extends BaseRecipe {
     }
 
     @Override
-    public IRecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<?> getSerializer() {
         return ModRecipeSerializers.BOILING.get();
     }
 
     @Override
-    public IRecipeType<?> getType() {
+    public RecipeType<?> getType() {
         return ModRecipeType.BOILING;
     }
 
@@ -79,9 +79,9 @@ public class BoilingRecipe extends BaseRecipe {
 
         @Override
         public BoilingRecipe fromJson(ResourceLocation id, JsonObject json) {
-            JsonObject jsonelement = JSONUtils.getAsJsonObject(json, "input");
+            JsonObject jsonelement = GsonHelper.getAsJsonObject(json, "input");
             FluidIngredient ingredient = (FluidIngredient) CraftingHelper.getIngredient(jsonelement);
-            JsonObject resultJson = JSONUtils.getAsJsonObject(json, "result");
+            JsonObject resultJson = GsonHelper.getAsJsonObject(json, "result");
             FluidStack result = new FluidStack(ForgeRegistries.FLUIDS.getValue(new ResourceLocation(resultJson.get("fluid").getAsString())), resultJson.get("amount").getAsInt());
             double heatCapacity = json.get("inputHeatCapacity").getAsDouble();
             return new BoilingRecipe(id, ingredient, result, heatCapacity);
@@ -89,14 +89,14 @@ public class BoilingRecipe extends BaseRecipe {
 
         @Nullable
         @Override
-        public BoilingRecipe fromNetwork(ResourceLocation id, PacketBuffer buf) {
+        public BoilingRecipe fromNetwork(ResourceLocation id, FriendlyByteBuf buf) {
             FluidIngredient input = (FluidIngredient) CraftingHelper.getIngredient(FluidIngredient.Serializer.ID, buf);
             FluidStack output = buf.readFluidStack();
             return new BoilingRecipe(id, input, output, buf.readDouble());
         }
 
         @Override
-        public void toNetwork(PacketBuffer buf, BoilingRecipe recipe) {
+        public void toNetwork(FriendlyByteBuf buf, BoilingRecipe recipe) {
             CraftingHelper.write(buf, recipe.input);
             buf.writeFluidStack(recipe.output);
             buf.writeDouble(recipe.inputHeatCapacity);

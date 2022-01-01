@@ -2,8 +2,8 @@ package mrghastien.thermocraft.common.network.data;
 
 import mrghastien.thermocraft.common.network.CompositeDataNetworkBinding;
 import mrghastien.thermocraft.common.network.INetworkBinding;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +23,7 @@ public abstract class DefaultDataHolder implements IDataHolder {
         this.binding = binding;
     }
 
-    public static DefaultDataHolder container(Container container) {
+    public static DefaultDataHolder container(AbstractContainerMenu container) {
         return new ContainerDataHolder(container);
     }
 

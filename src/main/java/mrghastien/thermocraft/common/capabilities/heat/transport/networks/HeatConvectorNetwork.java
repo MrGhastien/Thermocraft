@@ -7,12 +7,12 @@ import mrghastien.thermocraft.common.capabilities.heat.transport.cables.Pump;
 import mrghastien.thermocraft.common.network.data.DataType;
 import mrghastien.thermocraft.util.MathUtils;
 import mrghastien.thermocraft.util.Pair;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -30,7 +30,7 @@ public class HeatConvectorNetwork extends HeatNetwork {
     final Map<BlockPos, Pump> controllerCache;
     final Map<BlockPos, Cable> validCache;
 
-    HeatConvectorNetwork(long id, World world) {
+    HeatConvectorNetwork(long id, Level world) {
         super(id, world);
         validCache = new HashMap<>();
         controllerCache = new HashMap<>();
@@ -137,21 +137,21 @@ public class HeatConvectorNetwork extends HeatNetwork {
     @Override
     public double getConductionCoefficient() {
         if(fluid == Fluids.EMPTY) return 0.0;
-        FluidAttributes attributes = fluid.getFluid().getAttributes();
+        FluidAttributes attributes = fluid.getAttributes();
         double coefficient = MathUtils.map(attributes.getDensity(), 500, 5000, 0.25, 1.5)
                 * MathUtils.map(attributes.getViscosity(), 500, 5000, 1.2, 0.4);
         return super.getConductionCoefficient() * coefficient;
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT nbt = super.serializeNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = super.serializeNBT();
         nbt.putString("fluid", fluid.getRegistryName().toString());
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
         Fluid f = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(nbt.getString("fluid")));
         if(f == null) ThermoCraft.LOGGER.warn("Couldn't deserialize heat network from nbt : no fluid specified");

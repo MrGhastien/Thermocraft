@@ -1,12 +1,12 @@
 package mrghastien.thermocraft.common.network.data;
 
 import mrghastien.thermocraft.util.math.FixedPointNumber;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.IIntArray;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.common.extensions.IForgeFriendlyByteBuf;
 import net.minecraftforge.common.extensions.IForgeItemStack;
-import net.minecraftforge.common.extensions.IForgePacketBuffer;
 import net.minecraftforge.fluids.FluidStack;
 
 import javax.annotation.Nonnull;
@@ -30,68 +30,68 @@ public class DataType<T> {
 
     public static final DataType<Integer> INT = builder(Integer.TYPE)
             .defaultValue(0)
-            .toBytes(PacketBuffer::writeInt)
-            .fromBytes(PacketBuffer::readInt)
-            .serializeNBT(IntNBT::valueOf)
-            .deserializeNBT(nbt -> ((IntNBT)nbt).getAsInt())
+            .toBytes(FriendlyByteBuf::writeInt)
+            .fromBytes(FriendlyByteBuf::readInt)
+            .serializeNBT(IntTag::valueOf)
+            .deserializeNBT(nbt -> ((IntTag)nbt).getAsInt())
             .build();
 
     public static final DataType<Long> LONG = builder(Long.TYPE)
             .defaultValue(0L)
-            .toBytes(PacketBuffer::writeLong)
-            .fromBytes(PacketBuffer::readLong)
-            .serializeNBT(LongNBT::valueOf)
-            .deserializeNBT(nbt -> ((LongNBT)nbt).getAsLong())
+            .toBytes(FriendlyByteBuf::writeLong)
+            .fromBytes(FriendlyByteBuf::readLong)
+            .serializeNBT(LongTag::valueOf)
+            .deserializeNBT(nbt -> ((LongTag)nbt).getAsLong())
             .build();
 
     public static final DataType<Float> FLOAT = builder(Float.TYPE)
             .defaultValue(0f)
-            .toBytes(PacketBuffer::writeFloat)
-            .fromBytes(PacketBuffer::readFloat)
-            .serializeNBT(FloatNBT::valueOf)
-            .deserializeNBT(nbt -> ((FloatNBT)nbt).getAsFloat())
+            .toBytes(FriendlyByteBuf::writeFloat)
+            .fromBytes(FriendlyByteBuf::readFloat)
+            .serializeNBT(FloatTag::valueOf)
+            .deserializeNBT(nbt -> ((FloatTag)nbt).getAsFloat())
             .build();
 
     public static final DataType<Double> DOUBLE = builder(Double.TYPE)
             .defaultValue(0d)
-            .toBytes(PacketBuffer::writeDouble)
-            .fromBytes(PacketBuffer::readDouble)
-            .serializeNBT(DoubleNBT::valueOf)
-            .deserializeNBT(nbt -> ((DoubleNBT)nbt).getAsDouble())
+            .toBytes(FriendlyByteBuf::writeDouble)
+            .fromBytes(FriendlyByteBuf::readDouble)
+            .serializeNBT(DoubleTag::valueOf)
+            .deserializeNBT(nbt -> ((DoubleTag)nbt).getAsDouble())
             .build();
 
     public static final DataType<Boolean> BOOL = builder(Boolean.TYPE)
             .defaultValue(false)
-            .toBytes(PacketBuffer::writeBoolean)
-            .fromBytes(PacketBuffer::readBoolean)
-            .serializeNBT(ByteNBT::valueOf)
-            .deserializeNBT(nbt -> ((ByteNBT)nbt).getAsByte() != 0)
+            .toBytes(FriendlyByteBuf::writeBoolean)
+            .fromBytes(FriendlyByteBuf::readBoolean)
+            .serializeNBT(ByteTag::valueOf)
+            .deserializeNBT(nbt -> ((ByteTag)nbt).getAsByte() != 0)
             .build();
 
     public static final DataType<String> STRING = builder(String.class)
             .defaultValue("")
-            .toBytes(PacketBuffer::writeUtf)
-            .fromBytes(PacketBuffer::readUtf)
-            .serializeNBT(StringNBT::valueOf)
-            .deserializeNBT(INBT::getAsString)
+            .toBytes(FriendlyByteBuf::writeUtf)
+            .fromBytes(FriendlyByteBuf::readUtf)
+            .serializeNBT(StringTag::valueOf)
+            .deserializeNBT(Tag::getAsString)
             .build();
 
     public static final DataType<ItemStack> ITEM_STACK = builder(ItemStack.class)
             .defaultValue(ItemStack.EMPTY)
             .equalityTest(ItemStack::matches)
-            .toBytes(PacketBuffer::writeItem)
-            .fromBytes(PacketBuffer::readItem)
+            .toBytes(FriendlyByteBuf::writeItem)
+            .fromBytes(FriendlyByteBuf::readItem)
             .serializeNBT(IForgeItemStack::serializeNBT)
-            .deserializeNBT(nbt -> ItemStack.of((CompoundNBT) nbt))
+            .deserializeNBT(nbt -> ItemStack.of((CompoundTag) nbt))
             .build();
 
     public static final DataType<FluidStack> FLUID_STACK = builder(FluidStack.class)
             .defaultValue(FluidStack.EMPTY)
             .equalityTest(FluidStack::isFluidStackIdentical)
-            .toBytes(IForgePacketBuffer::writeFluidStack)
-            .fromBytes(IForgePacketBuffer::readFluidStack)
-            .serializeNBT(v -> v.writeToNBT(new CompoundNBT()))
-            .deserializeNBT(nbt -> FluidStack.loadFluidStackFromNBT((CompoundNBT) nbt))
+            .toBytes(IForgeFriendlyByteBuf::writeFluidStack)
+            .fromBytes(IForgeFriendlyByteBuf::readFluidStack)
+            .serializeNBT(v -> v.writeToNBT(new CompoundTag()))
+            .deserializeNBT(nbt -> FluidStack.loadFluidStackFromNBT((CompoundTag) nbt))
             .build();
 
     public static final DataType<FixedPointNumber> FIXED_POINT = builder(FixedPointNumber.class)
@@ -99,23 +99,23 @@ public class DataType<T> {
             .toBytes((buf, value) -> value.toBuffer(buf))
             .fromBytes(FixedPointNumber::decodeFromBuffer)
             .serializeNBT(v -> {
-                CompoundNBT tag = new CompoundNBT();
+                CompoundTag tag = new CompoundTag();
                 tag.putLong("integral", v.longValue());
                 tag.putShort("fractional", v.getFractionalBits());
                 return tag;
             })
             .deserializeNBT(nbt -> {
-                CompoundNBT tag = (CompoundNBT) nbt;
+                CompoundTag tag = (CompoundTag) nbt;
                 return FixedPointNumber.deserializeNBT(tag);
             })
             .build();
 
     private final Class<T> clazz;
     private final T defaultValue;
-    private final BiConsumer<PacketBuffer, T> encoder;
-    private final Function<PacketBuffer, T> decoder;
-    private final Function<T, INBT> nbtEncoder;
-    private final Function<INBT, T> nbtDecoder;
+    private final BiConsumer<FriendlyByteBuf, T> encoder;
+    private final Function<FriendlyByteBuf, T> decoder;
+    private final Function<T, Tag> nbtEncoder;
+    private final Function<Tag, T> nbtDecoder;
     private final BiPredicate<T, T> equalityPredicate;
 
     private DataType(Builder<T> builder) {
@@ -153,19 +153,19 @@ public class DataType<T> {
         return (DataReference<T>) reference;
     }
 
-    public void encode(PacketBuffer buf, T value) {
+    public void encode(FriendlyByteBuf buf, T value) {
         encoder.accept(buf, value);
     }
 
-    public INBT serializeNBT(T value) {
+    public Tag serializeNBT(T value) {
         return nbtEncoder.apply(value);
     }
 
-    public T deserializeNBT(INBT tag) {
+    public T deserializeNBT(Tag tag) {
         return nbtDecoder.apply(tag);
     }
 
-    public T decode(PacketBuffer buf) {
+    public T decode(FriendlyByteBuf buf) {
         return decoder.apply(buf);
     }
 
@@ -173,11 +173,11 @@ public class DataType<T> {
         return this == INT || this == LONG || this == FLOAT || this == DOUBLE;
     }
 
-    public IIntArray toIntArray(DataReference<T> reference) {
+    public ContainerData toIntArray(DataReference<T> reference) {
         if(!canCreateIntArray())
             throw new IllegalArgumentException("Cannot create IntArray from " + clazz);
 
-        return new ReferenceIntArray(reference);
+        return new ExtendedContainerData(reference);
     }
 
     public boolean equals(T first, Object second) {
@@ -193,7 +193,7 @@ public class DataType<T> {
         return defaultValue;
     }
 
-    public class ReferenceIntArray implements IIntArray {
+    public class ExtendedContainerData implements ContainerData {
 
         private static final long MASK = 0xffffffffffffL;
 
@@ -203,7 +203,7 @@ public class DataType<T> {
 
         private final int length;
 
-        private ReferenceIntArray(DataReference<?> ref) {
+        private ExtendedContainerData(DataReference<?> ref) {
             this.ref = ref;
             if(ref.getType() != DataType.this) throw new IllegalStateException();
             longSupplier = () -> {
@@ -250,10 +250,10 @@ public class DataType<T> {
 
         private Class<T> clazz;
         private T defaultValue;
-        private BiConsumer<PacketBuffer, T> encoder;
-        private Function<PacketBuffer, T> decoder;
-        private Function<T, INBT> nbtEncoder;
-        private Function<INBT, T> nbtDecoder;
+        private BiConsumer<FriendlyByteBuf, T> encoder;
+        private Function<FriendlyByteBuf, T> decoder;
+        private Function<T, Tag> nbtEncoder;
+        private Function<Tag, T> nbtDecoder;
         private BiPredicate<T, T> equalityPredicate;
 
         private Builder(Class<T> type) {
@@ -273,25 +273,25 @@ public class DataType<T> {
             return this;
         }
 
-        public Builder<T> fromBytes(@Nonnull Function<PacketBuffer, T> decoder) {
+        public Builder<T> fromBytes(@Nonnull Function<FriendlyByteBuf, T> decoder) {
             checkNotBuilt();
             this.decoder = decoder;
             return this;
         }
 
-        public Builder<T> toBytes(@Nonnull BiConsumer<PacketBuffer, T> encoder) {
+        public Builder<T> toBytes(@Nonnull BiConsumer<FriendlyByteBuf, T> encoder) {
             checkNotBuilt();
             this.encoder = encoder;
             return this;
         }
 
-        public Builder<T> serializeNBT(@Nonnull Function<T, INBT> encoder) {
+        public Builder<T> serializeNBT(@Nonnull Function<T, Tag> encoder) {
             checkNotBuilt();
             this.nbtEncoder = encoder;
             return this;
         }
 
-        public Builder<T> deserializeNBT(@Nonnull Function<INBT, T> decoder) {
+        public Builder<T> deserializeNBT(@Nonnull Function<Tag, T> decoder) {
             checkNotBuilt();
             this.nbtDecoder = decoder;
             return this;

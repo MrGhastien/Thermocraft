@@ -1,17 +1,17 @@
 package mrghastien.thermocraft.client.screens;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import mrghastien.thermocraft.client.screens.widgets.ThermoBar;
 import mrghastien.thermocraft.client.screens.widgets.Widget;
 import mrghastien.thermocraft.common.inventory.containers.SolidHeaterContainer;
 import mrghastien.thermocraft.common.tileentities.SolidHeaterTile;
 import mrghastien.thermocraft.util.MathUtils;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Inventory;
 
 public class SolidHeaterScreen extends BaseContainerScreen<SolidHeaterContainer, SolidHeaterTile> {
 
-    public SolidHeaterScreen(SolidHeaterContainer container, PlayerInventory playerInventory, ITextComponent title) {
+    public SolidHeaterScreen(SolidHeaterContainer container, Inventory playerInventory, Component title) {
         super(container, playerInventory, title);
     }
 
@@ -22,7 +22,7 @@ public class SolidHeaterScreen extends BaseContainerScreen<SolidHeaterContainer,
     }
 
     @Override
-    protected void renderBg(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) {
+    protected void renderBg(PoseStack matrixStack, float partialTicks, int mouseX, int mouseY) {
         super.renderBg(matrixStack, partialTicks, mouseX, mouseY);
 
         int c = tileEntity.getTotalBurnTime() == 0 ? 15 : MathUtils.scale(tileEntity.getTotalBurnTime() - tileEntity.getBurnTime(), tileEntity.getTotalBurnTime(), 15);

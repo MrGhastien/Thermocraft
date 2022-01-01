@@ -1,12 +1,12 @@
 package mrghastien.thermocraft.common.network.data;
 
-import net.minecraft.inventory.container.Container;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 
 public class ContainerDataHolder extends DefaultDataHolder {
 
-    private final Container container;
+    private final AbstractContainerMenu container;
 
-    public ContainerDataHolder(Container container) {
+    public ContainerDataHolder(AbstractContainerMenu container) {
         super();
         this.container = container;
     }

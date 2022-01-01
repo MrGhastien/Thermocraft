@@ -1,11 +1,11 @@
 package mrghastien.thermocraft.api.fluid;
 
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidTank;
 
-public interface IModFluidTank extends IFluidTank, INBTSerializable<CompoundNBT> {
+public interface IModFluidTank extends IFluidTank, INBTSerializable<CompoundTag> {
 
     void setFluid(FluidStack stack);
 

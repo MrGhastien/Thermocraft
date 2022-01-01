@@ -2,7 +2,7 @@ package mrghastien.thermocraft.common.registries;
 
 import mrghastien.thermocraft.common.ThermoCraft;
 import mrghastien.thermocraft.util.FluidRegistryObject;
-import net.minecraft.fluid.Fluid;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 

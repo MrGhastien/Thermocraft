@@ -2,11 +2,10 @@ package mrghastien.thermocraft.common.capabilities.heat;
 
 import mrghastien.thermocraft.api.IChangeListener;
 import mrghastien.thermocraft.api.heat.IHeatHandler;
-import mrghastien.thermocraft.common.ThermoCraft;
 import mrghastien.thermocraft.common.network.data.DataType;
 import mrghastien.thermocraft.common.network.data.IDataHolder;
 import mrghastien.thermocraft.util.math.FixedPointNumber;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.LazyOptional;
 
 import javax.annotation.Nonnull;
@@ -127,15 +126,15 @@ public class HeatHandler implements IHeatHandler {
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT nbt = new CompoundNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = new CompoundTag();
         nbt.putLong("internalEnergy", getInternalEnergyFloored());
         nbt.putDouble("heatCapacity", getHeatCapacity());
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         setInternalEnergy(nbt.getLong("internalEnergy"));
         setHeatCapacity(nbt.getDouble("heatCapacity"), false);
     }

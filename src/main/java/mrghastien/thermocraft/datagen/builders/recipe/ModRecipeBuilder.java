@@ -4,11 +4,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
-import net.minecraft.advancements.ICriterionInstance;
-import net.minecraft.advancements.IRequirementsStrategy;
-import net.minecraft.data.IFinishedRecipe;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.advancements.CriterionTriggerInstance;
+import net.minecraft.advancements.RequirementsStrategy;
+import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -28,7 +28,7 @@ public abstract class ModRecipeBuilder<T extends ModRecipeBuilder<T>> {
 	}
 
     @SuppressWarnings("unchecked")
-	public T unlockedBy(String name, ICriterionInstance criterion) {
+	public T unlockedBy(String name, CriterionTriggerInstance criterion) {
         advancementBuilder.addCriterion(name, criterion);
         return (T) this;
     }
@@ -41,10 +41,10 @@ public abstract class ModRecipeBuilder<T extends ModRecipeBuilder<T>> {
 	
 	protected abstract Result getResult(ResourceLocation id);
 	
-	public void save(Consumer<IFinishedRecipe> consumer, ResourceLocation id) {
+	public void save(Consumer<FinishedRecipe> consumer, ResourceLocation id) {
 		this.validate(id);
 		this.advancementBuilder.parent(new ResourceLocation("recipes/root"))
-				.rewards(AdvancementRewards.Builder.recipe(id)).requirements(IRequirementsStrategy.OR);
+				.rewards(AdvancementRewards.Builder.recipe(id)).requirements(RequirementsStrategy.OR);
 		consumer.accept(getResult(id));
 	}
 	
@@ -54,7 +54,7 @@ public abstract class ModRecipeBuilder<T extends ModRecipeBuilder<T>> {
 		}
 	}
 	
-	protected abstract class Result implements IFinishedRecipe {
+	protected abstract class Result implements FinishedRecipe {
 
 		protected final ResourceLocation id;
 		protected final ResourceLocation advancementId;
@@ -85,7 +85,7 @@ public abstract class ModRecipeBuilder<T extends ModRecipeBuilder<T>> {
 		}
 
 		@Override
-		public IRecipeSerializer<?> getType() {
+		public RecipeSerializer<?> getType() {
 			return ForgeRegistries.RECIPE_SERIALIZERS.getValue(serializerName);
 		}
 

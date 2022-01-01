@@ -1,17 +1,17 @@
 package mrghastien.thermocraft.common.crafting;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.FurnaceRecipe;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SmeltingRecipe;
 
 public class FurnaceRecipeWrapper extends BaseRecipe {
 
-	private final FurnaceRecipe source;
+	private final SmeltingRecipe source;
 	
-	public FurnaceRecipeWrapper(ResourceLocation id, FurnaceRecipe source) {
+	public FurnaceRecipeWrapper(ResourceLocation id, SmeltingRecipe source) {
 		super(id);
 		this.source = source;
 	}
@@ -21,13 +21,13 @@ public class FurnaceRecipeWrapper extends BaseRecipe {
 	}
 
 	@Override
-	public IRecipeSerializer<?> getSerializer() {
-		return IRecipeSerializer.SMELTING_RECIPE;
+	public RecipeSerializer<?> getSerializer() {
+		return RecipeSerializer.SMELTING_RECIPE;
 	}
 
 	@Override
-	public IRecipeType<?> getType() {
-		return IRecipeType.SMELTING;
+	public RecipeType<?> getType() {
+		return RecipeType.SMELTING;
 	}
 
 	public Ingredient getIngredient() {
@@ -35,7 +35,7 @@ public class FurnaceRecipeWrapper extends BaseRecipe {
 	}
 	
 	public ItemStack getResult() {
-		return source.assemble(DummyInventory.getInstance());
+		return source.assemble(DummyContainer.getInstance());
 	}
 	
 	public int getCookTime() {

@@ -6,10 +6,10 @@ import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNe
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetworkHandler;
 import mrghastien.thermocraft.util.ModUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
@@ -18,11 +18,11 @@ public class UpdateCablePacket {
     //private final HeatNetworkHandler.HeatNetworkType type;
     private final BlockPos pos;
     private final UpdateType type;
-    private final CompoundNBT data;
+    private final CompoundTag data;
 
     public UpdateCablePacket(Cable c, UpdateType type) {
         HeatNetwork net = c.getNetwork();
-        this.data = new CompoundNBT();
+        this.data = new CompoundTag();
         switch (type) {
             case NETWORK:
                 data.putLong("id", net == null ? -1 : net.getId());
@@ -35,13 +35,13 @@ public class UpdateCablePacket {
         this.type = type;
     }
 
-    UpdateCablePacket(PacketBuffer buf) {
+    UpdateCablePacket(FriendlyByteBuf buf) {
         this.type = buf.readEnum(UpdateType.class);
         this.data = buf.readNbt();
         this.pos = buf.readBlockPos();
     }
 
-    public void encode(PacketBuffer buf) {
+    public void encode(FriendlyByteBuf buf) {
         buf.writeEnum(type);
         buf.writeNbt(data);
         buf.writeBlockPos(pos);

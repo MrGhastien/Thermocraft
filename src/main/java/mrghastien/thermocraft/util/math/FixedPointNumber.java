@@ -1,7 +1,7 @@
 package mrghastien.thermocraft.util.math;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
@@ -273,7 +273,7 @@ public class FixedPointNumber extends Number implements Comparable<FixedPointNum
         return array;
     }
 
-    public void toBuffer(PacketBuffer buf) {
+    public void toBuffer(FriendlyByteBuf buf) {
         buf.writeLong(integral);
         buf.writeShort(fractional);
     }
@@ -381,16 +381,16 @@ public class FixedPointNumber extends Number implements Comparable<FixedPointNum
         return (short) (l & 0xffff);
     }
 
-    public static FixedPointNumber decodeFromBuffer(PacketBuffer buf) {
+    public static FixedPointNumber decodeFromBuffer(FriendlyByteBuf buf) {
         return new FixedPointNumber(buf.readLong(), buf.readShort());
     }
 
-    public static FixedPointNumber.Mutable decodeFromBuffer(PacketBuffer buf, FixedPointNumber.Mutable number) {
+    public static FixedPointNumber.Mutable decodeFromBuffer(FriendlyByteBuf buf, FixedPointNumber.Mutable number) {
        number.set(buf.readLong(), buf.readShort());
        return number;
     }
 
-    public static FixedPointNumber deserializeNBT(CompoundNBT tag) {
+    public static FixedPointNumber deserializeNBT(CompoundTag tag) {
         return new FixedPointNumber(tag.getLong("integral"), tag.getShort("fractional"));
     }
 

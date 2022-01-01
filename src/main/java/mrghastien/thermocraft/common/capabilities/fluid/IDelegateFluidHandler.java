@@ -7,6 +7,8 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 import javax.annotation.Nonnull;
 import java.util.List;
 
+import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
+
 public interface IDelegateFluidHandler extends IFluidHandler {
 
     List<IFluidTank> getFluidTanks();

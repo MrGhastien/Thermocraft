@@ -2,10 +2,10 @@ package mrghastien.thermocraft.api.heat;
 
 import mrghastien.thermocraft.api.IChangeListener;
 import mrghastien.thermocraft.util.math.FixedPointNumber;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;
 
-public interface IHeatHandler extends INBTSerializable<CompoundNBT>, IChangeListener {
+public interface IHeatHandler extends INBTSerializable<CompoundTag>, IChangeListener {
 
     double AIR_TEMPERATURE = 293.0;
 

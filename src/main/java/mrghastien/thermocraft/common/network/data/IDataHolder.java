@@ -2,7 +2,7 @@ package mrghastien.thermocraft.common.network.data;
 
 import mrghastien.thermocraft.common.ThermoCraft;
 import mrghastien.thermocraft.common.network.INetworkBinding;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;

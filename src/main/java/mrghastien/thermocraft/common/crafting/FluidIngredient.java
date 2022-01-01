@@ -2,13 +2,13 @@ package mrghastien.thermocraft.common.crafting;
 
 import com.google.gson.*;
 import mrghastien.thermocraft.common.ThermoCraft;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.ITag;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.tags.Tag;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.common.crafting.IIngredientSerializer;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -88,7 +88,7 @@ public class FluidIngredient extends Ingredient {
         return fluids.length == 0 ? EMPTY : new FluidIngredient(Arrays.stream(fluids).map(SingleFluidList::new));
     }
 
-    public static FluidIngredient of(ITag<Fluid> tag, int count) {
+    public static FluidIngredient of(Tag<Fluid> tag, int count) {
         return new FluidIngredient(Stream.of(new TagFluidList(tag, count)));
     }
 
@@ -99,7 +99,7 @@ public class FluidIngredient extends Ingredient {
             JsonArray array = json.getAsJsonArray();
             if(array.size() == 0) throw new JsonSyntaxException("Fluid array cannot be empty, at least one must be defined");
             return from(StreamSupport.stream(array.spliterator(), false)
-                    .map(element -> listFromJson(JSONUtils.convertToJsonObject(element, "fluid"))));
+                    .map(element -> listFromJson(GsonHelper.convertToJsonObject(element, "fluid"))));
             //The 2nd param is only used for the exception message if failed to convert
         }
         throw new JsonSyntaxException("Expected item to be object or array of objects");
@@ -110,19 +110,19 @@ public class FluidIngredient extends Ingredient {
             throw new JsonParseException("An ingredient entry is either a tag or a fluid, not both");
 
         if (json.has("fluid")) {
-            ResourceLocation id = new ResourceLocation(JSONUtils.getAsString(json, "fluid"));
+            ResourceLocation id = new ResourceLocation(GsonHelper.getAsString(json, "fluid"));
             Fluid fluid = ForgeRegistries.FLUIDS.getValue(id);
             if(fluid == null) throw new JsonSyntaxException("Unknown fluid '" + id + "'");
 
-            int amount = JSONUtils.getAsInt(json, "amount");
+            int amount = GsonHelper.getAsInt(json, "amount");
             return new SingleFluidList(new FluidStack(fluid, amount));
 
         } else if(json.has("tag")) {
-            ResourceLocation id = new ResourceLocation(JSONUtils.getAsString(json, "tag"));
-            ITag<Fluid> tag = FluidTags.getAllTags().getTag(id);
+            ResourceLocation id = new ResourceLocation(GsonHelper.getAsString(json, "tag"));
+            Tag<Fluid> tag = FluidTags.getAllTags().getTag(id);
             if(tag == null) throw new JsonSyntaxException("Unknown fluid tag '" + id + "'");
 
-            return new TagFluidList(tag, JSONUtils.getAsInt(json, "amount", 100));
+            return new TagFluidList(tag, GsonHelper.getAsInt(json, "amount", 100));
         }
         throw new JsonParseException("An ingredient entry needs either a tag or a fluid");
     }
@@ -159,10 +159,10 @@ public class FluidIngredient extends Ingredient {
 
     public static class TagFluidList implements IFluidList {
 
-        final ITag<Fluid> fluidTag;
+        final Tag<Fluid> fluidTag;
         final int count;
 
-        public TagFluidList(ITag<Fluid> tag, int count) {
+        public TagFluidList(Tag<Fluid> tag, int count) {
             this.fluidTag = tag;
             this.count = count;
         }
@@ -177,7 +177,7 @@ public class FluidIngredient extends Ingredient {
         public JsonObject toJson() {
             JsonObject json = new JsonObject();
             json.addProperty("type", FluidIngredient.Serializer.ID.toString());
-            json.addProperty("tag", FluidTags.getAllTags().getIdOrThrow(this.fluidTag).toString());
+            json.addProperty("tag", FluidTags.getAllTags().getId(this.fluidTag).toString());
             json.addProperty("amount", count);
             return json;
         }
@@ -189,7 +189,7 @@ public class FluidIngredient extends Ingredient {
         public static final Serializer INSTANCE = new Serializer();
 
         @Override
-        public FluidIngredient parse(PacketBuffer buffer) {
+        public FluidIngredient parse(FriendlyByteBuf buffer) {
             int length = buffer.readVarInt();
             return new FluidIngredient(Stream.generate(() -> new SingleFluidList(buffer.readFluidStack())).limit(length));
         }
@@ -200,25 +200,25 @@ public class FluidIngredient extends Ingredient {
                 throw new JsonParseException("An ingredient entry is either a tag or a fluid, not both");
 
             if (json.has("fluid")) {
-                ResourceLocation id = new ResourceLocation(JSONUtils.getAsString(json, "fluid"));
+                ResourceLocation id = new ResourceLocation(GsonHelper.getAsString(json, "fluid"));
                 Fluid fluid = ForgeRegistries.FLUIDS.getValue(id);
                 if(fluid == null) throw new JsonSyntaxException("Unknown fluid '" + id + "'");
 
-                int amount = JSONUtils.getAsInt(json, "amount");
+                int amount = GsonHelper.getAsInt(json, "amount");
                 return FluidIngredient.from(Stream.of(new SingleFluidList(new FluidStack(fluid, amount))));
 
             } else if(json.has("tag")) {
-                ResourceLocation id = new ResourceLocation(JSONUtils.getAsString(json, "tag"));
-                ITag<Fluid> tag = FluidTags.getAllTags().getTag(id);
+                ResourceLocation id = new ResourceLocation(GsonHelper.getAsString(json, "tag"));
+                Tag<Fluid> tag = FluidTags.getAllTags().getTag(id);
                 if(tag == null) throw new JsonSyntaxException("Unknown fluid tag '" + id + "'");
 
-                return FluidIngredient.of(tag, JSONUtils.getAsInt(json, "amount", 1000));
+                return FluidIngredient.of(tag, GsonHelper.getAsInt(json, "amount", 1000));
             }
             throw new JsonParseException("An ingredient entry needs either a tag or a fluid");
         }
 
         @Override
-        public void write(PacketBuffer buffer, FluidIngredient ingredient) {
+        public void write(FriendlyByteBuf buffer, FluidIngredient ingredient) {
             FluidStack[] fluids = ingredient.getFluids();
             buffer.writeVarInt(fluids.length);
             for(FluidStack stack : fluids)

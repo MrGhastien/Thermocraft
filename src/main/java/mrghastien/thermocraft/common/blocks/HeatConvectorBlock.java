@@ -4,24 +4,25 @@ import mrghastien.thermocraft.common.ThermoCraft;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetworkHandler;
 import mrghastien.thermocraft.common.tileentities.cables.HeatConvectorTile;
 import mrghastien.thermocraft.common.tileentities.cables.HeatTransmitterTile;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
@@ -33,43 +34,48 @@ public class HeatConvectorBlock extends HeatTransmitterBlock {
     }
 
     @Override
-    public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult) {
-        if(!world.isClientSide()) return ActionResultType.PASS;
+    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult) {
+        if(!world.isClientSide()) return InteractionResult.PASS;
         if(player.getItemInHand(hand).getItem() == Items.BOWL) {
-            TileEntity te = world.getBlockEntity(pos);
+            BlockEntity te = world.getBlockEntity(pos);
             if(te instanceof HeatTransmitterTile<?>)
-                player.sendMessage(new StringTextComponent("Cable connections : " + ((HeatTransmitterTile<?>)te).getCable().getCableConnections()), player.getUUID());
+                player.sendMessage(new TextComponent("Cable connections : " + ((HeatTransmitterTile<?>)te).getCable().getCableConnections()), player.getUUID());
         }
-        return ActionResultType.PASS;
+        return InteractionResult.PASS;
     }
 
     @Override
-    public void setPlacedBy(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
+    public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
         ThermoCraft.LOGGER.debug("SetPlacedBy");
         if(itemStack.getItem() == asItem()) {
-            CompoundNBT nbt = itemStack.getTag();
+            CompoundTag nbt = itemStack.getTag();
             Fluid fluid;
             if(nbt != null && nbt.contains("fluid")) {
                 ResourceLocation fluidLocation = new ResourceLocation(nbt.getString("fluid"));
                 fluid = ForgeRegistries.FLUIDS.getValue(fluidLocation);
             } else fluid = Fluids.EMPTY;
 
-            TileEntity te = world.getBlockEntity(pos);
+            BlockEntity te = world.getBlockEntity(pos);
             if (te instanceof HeatConvectorTile) {
                 ((HeatConvectorTile) te).setFluid(fluid);
             }
         }
     }
 
-    @Nullable
-    @Override
-    public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-        ThermoCraft.LOGGER.debug("created TE");
-        return new HeatConvectorTile();
-    }
-
     @Override
     public HeatNetworkHandler.HeatNetworkType getNetworkType() {
         return HeatNetworkHandler.HeatNetworkType.CONVECTOR;
+    }
+
+    @Nullable
+    @Override
+    public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level p_153212_, BlockState p_153213_, BlockEntityType<T> p_153214_) {
+        return super.getTicker(p_153212_, p_153213_, p_153214_);
     }
 }

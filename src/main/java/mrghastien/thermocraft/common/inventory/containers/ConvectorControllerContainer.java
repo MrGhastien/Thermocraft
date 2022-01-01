@@ -2,23 +2,23 @@ package mrghastien.thermocraft.common.inventory.containers;
 
 import mrghastien.thermocraft.common.registries.ModContainers;
 import mrghastien.thermocraft.common.tileentities.cables.HeatConvectorPumpTile;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class ConvectorControllerContainer extends BaseContainer {
 
-    public ConvectorControllerContainer(int id, PlayerInventory playerInventory, HeatConvectorPumpTile tileEntity) {
+    public ConvectorControllerContainer(int id, Inventory playerInventory, HeatConvectorPumpTile tileEntity) {
         super(ModContainers.HEAT_CONVECTOR_PUMP.get(), id, playerInventory, tileEntity, 0);
         layoutPlayerInventorySlots(8, 93);
     }
 
-    public static ConvectorControllerContainer createClient(int id, PlayerInventory inv, PacketBuffer data) {
+    public static ConvectorControllerContainer createClient(int id, Inventory inv, FriendlyByteBuf data) {
         BlockPos pos = data.readBlockPos();
-        World world = inv.player.level;
-        TileEntity te = world.getBlockEntity(pos);
+        Level world = inv.player.level;
+        BlockEntity te = world.getBlockEntity(pos);
         if(te instanceof HeatConvectorPumpTile) {
             return new ConvectorControllerContainer(id, inv, (HeatConvectorPumpTile) te);
         }

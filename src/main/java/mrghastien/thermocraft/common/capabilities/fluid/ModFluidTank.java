@@ -2,10 +2,9 @@ package mrghastien.thermocraft.common.capabilities.fluid;
 
 import mrghastien.thermocraft.api.IChangeListener;
 import mrghastien.thermocraft.api.fluid.IModFluidTank;
-import mrghastien.thermocraft.common.ThermoCraft;
 import mrghastien.thermocraft.common.network.data.DataType;
 import mrghastien.thermocraft.common.network.data.IDataHolder;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
@@ -71,15 +70,15 @@ public class ModFluidTank implements IModFluidTank {
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT nbt = new CompoundNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = new CompoundTag();
         fluid.writeToNBT(nbt);
         nbt.putInt("Capacity", capacity);
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         setFluid(FluidStack.loadFluidStackFromNBT(nbt));
         this.capacity = nbt.getInt("Capacity");
     }

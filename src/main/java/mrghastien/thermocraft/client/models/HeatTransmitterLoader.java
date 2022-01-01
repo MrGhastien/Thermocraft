@@ -4,9 +4,9 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.GsonHelper;
 import net.minecraftforge.client.model.IModelLoader;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 
@@ -16,16 +16,17 @@ import java.util.Map;
 
 public class HeatTransmitterLoader implements IModelLoader<HeatTransmitterGeometry> {
     @Override
-    public void onResourceManagerReload(@Nonnull IResourceManager resourceManager) {
+    public void onResourceManagerReload(@Nonnull ResourceManager resourceManager) {
 
     }
 
+    @Nonnull
     @Override
     public HeatTransmitterGeometry read(@Nonnull JsonDeserializationContext deserializationContext, JsonObject modelContents) {
         validate(modelContents);
         Map<String, String> textureMap = new HashMap<>();
         if(modelContents.has("textures")) {
-            JsonObject textures = JSONUtils.getAsJsonObject(modelContents, "textures");
+            JsonObject textures = GsonHelper.getAsJsonObject(modelContents, "textures");
             for(Map.Entry<String, JsonElement> entry : textures.entrySet()) {
                 textureMap.put(entry.getKey(), entry.getValue().getAsString());
             }
@@ -37,9 +38,9 @@ public class HeatTransmitterLoader implements IModelLoader<HeatTransmitterGeomet
         if(modelContents.has("parent")) {
             parentLocation = getParent(modelContents);
         } else {
-            center = (ModelLoaderRegistry.VanillaProxy) ModelLoaderRegistry.getModel(new ResourceLocation("elements"), deserializationContext, JSONUtils.getAsJsonObject(modelContents, "center"));
-            transfer = (ModelLoaderRegistry.VanillaProxy) ModelLoaderRegistry.getModel(new ResourceLocation("elements"), deserializationContext, JSONUtils.getAsJsonObject(modelContents, "transfer_connection"));
-            neutral = (ModelLoaderRegistry.VanillaProxy) ModelLoaderRegistry.getModel(new ResourceLocation("elements"), deserializationContext, JSONUtils.getAsJsonObject(modelContents, "neutral_connection"));
+            center = (ModelLoaderRegistry.VanillaProxy) ModelLoaderRegistry.getModel(new ResourceLocation("elements"), deserializationContext, GsonHelper.getAsJsonObject(modelContents, "center"));
+            transfer = (ModelLoaderRegistry.VanillaProxy) ModelLoaderRegistry.getModel(new ResourceLocation("elements"), deserializationContext, GsonHelper.getAsJsonObject(modelContents, "transfer_connection"));
+            neutral = (ModelLoaderRegistry.VanillaProxy) ModelLoaderRegistry.getModel(new ResourceLocation("elements"), deserializationContext, GsonHelper.getAsJsonObject(modelContents, "neutral_connection"));
         }
 
         return new HeatTransmitterGeometry(center, transfer, neutral, textureMap, parentLocation);
@@ -57,6 +58,6 @@ public class HeatTransmitterLoader implements IModelLoader<HeatTransmitterGeomet
     }
 
     private ResourceLocation getParent(JsonObject modelContents) {
-        return new ResourceLocation(JSONUtils.getAsString(modelContents, "parent"));
+        return new ResourceLocation(GsonHelper.getAsString(modelContents, "parent"));
     }
 }

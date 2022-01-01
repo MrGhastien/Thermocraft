@@ -1,11 +1,11 @@
 package mrghastien.thermocraft.client.screens.widgets;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import mrghastien.thermocraft.api.heat.IHeatHandler;
 import mrghastien.thermocraft.util.Constants;
 import mrghastien.thermocraft.util.RenderUtils;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.screens.Screen;
 
 import java.awt.*;
 import java.util.function.Supplier;
@@ -25,7 +25,7 @@ public class ThermoBar extends Widget {
     }
 
     @Override
-    protected void renderBg(Screen screen, MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+    protected void renderBg(Screen screen, PoseStack stack, int mouseX, int mouseY, float partialTicks) {
         int x = bounds.x;
         int y = bounds.y;
         int width = bounds.width;
@@ -43,11 +43,11 @@ public class ThermoBar extends Widget {
     }
 
     @Override
-    protected void onHovered(Screen screen, MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+    protected void onHovered(Screen screen, PoseStack stack, int mouseX, int mouseY, float partialTicks) {
         IHeatHandler handler = getHandler();
         setTooltips(String.format("Heat : %3.2f " + Constants.TEMPERATURE_UNIT, handler.getTemperature()),
-                TextFormatting.DARK_GRAY + "Energy : " + handler.getInternalEnergy().longValue() + " " + Constants.ENERGY_UNIT,
-                String.format("%sDissipation : %.2f %s/t", TextFormatting.DARK_GRAY, Math.max(0, -handler.getDissipation()), Constants.ENERGY_UNIT));
+                ChatFormatting.DARK_GRAY + "Energy : " + handler.getInternalEnergy().longValue() + " " + Constants.ENERGY_UNIT,
+                String.format("%sDissipation : %.2f %s/t", ChatFormatting.DARK_GRAY, Math.max(0, -handler.getDissipation()), Constants.ENERGY_UNIT));
         super.onHovered(screen, stack, mouseX, mouseY, partialTicks);
     }
 }

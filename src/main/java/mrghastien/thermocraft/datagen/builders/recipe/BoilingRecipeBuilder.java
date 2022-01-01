@@ -5,10 +5,10 @@ import mrghastien.thermocraft.common.ThermoCraft;
 import mrghastien.thermocraft.common.crafting.FluidIngredient;
 import mrghastien.thermocraft.common.registries.ModBlocks;
 import mrghastien.thermocraft.datagen.CriterionHelper;
-import net.minecraft.data.IFinishedRecipe;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.tags.ITag.INamedTag;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.Tag;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -39,11 +39,11 @@ public class BoilingRecipeBuilder extends ModRecipeBuilder<BoilingRecipeBuilder>
 		return ingredient(FluidIngredient.of(new FluidStack(fluid, amount)));
 	}
 	
-	public BoilingRecipeBuilder ingredient(INamedTag<Fluid> tag, int amount) {
+	public BoilingRecipeBuilder ingredient(Tag.Named<Fluid> tag, int amount) {
 		return ingredient(FluidIngredient.of(tag, amount));
 	}
 
-	public void save(Consumer<IFinishedRecipe> consumer) {
+	public void save(Consumer<FinishedRecipe> consumer) {
 		this.save(consumer, new ResourceLocation(ThermoCraft.MODID, "boiling/" + result.getFluid().getRegistryName().getPath()));
 	}
 

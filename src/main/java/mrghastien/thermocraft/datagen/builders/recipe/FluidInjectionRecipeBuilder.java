@@ -4,12 +4,12 @@ import com.google.gson.JsonObject;
 import mrghastien.thermocraft.common.ThermoCraft;
 import mrghastien.thermocraft.common.crafting.FluidIngredient;
 import mrghastien.thermocraft.common.crafting.StackIngredient;
-import net.minecraft.data.IFinishedRecipe;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tags.ITag;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.Tag;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 
 import java.util.function.Consumer;
@@ -31,20 +31,20 @@ public class FluidInjectionRecipeBuilder extends ModRecipeBuilder<FluidInjection
         return new FluidInjectionRecipeBuilder(FluidIngredient.of(fluid), StackIngredient.of(input), output);
     }
 
-    public static FluidInjectionRecipeBuilder recipe(ITag<Fluid> fluid, int count, ItemStack input, ItemStack output) {
+    public static FluidInjectionRecipeBuilder recipe(Tag<Fluid> fluid, int count, ItemStack input, ItemStack output) {
         return new FluidInjectionRecipeBuilder(FluidIngredient.of(fluid, count), StackIngredient.of(input), output);
     }
 
-    public static FluidInjectionRecipeBuilder recipe(ITag<Fluid> fluid, int amount, ITag<Item> input, int count, ItemStack output) {
+    public static FluidInjectionRecipeBuilder recipe(Tag<Fluid> fluid, int amount, Tag<Item> input, int count, ItemStack output) {
         return new FluidInjectionRecipeBuilder(FluidIngredient.of(fluid, amount), StackIngredient.of(input, count), output);
     }
 
-    public static FluidInjectionRecipeBuilder recipe(FluidStack fluid, ITag<Item> input, int count, ItemStack output) {
+    public static FluidInjectionRecipeBuilder recipe(FluidStack fluid, Tag<Item> input, int count, ItemStack output) {
         return new FluidInjectionRecipeBuilder(FluidIngredient.of(fluid), StackIngredient.of(input, count), output);
     }
 
 
-    public void save(Consumer<IFinishedRecipe> consumer) {
+    public void save(Consumer<FinishedRecipe> consumer) {
         this.save(consumer, new ResourceLocation(ThermoCraft.MODID, "fluid_injection/" + output.getItem().getRegistryName().getPath()));
     }
 

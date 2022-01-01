@@ -4,13 +4,8 @@ import io.netty.buffer.Unpooled;
 import mrghastien.thermocraft.common.ThermoCraft;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetwork;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetworkHandler;
-import mrghastien.thermocraft.common.inventory.containers.BaseContainer;
-import mrghastien.thermocraft.common.network.INetworkBinding;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
@@ -20,23 +15,23 @@ import java.util.function.Supplier;
  */
 public class UpdateHeatNetworkPacket {
 
-    private final PacketBuffer buf;
+    private final FriendlyByteBuf buf;
     private final long id;
 
     public UpdateHeatNetworkPacket(HeatNetwork net) {
         this.id = net.getId();
-        this.buf = new PacketBuffer(Unpooled.buffer());
+        this.buf = new FriendlyByteBuf(Unpooled.buffer());
         net.getBinding().encode(buf);
     }
 
-    public void encode(PacketBuffer buf) {
+    public void encode(FriendlyByteBuf buf) {
         buf.writeLong(id);
         buf.writeBytes(this.buf);
     }
 
-    public UpdateHeatNetworkPacket(PacketBuffer buf) {
+    public UpdateHeatNetworkPacket(FriendlyByteBuf buf) {
         this.id = buf.readLong();
-        this.buf = new PacketBuffer(buf.copy());
+        this.buf = new FriendlyByteBuf(buf.copy());
     }
 
     public void handle(Supplier<NetworkEvent.Context> ctx) {

@@ -4,8 +4,8 @@ import mrghastien.thermocraft.common.network.data.DataReference;
 import mrghastien.thermocraft.common.network.data.DataType;
 import mrghastien.thermocraft.common.network.data.IDataHolder;
 import mrghastien.thermocraft.common.network.data.ReadOnlyDataHolder;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -39,7 +39,7 @@ public class CompositeDataNetworkBinding implements INetworkBinding {
     }
 
     @Override
-    public void encode(PacketBuffer buf) {
+    public void encode(FriendlyByteBuf buf) {
         //Encode the modified data in the buffer
         for (Map.Entry<ResourceLocation, DataReference<?>> entry : dirtyMap.entrySet()) {
             DataReference<?> ref = entry.getValue();
@@ -51,7 +51,7 @@ public class CompositeDataNetworkBinding implements INetworkBinding {
     }
 
     @Override
-    public void decode(PacketBuffer buf) {
+    public void decode(FriendlyByteBuf buf) {
         //While there is still data in the buffer, decode it and update the container
         while (buf.isReadable()) {
             DataType<?> expected = DataType.fromString(buf.readUtf());

@@ -1,38 +1,38 @@
 package mrghastien.thermocraft.common.inventory.containers;
 
-import mrghastien.thermocraft.common.network.*;
+import mrghastien.thermocraft.common.network.INetworkBinding;
 import mrghastien.thermocraft.common.network.data.ContainerDataHolder;
 import mrghastien.thermocraft.common.network.packets.PacketHandler;
 import mrghastien.thermocraft.common.network.packets.UpdateClientContainerPacket;
 import mrghastien.thermocraft.common.tileentities.BaseTile;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.inventory.container.IContainerListener;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerListener;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 import net.minecraftforge.items.wrapper.InvWrapper;
 
 import javax.annotation.Nullable;
 
-public abstract class BaseContainer extends Container {
+public abstract class BaseContainer extends AbstractContainerMenu {
 
-    public final TileEntity tileEntity;
+    public final BlockEntity tileEntity;
     protected final IItemHandler playerInventory;
     protected final BlockPos pos;
-    protected final World world;
+    protected final Level world;
     protected final int size;
 
     protected final ContainerDataHolder dataHolder;
 
-    protected BaseContainer(@Nullable ContainerType<?> containerType, int id, PlayerInventory playerInventory, TileEntity tileEntity, int size) {
+    protected BaseContainer(@Nullable MenuType<?> containerType, int id, Inventory playerInventory, BlockEntity tileEntity, int size) {
         super(containerType, id);
         this.tileEntity = tileEntity;
         this.world = tileEntity.getLevel();
@@ -71,7 +71,7 @@ public abstract class BaseContainer extends Container {
     }
 
     @Override
-    public ItemStack quickMoveStack(PlayerEntity playerIn, int index) {
+    public ItemStack quickMoveStack(Player playerIn, int index) {
         ItemStack itemstack = ItemStack.EMPTY;
         Slot slot = this.slots.get(index);
 
@@ -102,9 +102,9 @@ public abstract class BaseContainer extends Container {
 
         INetworkBinding binding = dataHolder.getBinding();
         if(binding.hasChanged()) {
-            for (IContainerListener listener : containerListeners) {
-                if(listener instanceof ServerPlayerEntity)
-                PacketHandler.sendToPlayer(new UpdateClientContainerPacket(binding), (ServerPlayerEntity) listener);
+            for (ContainerListener listener : containerListeners) {
+                if(listener instanceof ServerPlayer)
+                PacketHandler.sendToPlayer(new UpdateClientContainerPacket(binding), (ServerPlayer) listener);
             }
         }
     }
@@ -114,7 +114,7 @@ public abstract class BaseContainer extends Container {
     }
 
     @Override
-    public boolean stillValid(PlayerEntity player) {
+    public boolean stillValid(Player player) {
         return player.blockPosition().distSqr(tileEntity.getBlockPos()) < 64;
     }
 }

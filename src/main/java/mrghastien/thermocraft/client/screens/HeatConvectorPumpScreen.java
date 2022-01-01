@@ -1,21 +1,21 @@
 package mrghastien.thermocraft.client.screens;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatConvectorNetwork;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetworkHandler;
 import mrghastien.thermocraft.common.inventory.containers.ConvectorControllerContainer;
 import mrghastien.thermocraft.common.tileentities.cables.HeatConvectorPumpTile;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Inventory;
 
 public class HeatConvectorPumpScreen extends BaseContainerScreen<ConvectorControllerContainer, HeatConvectorPumpTile> {
 
-    public HeatConvectorPumpScreen(ConvectorControllerContainer container, PlayerInventory playerInventory, ITextComponent title) {
+    public HeatConvectorPumpScreen(ConvectorControllerContainer container, Inventory playerInventory, Component title) {
         super(container, playerInventory, title);
     }
 
     @Override
-    protected void renderLabels(MatrixStack matrixStack, int mouseX, int mouseY) {
+    protected void renderLabels(PoseStack matrixStack, int mouseX, int mouseY) {
         super.renderLabels(matrixStack, mouseX, mouseY);
         HeatConvectorNetwork net = (HeatConvectorNetwork) HeatNetworkHandler.instance().getClient(tileEntity.getNetworkId());
         if(net == null) return;

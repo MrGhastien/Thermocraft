@@ -3,17 +3,18 @@ package mrghastien.thermocraft.client.models;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Transformation;
+import com.mojang.math.Vector3f;
 import mrghastien.thermocraft.util.Constants;
-import net.minecraft.client.renderer.model.*;
+import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.math.vector.TransformationMatrix;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.client.resources.model.*;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.model.IModelConfiguration;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
-import net.minecraftforge.client.model.SimpleModelTransform;
+import net.minecraftforge.client.model.SimpleModelState;
 import net.minecraftforge.client.model.geometry.IModelGeometry;
 
 import javax.annotation.Nullable;
@@ -38,28 +39,29 @@ public class HeatTransmitterGeometry implements IModelGeometry<HeatTransmitterGe
         this.textureMap = textureMap;
         this.parentLocation = parentLocation;
     }
-
+    //IModelConfiguration owner, ModelBakery bakery, Function<RenderMaterial, TextureAtlasSprite> spriteGetter, ModelTransform modelTransform, ItemOverrideList overrides, ResourceLocation modelLocation
+//IModelConfiguration iModelConfiguration, ModelBakery modelBakery, Function<Material, TextureAtlasSprite> function, ModelState modelState, ItemOverrides itemOverrides, ResourceLocation resourceLocation
     @Override
-    public IBakedModel bake(IModelConfiguration owner, ModelBakery bakery, Function<RenderMaterial, TextureAtlasSprite> spriteGetter, IModelTransform modelTransform, ItemOverrideList overrides, ResourceLocation modelLocation) {
-        ImmutableMap.Builder<Direction, IBakedModel> transferModels = new ImmutableMap.Builder<>();
-        ImmutableMap.Builder<Direction, IBakedModel> neutralModels = new ImmutableMap.Builder<>();
+    public BakedModel bake(IModelConfiguration owner, ModelBakery bakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides itemOverrides, ResourceLocation modelLocation) {
+        ImmutableMap.Builder<Direction, BakedModel> transferModels = new ImmutableMap.Builder<>();
+        ImmutableMap.Builder<Direction, BakedModel> neutralModels = new ImmutableMap.Builder<>();
         for(Direction dir : Constants.DIRECTIONS) {
-            TransformationMatrix transformationMatrix = modelTransform.getRotation();
-            IModelTransform transform = new SimpleModelTransform(new TransformationMatrix(
+            Transformation transformationMatrix = modelState.getRotation();
+            ModelState transform = new SimpleModelState(new Transformation(
                     transformationMatrix.getTranslation(),
                     getRotation(dir),
                     transformationMatrix.getScale(),
-                    transformationMatrix.getRightRot()
+                    transformationMatrix.getRightRotation()
             ));
-            transferModels.put(dir, transfer.bake(owner, bakery, spriteGetter, transform, overrides, modelLocation));
-            neutralModels.put(dir, neutral.bake(owner, bakery, spriteGetter, transform, overrides, modelLocation));
+            transferModels.put(dir, transfer.bake(owner, bakery, spriteGetter, transform, itemOverrides, modelLocation));
+            neutralModels.put(dir, neutral.bake(owner, bakery, spriteGetter, transform, itemOverrides, modelLocation));
         }
-        return new HeatTransmitterBakedModel(center.bake(owner, bakery, spriteGetter, modelTransform, overrides, modelLocation), transferModels.build(), neutralModels.build(), spriteGetter.apply(owner.resolveTexture(textureMap.get("particle"))));
+        return new HeatTransmitterBakedModel(center.bake(owner, bakery, spriteGetter, modelState, itemOverrides, modelLocation), transferModels.build(), neutralModels.build(), spriteGetter.apply(owner.resolveTexture(textureMap.get("particle"))));
     }
 
     @Override
-    public Collection<RenderMaterial> getTextures(IModelConfiguration owner, Function<ResourceLocation, IUnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors) {
-        ImmutableList.Builder<RenderMaterial> listBuilder = ImmutableList.builder();
+    public Collection<Material> getTextures(IModelConfiguration owner, Function<ResourceLocation, UnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors) {
+        ImmutableList.Builder<Material> listBuilder = ImmutableList.builder();
         listBuilder.addAll(center.getTextures(owner, modelGetter, missingTextureErrors));
         listBuilder.addAll(transfer.getTextures(owner, modelGetter, missingTextureErrors));
         listBuilder.addAll(neutral.getTextures(owner, modelGetter, missingTextureErrors));
@@ -84,5 +86,4 @@ public class HeatTransmitterGeometry implements IModelGeometry<HeatTransmitterGe
         }
         return null;
     }
-
 }

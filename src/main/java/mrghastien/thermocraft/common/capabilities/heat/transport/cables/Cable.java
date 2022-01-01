@@ -6,16 +6,15 @@ import mrghastien.thermocraft.common.ThermoCraft;
 import mrghastien.thermocraft.common.capabilities.Capabilities;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetwork;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetworkHandler;
-import mrghastien.thermocraft.common.network.packets.UpdateCablePacket;
 import mrghastien.thermocraft.common.tileentities.cables.HeatTransmitterTile;
 import mrghastien.thermocraft.util.Constants;
 import mrghastien.thermocraft.util.ModUtils;
-import net.minecraft.block.BlockState;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.util.LazyOptional;
 
 import java.util.EnumMap;
@@ -26,7 +25,7 @@ import java.util.function.Supplier;
 public abstract class Cable {
 
     protected HeatNetwork network;
-    protected World world;
+    protected Level world;
     protected final EnumMap<Direction, TransferType> connections;
     private final EnumSet<Direction> cableConnections;
     private final EnumSet<Direction> otherConnections; //Cache
@@ -35,7 +34,7 @@ public abstract class Cable {
     protected final HeatTransmitterTile<?> tileEntity;
     private boolean valid = true;
 
-    public Cable(World world, BlockPos pos, HeatTransmitterTile<?> tileEntity) {
+    public Cable(Level world, BlockPos pos, HeatTransmitterTile<?> tileEntity) {
         this.world = world;
         this.pos = pos;
         this.stateSupplier = () -> world.getBlockState(pos);
@@ -85,7 +84,7 @@ public abstract class Cable {
         return pos;
     }
 
-    public World getWorld() {
+    public Level getWorld() {
         return network == null ? world : network.getWorld();
     }
 
@@ -107,7 +106,7 @@ public abstract class Cable {
         if(canConnect(dir)) {
             return changeConnection(dir, TransferType.NEUTRAL);
         } else {
-            TileEntity te = world.getBlockEntity(adj);
+            BlockEntity te = world.getBlockEntity(adj);
             if(te != null) {
                 LazyOptional<IHeatHandler> handler = te.getCapability(Capabilities.HEAT_HANDLER_CAPABILITY, dir.getOpposite());
                 boolean canReceive = handler.map(IHeatHandler::canReceive).orElse(false);
@@ -156,13 +155,13 @@ public abstract class Cable {
         return false;
     }
 
-    public void writeToNbt(CompoundNBT nbt) {
+    public void writeToNbt(CompoundTag nbt) {
         for(Map.Entry<Direction, TransferType> e : connections.entrySet()) {
             nbt.putString(e.getKey().getName(), e.getValue().getSerializedName());
         }
     }
 
-    public boolean handleUpdateTag(CompoundNBT nbt) {
+    public boolean handleUpdateTag(CompoundTag nbt) {
         boolean result = false;
         for(Direction dir : Constants.DIRECTIONS) {
             result |= changeConnection(dir, TransferType.fromString(nbt.getString(dir.getName())));

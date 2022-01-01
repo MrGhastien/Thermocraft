@@ -1,19 +1,15 @@
 package mrghastien.thermocraft.util;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldVertexBufferUploader;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidAttributes;
-import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
@@ -30,12 +26,12 @@ public final class RenderUtils {
 		int lastYPos = yPos + height;
 		RenderSystem.disableTexture();
 		RenderSystem.enableBlend();
-		RenderSystem.disableAlphaTest();
+		//RenderSystem.disableAlphaTest();
 		RenderSystem.defaultBlendFunc();
-		RenderSystem.shadeModel(GL11.GL_SMOOTH);
-		Tessellator tessellator = Tessellator.getInstance();
+		//RenderSystem.shadeModel(GL11.GL_SMOOTH);
+		Tesselator tessellator = Tesselator.getInstance();
 		BufferBuilder bufferbuilder = tessellator.getBuilder();
-		bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
+		bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 		switch(mode) {
 			case VERTICAL:
 				bufferbuilder.vertex(lastXPos, yPos, offset).color(start.getRed(), start.getGreen(), start.getBlue(), start.getAlpha()).endVertex();
@@ -52,9 +48,9 @@ public final class RenderUtils {
 				break;
 		}
 		tessellator.end();
-		RenderSystem.shadeModel(GL11.GL_FLAT);
+		//RenderSystem.shadeModel(GL11.GL_FLAT);
 		RenderSystem.disableBlend();
-		RenderSystem.enableAlphaTest();
+		//RenderSystem.enableAlphaTest();
 		RenderSystem.enableTexture();
 	}
 	
@@ -65,20 +61,20 @@ public final class RenderUtils {
 		
 	}
 
-	public static void fillFluid(MatrixStack stack, int x, int y, int offset, int width, int height, @Nonnull Fluid f) {
+	public static void fillFluid(PoseStack stack, int x, int y, int offset, int width, int height, @Nonnull Fluid f) {
 		Minecraft mc = Minecraft.getInstance();
 		FluidAttributes attributes = f.getAttributes();
 		ResourceLocation id = attributes.getStillTexture();
-		TextureAtlasSprite sprite = mc.getTextureAtlas(PlayerContainer.BLOCK_ATLAS).apply(id);
-		mc.getTextureManager().bind(PlayerContainer.BLOCK_ATLAS);
+		TextureAtlasSprite sprite = mc.getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(id);
+		RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
 		Color color = new Color(attributes.getColor());
-		RenderSystem.color4f(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
+		RenderSystem.setShaderColor(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
 		int heightIterations = (height) / sprite.getHeight(); //The amount of full height quads
 		int widthIterations = (width) / sprite.getWidth(); //The amount of full width quads
 		int heightRemainder = (height) % sprite.getHeight(); //The height of the last quad
 		int widthRemainder = (width) % sprite.getWidth(); //The width of the last quad
-		BufferBuilder bufferbuilder = Tessellator.getInstance().getBuilder();
-		bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
+		BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
+		bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
 		for(int i = 0; i < heightIterations; i++) {
 			for(int j = 0; j < widthIterations; j++) {
 				//Bottom left full quads (if large enough)
@@ -94,19 +90,19 @@ public final class RenderUtils {
 		//Top Right quad
 		renderFluidQuad(stack, sprite, x + widthIterations * sprite.getWidth(), y, offset, widthRemainder, heightRemainder);
 		bufferbuilder.end();
-		RenderSystem.enableAlphaTest();
-		WorldVertexBufferUploader.end(bufferbuilder);
-		RenderSystem.color4f(1, 1, 1, 1);
+		//RenderSystem.enableAlphaTest();
+		bufferbuilder.end();
+		RenderSystem.setShaderColor(1, 1, 1, 1);
 	}
 
-	public static void renderFluidQuad(MatrixStack stack, TextureAtlasSprite sprite, int x, int y, int z, int width, int height) {
+	public static void renderFluidQuad(PoseStack stack, TextureAtlasSprite sprite, int x, int y, int z, int width, int height) {
 		int spriteWidth = MathUtils.clamp(sprite.getWidth(), 0, width);
 		int spriteHeight = MathUtils.clamp(sprite.getHeight(), 0, height);
 		float u = MathUtils.clamp(MathUtils.inverseLerp(0, sprite.getWidth(), width) * 16, 0, 16);
 		float v = MathUtils.clamp(MathUtils.inverseLerp(sprite.getHeight(), 0, height) * 16, 0, 16);
 
 		Matrix4f matrix = stack.last().pose();
-		BufferBuilder bufferbuilder = Tessellator.getInstance().getBuilder();
+		BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
 		bufferbuilder.vertex(matrix, (float)x, (float)(y + spriteHeight), (float)z).uv(sprite.getU0(), sprite.getV1()).endVertex();
 		bufferbuilder.vertex(matrix, (float)(x + spriteWidth), (float)(y + spriteHeight), (float)z).uv(sprite.getU(u), sprite.getV1()).endVertex();
 		bufferbuilder.vertex(matrix, (float)(x + spriteWidth), (float)y, (float)z).uv(sprite.getU(u), sprite.getV(v)).endVertex();
@@ -114,10 +110,10 @@ public final class RenderUtils {
 	}
 	
 	public static Color lerpColor(Color start, Color end, float t) {
-		int lerpRed = (int) net.minecraft.util.math.MathHelper.clampedLerp(end.getRed(), start.getRed(), t);
-		int lerpGreen = (int) net.minecraft.util.math.MathHelper.clampedLerp(end.getGreen(), start.getGreen(), t);
-		int lerpBlue = (int) net.minecraft.util.math.MathHelper.clampedLerp(end.getBlue(), start.getBlue(), t);
-		int lerpAlpha = (int) net.minecraft.util.math.MathHelper.clampedLerp(end.getAlpha(), start.getAlpha(), t);
+		int lerpRed = (int) Mth.clampedLerp(end.getRed(), start.getRed(), t);
+		int lerpGreen = (int) Mth.clampedLerp(end.getGreen(), start.getGreen(), t);
+		int lerpBlue = (int) Mth.clampedLerp(end.getBlue(), start.getBlue(), t);
+		int lerpAlpha = (int) Mth.clampedLerp(end.getAlpha(), start.getAlpha(), t);
 		return new Color(lerpRed, lerpGreen, lerpBlue, lerpAlpha);
 	}
 

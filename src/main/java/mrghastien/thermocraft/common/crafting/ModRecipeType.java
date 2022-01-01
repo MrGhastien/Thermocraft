@@ -1,22 +1,22 @@
 	package mrghastien.thermocraft.common.crafting;
 
     import mrghastien.thermocraft.common.ThermoCraft;
-    import net.minecraft.inventory.IInventory;
-    import net.minecraft.item.crafting.IRecipe;
-    import net.minecraft.item.crafting.IRecipeSerializer;
-    import net.minecraft.item.crafting.IRecipeType;
-    import net.minecraft.item.crafting.RecipeManager;
-    import net.minecraft.util.ResourceLocation;
-    import net.minecraft.util.registry.Registry;
-    import net.minecraft.world.World;
-    import net.minecraftforge.fml.server.ServerLifecycleHooks;
+    import net.minecraft.core.Registry;
+    import net.minecraft.resources.ResourceLocation;
+    import net.minecraft.world.Container;
+    import net.minecraft.world.item.crafting.Recipe;
+    import net.minecraft.world.item.crafting.RecipeManager;
+    import net.minecraft.world.item.crafting.RecipeSerializer;
+    import net.minecraft.world.item.crafting.RecipeType;
+    import net.minecraft.world.level.Level;
+    import net.minecraftforge.fmllegacy.server.ServerLifecycleHooks;
     import net.minecraftforge.registries.IForgeRegistry;
 
     import java.util.*;
     import java.util.function.Function;
     import java.util.stream.Stream;
 
-    public class ModRecipeType<T extends BaseRecipe> implements IRecipeType<T> {
+    public class ModRecipeType<T extends BaseRecipe> implements RecipeType<T> {
 
         private static final List<ModRecipeType<? extends BaseRecipe>> types = new ArrayList<>();
         private static final List<ModRecipeType<? extends BaseRecipe>> wrappers = new ArrayList<>();
@@ -38,16 +38,16 @@
          *
          * @param <T> The wrapper type
          * @param <R> The base recipe type
-         * @param type The {@link IRecipeType} corresponding to the vanilla recipe
+         * @param type The {@link RecipeType} corresponding to the vanilla recipe
          * @param func A function converting the vanilla recipe to a wrapper
          */
-        private static <T extends BaseRecipe, R extends IRecipe<IInventory>> RecipeTypeWrapper<T, R> register(IRecipeType<R> type, Function<R, T> func) {
+        private static <T extends BaseRecipe, R extends Recipe<Container>> RecipeTypeWrapper<T, R> register(RecipeType<R> type, Function<R, T> func) {
             RecipeTypeWrapper<T, R> wrapper = new RecipeTypeWrapper<>(type, func);
             wrappers.add(wrapper);
             return wrapper;
         }
 
-        public static void registerTypes(IForgeRegistry<IRecipeSerializer<?>> registry) {
+        public static void registerTypes(IForgeRegistry<RecipeSerializer<?>> registry) {
             types.forEach(type -> Registry.register(Registry.RECIPE_TYPE, type.registryName, type));
         }
 
@@ -58,21 +58,21 @@
             this.registryName = new ResourceLocation(ThermoCraft.MODID, name);
         }
 
-        public Map<ResourceLocation, T> getRecipes(World world) {
+        public Map<ResourceLocation, T> getRecipes(Level world) {
             if (world == null) {
-                world = ServerLifecycleHooks.getCurrentServer().getLevel(World.OVERWORLD);
+                world = ServerLifecycleHooks.getCurrentServer().getLevel(Level.OVERWORLD);
                 if (world == null) return Collections.emptyMap();
             }
 
             if (cache.isEmpty()) {
                 RecipeManager recipeManager = world.getRecipeManager();
-                List<T> recipes = recipeManager.getRecipesFor(this, BaseRecipe.DummyInventory.getInstance(), world);
+                List<T> recipes = recipeManager.getRecipesFor(this, BaseRecipe.DummyContainer.getInstance(), world);
                 recipes.forEach(recipe -> cache.put(recipe.getId(), recipe));
             }
             return cache;
         }
 
-        public Stream<T> stream(World world) {
+        public Stream<T> stream(Level world) {
             return getRecipes(world).values().stream();
         }
     }

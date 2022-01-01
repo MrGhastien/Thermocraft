@@ -13,6 +13,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
+
 public class ModFluidHandler implements IDelegateFluidHandler {
 
     private final IModFluidTank[] tanks;

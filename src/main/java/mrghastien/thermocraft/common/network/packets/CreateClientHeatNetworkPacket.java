@@ -3,8 +3,8 @@ package mrghastien.thermocraft.common.network.packets;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetwork;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetworkHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
@@ -18,12 +18,12 @@ public class CreateClientHeatNetworkPacket {
         this.networkId = net.getId();
     }
 
-    public void encode(PacketBuffer buf) {
+    public void encode(FriendlyByteBuf buf) {
         buf.writeEnum(type);
         buf.writeLong(networkId);
     }
 
-    public CreateClientHeatNetworkPacket(PacketBuffer buf) {
+    public CreateClientHeatNetworkPacket(FriendlyByteBuf buf) {
         this.type = buf.readEnum(HeatNetworkHandler.HeatNetworkType.class);
         this.networkId = buf.readLong();
     }

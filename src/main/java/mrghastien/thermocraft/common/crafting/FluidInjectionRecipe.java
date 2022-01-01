@@ -4,13 +4,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import mrghastien.thermocraft.common.capabilities.fluid.ModFluidHandler;
 import mrghastien.thermocraft.common.registries.ModRecipeSerializers;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.fluids.FluidStack;
 
@@ -62,12 +62,12 @@ public class FluidInjectionRecipe extends BaseRecipe {
     }
 
     @Override
-    public IRecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<?> getSerializer() {
         return ModRecipeSerializers.FLUID_INJECTION.get();
     }
 
     @Override
-    public IRecipeType<?> getType() {
+    public RecipeType<?> getType() {
         return ModRecipeType.FLUID_INJECTION;
     }
 
@@ -79,9 +79,9 @@ public class FluidInjectionRecipe extends BaseRecipe {
             if(!json.has("fluid")) throw new JsonSyntaxException("Fluid Injection recipe must have an input fluid");
             if(!json.has("output")) throw new JsonSyntaxException("Fluid Injection recipe must have a result");
 
-            JsonObject inputObject = JSONUtils.getAsJsonObject(json, "input");
-            JsonObject fluidObject = JSONUtils.getAsJsonObject(json, "fluid");
-            JsonObject outputObject = JSONUtils.getAsJsonObject(json, "output");
+            JsonObject inputObject = GsonHelper.getAsJsonObject(json, "input");
+            JsonObject fluidObject = GsonHelper.getAsJsonObject(json, "fluid");
+            JsonObject outputObject = GsonHelper.getAsJsonObject(json, "output");
 
             StackIngredient ingredient = (StackIngredient) CraftingHelper.getIngredient(inputObject);
             FluidIngredient fluidStackInput = (FluidIngredient) CraftingHelper.getIngredient(fluidObject);
@@ -91,7 +91,7 @@ public class FluidInjectionRecipe extends BaseRecipe {
 
         @Nullable
         @Override
-        public FluidInjectionRecipe fromNetwork(ResourceLocation id, PacketBuffer buf) {
+        public FluidInjectionRecipe fromNetwork(ResourceLocation id, FriendlyByteBuf buf) {
             StackIngredient ingredient = (StackIngredient) CraftingHelper.getIngredient(FluidIngredient.Serializer.ID, buf);
             FluidIngredient fluidIngredient = (FluidIngredient) CraftingHelper.getIngredient(FluidIngredient.Serializer.ID, buf);
             ItemStack result = buf.readItem();
@@ -100,7 +100,7 @@ public class FluidInjectionRecipe extends BaseRecipe {
         }
 
         @Override
-        public void toNetwork(PacketBuffer buf, FluidInjectionRecipe recipe) {
+        public void toNetwork(FriendlyByteBuf buf, FluidInjectionRecipe recipe) {
             CraftingHelper.write(buf, recipe.input);
             CraftingHelper.write(buf, recipe.fluid);
             buf.writeItem(recipe.output);

@@ -3,14 +3,16 @@ package mrghastien.thermocraft.common.tileentities.cables;
 import mrghastien.thermocraft.common.ThermoCraft;
 import mrghastien.thermocraft.common.capabilities.heat.transport.cables.ConvectorCable;
 import mrghastien.thermocraft.common.registries.ModTileEntities;
-import net.minecraft.fluid.Fluid;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
 
 public class HeatConvectorTile extends HeatTransmitterTile<ConvectorCable> {
 
     protected Fluid fluid;
 
-    public HeatConvectorTile() {
-        super(ModTileEntities.HEAT_CONVECTOR.get());
+    public HeatConvectorTile(BlockPos pos, BlockState state) {
+        super(ModTileEntities.HEAT_CONVECTOR.get(), pos, state);
     }
 
     public void setFluid(Fluid fluid) {

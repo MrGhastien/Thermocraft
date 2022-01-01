@@ -4,13 +4,13 @@ import com.google.common.collect.ImmutableMap;
 import mrghastien.thermocraft.api.heat.TransferType;
 import mrghastien.thermocraft.common.tileentities.cables.HeatTransmitterTile;
 import mrghastien.thermocraft.util.Constants;
-import net.minecraft.block.BlockState;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.ItemOverrideList;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.util.Direction;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.model.data.IDynamicBakedModel;
 import net.minecraftforge.client.model.data.IModelData;
@@ -21,14 +21,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+
 public class HeatTransmitterBakedModel implements IDynamicBakedModel {
 
-    private final IBakedModel bakedCenter;
-    private final ImmutableMap<Direction, IBakedModel> transferModels;
-    private final ImmutableMap<Direction, IBakedModel> neutralModels;
+    private final BakedModel bakedCenter;
+    private final ImmutableMap<Direction, BakedModel> transferModels;
+    private final ImmutableMap<Direction, BakedModel> neutralModels;
     private final TextureAtlasSprite particle;
 
-    public HeatTransmitterBakedModel(IBakedModel bakedCenter, ImmutableMap<Direction, IBakedModel> transferModels, ImmutableMap<Direction, IBakedModel> neutralModels, TextureAtlasSprite particle) {
+    public HeatTransmitterBakedModel(BakedModel bakedCenter, ImmutableMap<Direction, BakedModel> transferModels, ImmutableMap<Direction, BakedModel> neutralModels, TextureAtlasSprite particle) {
         this.bakedCenter = bakedCenter;
         this.transferModels = transferModels;
         this.neutralModels = neutralModels;
@@ -78,7 +79,9 @@ public class HeatTransmitterBakedModel implements IDynamicBakedModel {
     }
 
     @Override
-    public ItemOverrideList getOverrides() {
+    public ItemOverrides getOverrides() {
         return null;
     }
+
+
 }

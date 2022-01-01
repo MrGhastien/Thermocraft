@@ -1,26 +1,26 @@
 package mrghastien.thermocraft.common.blocks;
 
+import com.mojang.blocklist.BlockListSupplier;
 import mrghastien.thermocraft.api.heat.TransferType;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetworkHandler;
 import mrghastien.thermocraft.common.tileentities.cables.HeatTransmitterTile;
 import mrghastien.thermocraft.util.Constants;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorldReader;
-import net.minecraft.world.World;
+import net.minecraft.Util;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
-import javax.annotation.Nullable;
 import java.util.EnumMap;
 
-public abstract class HeatTransmitterBlock extends Block {
+public abstract class HeatTransmitterBlock extends Block implements EntityBlock {
 
     public static final VoxelShape CENTER_BOX = Block.box(5, 5, 5, 11, 11, 11);
     public static final VoxelShape ARM_DOWN = Block.box(5, 0, 5, 11, 5, 11);
@@ -43,27 +43,18 @@ public abstract class HeatTransmitterBlock extends Block {
         super(p_i48440_1_);
     }
 
-    @Override
-    public boolean hasTileEntity(BlockState state) {
-        return true;
-    }
-
-    @Nullable
-    @Override
-    public abstract TileEntity createTileEntity(BlockState state, IBlockReader world);
-
     public abstract HeatNetworkHandler.HeatNetworkType getNetworkType();
 
     @Override
-    public VoxelShape getShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext ctx) {
+    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext ctx) {
         VoxelShape shape = CENTER_BOX;
-        TileEntity te = world.getBlockEntity(pos);
+        BlockEntity te = world.getBlockEntity(pos);
         if(te instanceof HeatTransmitterTile<?>) {
             EnumMap<Direction, TransferType> connections = ((HeatTransmitterTile<?>) te).getCable().getConnections();
             for (Direction dir : Constants.DIRECTIONS) {
                 TransferType type = connections.get(dir);
                 if (type != TransferType.NONE)
-                    shape = VoxelShapes.or(shape, VOXEL_MAP.get(dir));
+                    shape = Shapes.or(shape, VOXEL_MAP.get(dir));
             }
         }
         return shape;
@@ -71,10 +62,10 @@ public abstract class HeatTransmitterBlock extends Block {
 
     @SuppressWarnings("deprecation")
     @Override
-    public void neighborChanged(BlockState state, World world, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean isMoving) {
+    public void neighborChanged(BlockState state, Level world, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean isMoving) {
         super.neighborChanged(state, world, pos, neighborBlock, neighborPos, isMoving);
         if(world.isClientSide()) return;
-        TileEntity te = world.getBlockEntity(pos);
+        BlockEntity te = world.getBlockEntity(pos);
         if(te instanceof HeatTransmitterTile<?>) {
             Direction dir = Direction.getNearest(neighborPos.getX() - pos.getX(),
                     neighborPos.getY() - pos.getY(),

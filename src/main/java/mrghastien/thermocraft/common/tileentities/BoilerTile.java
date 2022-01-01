@@ -12,14 +12,15 @@ import mrghastien.thermocraft.common.crafting.ModRecipeType;
 import mrghastien.thermocraft.common.inventory.containers.BoilerContainer;
 import mrghastien.thermocraft.common.network.data.IDataHolder;
 import mrghastien.thermocraft.common.registries.ModTileEntities;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.util.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
@@ -38,8 +39,8 @@ public class BoilerTile extends BaseTile {
     private boolean running;
     private BoilingRecipe currentRecipe;
 
-    public BoilerTile() {
-        super(ModTileEntities.BOILER.get());
+    public BoilerTile(BlockPos pos, BlockState state) {
+        super(ModTileEntities.BOILER.get(), pos, state);
     }
 
     @Override
@@ -52,7 +53,7 @@ public class BoilerTile extends BaseTile {
 
     @Nullable
     @Override
-    public Container createMenu(int id, PlayerInventory playerInventory, PlayerEntity player) {
+    public AbstractContainerMenu createMenu(int id, Inventory playerInventory, Player player) {
         return new BoilerContainer(id, playerInventory, this);
     }
 
@@ -146,17 +147,17 @@ public class BoilerTile extends BaseTile {
     }
 
     @Override
-    protected void loadInternal(BlockState state, CompoundNBT nbt) {
+    protected void loadInternal(CompoundTag nbt) {
         heatHandler.deserializeNBT(nbt.getCompound("Heat"));
         inputHandler.getTank(0).setFluid(FluidStack.loadFluidStackFromNBT(nbt.getCompound("Input")));
         inputHandler.getTank(0).setFluid(FluidStack.loadFluidStackFromNBT(nbt.getCompound("Output")));
     }
 
     @Override
-    protected void saveInternal(CompoundNBT nbt) {
+    protected void saveInternal(CompoundTag nbt) {
         nbt.put("Heat", heatHandler.serializeNBT());
-        nbt.put("Input", inputHandler.getFluidInTank(0).writeToNBT(new CompoundNBT()));
-        nbt.put("Output", outputHandler.getFluidInTank(0).writeToNBT(new CompoundNBT()));
+        nbt.put("Input", inputHandler.getFluidInTank(0).writeToNBT(new CompoundTag()));
+        nbt.put("Output", outputHandler.getFluidInTank(0).writeToNBT(new CompoundTag()));
     }
 
     @Override

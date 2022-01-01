@@ -4,7 +4,7 @@ import mrghastien.thermocraft.common.ThermoCraft;
 import mrghastien.thermocraft.common.registries.ModFluids;
 import mrghastien.thermocraft.common.registries.ModTags;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.data.FluidTagsProvider;
+import net.minecraft.data.tags.FluidTagsProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
 
 public class ModFluidTagsProvider extends FluidTagsProvider {

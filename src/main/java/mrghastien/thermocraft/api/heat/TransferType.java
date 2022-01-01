@@ -1,11 +1,11 @@
 package mrghastien.thermocraft.api.heat;
 
-import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.StringRepresentable;
 
 import java.util.Locale;
 
 //Neutral is for connections between cables.
-public enum TransferType implements IStringSerializable {
+public enum TransferType implements StringRepresentable {
     NONE, INPUT, OUTPUT, BOTH,
     /**
      * For connections between cables only.

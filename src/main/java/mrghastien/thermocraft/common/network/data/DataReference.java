@@ -1,8 +1,8 @@
 package mrghastien.thermocraft.common.network.data;
 
-import net.minecraft.nbt.INBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import java.util.function.Consumer;
@@ -16,7 +16,7 @@ import java.util.function.Supplier;
  *
  * @param <T> The type of the data that will be synchronized
  */
-public class DataReference<T> implements Supplier<T>, Consumer<T>, INBTSerializable<INBT> {
+public class DataReference<T> implements Supplier<T>, Consumer<T>, INBTSerializable<Tag> {
 
     private T lastValue;
     final Supplier<T> getter;
@@ -55,7 +55,7 @@ public class DataReference<T> implements Supplier<T>, Consumer<T>, INBTSerializa
         return false;
     }
 
-    public void encode(PacketBuffer buf) {
+    public void encode(FriendlyByteBuf buf) {
         getType().encode(buf, get());
     }
 
@@ -63,7 +63,7 @@ public class DataReference<T> implements Supplier<T>, Consumer<T>, INBTSerializa
      * Reads data from the provided buffer and calls {@link #accept(T)}
      * @param buf The byte buffer to read from
      */
-    public void accept(PacketBuffer buf) {
+    public void accept(FriendlyByteBuf buf) {
         accept(getType().decode(buf));
     }
 
@@ -81,12 +81,12 @@ public class DataReference<T> implements Supplier<T>, Consumer<T>, INBTSerializa
     }
 
     @Override
-    public INBT serializeNBT() {
+    public Tag serializeNBT() {
         return getType().serializeNBT(get());
     }
 
     @Override
-    public void deserializeNBT(INBT nbt) {
+    public void deserializeNBT(Tag nbt) {
         accept(getType().deserializeNBT(nbt));
     }
 }

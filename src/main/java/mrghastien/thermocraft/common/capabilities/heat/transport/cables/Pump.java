@@ -4,17 +4,17 @@ import mrghastien.thermocraft.api.heat.TransferType;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetworkHandler;
 import mrghastien.thermocraft.common.tileentities.cables.HeatTransmitterTile;
 import mrghastien.thermocraft.util.ModUtils;
-import net.minecraft.block.BlockState;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 public class Pump extends Cable {
 
     Direction facing;
 
-    public Pump(World world, BlockPos pos, HeatTransmitterTile<?> tileEntity) {
+    public Pump(Level world, BlockPos pos, HeatTransmitterTile<?> tileEntity) {
         super(world, pos, tileEntity);
     }
 

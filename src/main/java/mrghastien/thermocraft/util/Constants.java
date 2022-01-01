@@ -1,6 +1,6 @@
 package mrghastien.thermocraft.util;
 
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
 
 public class Constants {
 

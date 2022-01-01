@@ -1,12 +1,12 @@
 package mrghastien.thermocraft.client.screens.widgets;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import mrghastien.thermocraft.util.Constants;
 import mrghastien.thermocraft.util.MathUtils;
 import mrghastien.thermocraft.util.RenderUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidTank;
 
@@ -25,7 +25,7 @@ public class FluidTankWidget extends Widget {
 
 
     @Override
-    protected void renderBg(Screen screen, MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+    protected void renderBg(Screen screen, PoseStack stack, int mouseX, int mouseY, float partialTicks) {
         IFluidTank tank = getTank();
         Minecraft mc = Minecraft.getInstance();
         FluidStack fluidStack = tank.getFluid();
@@ -35,9 +35,9 @@ public class FluidTankWidget extends Widget {
     }
 
     @Override
-    protected void onHovered(Screen screen, MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+    protected void onHovered(Screen screen, PoseStack stack, int mouseX, int mouseY, float partialTicks) {
         IFluidTank tank = getTank();
-        ITextComponent name = tank.getFluid().getFluid().getAttributes().getDisplayName(tank.getFluid());
+        Component name = tank.getFluid().getFluid().getAttributes().getDisplayName(tank.getFluid());
         setTooltips(String.format("%s : %d/%d %s", name.getString(), getTank().getFluidAmount(), getTank().getCapacity(), Constants.VOLUME_UNIT));
         super.onHovered(screen, stack, mouseX, mouseY, partialTicks);
     }

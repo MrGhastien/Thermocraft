@@ -4,7 +4,8 @@ import mrghastien.thermocraft.api.heat.IHeatHandler;
 import mrghastien.thermocraft.api.heat.TransferType;
 import mrghastien.thermocraft.common.capabilities.Capabilities;
 import mrghastien.thermocraft.common.capabilities.heat.transport.cables.Cable;
-import mrghastien.thermocraft.common.network.*;
+import mrghastien.thermocraft.common.network.CompositeDataNetworkBinding;
+import mrghastien.thermocraft.common.network.INetworkBinding;
 import mrghastien.thermocraft.common.network.data.DataReference;
 import mrghastien.thermocraft.common.network.data.DataType;
 import mrghastien.thermocraft.common.network.data.IDataHolder;
@@ -13,13 +14,13 @@ import mrghastien.thermocraft.common.network.packets.UpdateHeatNetworkPacket;
 import mrghastien.thermocraft.common.tileentities.cables.HeatTransmitterTile;
 import mrghastien.thermocraft.util.Constants;
 import mrghastien.thermocraft.util.math.FixedPointNumber;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraftforge.common.util.LazyOptional;
 
 import javax.annotation.Nonnull;
@@ -41,17 +42,17 @@ public abstract class HeatNetwork implements IHeatHandler{
     protected boolean valid = true;
 
     final LazyOptional<IHeatHandler> lazy;
-    protected final World world;
+    protected final Level world;
     final Map<BlockPos, Cable> cables;
     final Map<BlockPos, Cable> refreshMap;
     final Map<BlockPos, TransferPoint> nodes;
-    final Set<Chunk> chunks;
+    final Set<LevelChunk> chunks;
     protected int receiverCount;
     final long id;
 
     protected final IDataHolder dataHolder;
 
-    protected HeatNetwork(long id, World world) {
+    protected HeatNetwork(long id, Level world) {
         this.world = world;
         this.nodes = new HashMap<>();
         this.cables = new HashMap<>();
@@ -95,7 +96,7 @@ public abstract class HeatNetwork implements IHeatHandler{
         Cable removed = this.cables.remove(pos);
         if(removed == null) return false;
         boolean canRemove = true;
-        Chunk c = world.getChunkAt(pos);
+        LevelChunk c = world.getChunkAt(pos);
         for(BlockPos p : c.getBlockEntitiesPos()) {
             if(HeatNetworkHandler.instance().get(pos, world, type()) == this) {
                 canRemove = false;
@@ -189,7 +190,7 @@ public abstract class HeatNetwork implements IHeatHandler{
         return canWork;
     }
 
-    public World getWorld() {
+    public Level getWorld() {
         return world;
     }
 
@@ -295,15 +296,15 @@ public abstract class HeatNetwork implements IHeatHandler{
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT nbt = new CompoundNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = new CompoundTag();
         nbt.putLong("internalEnergy", getInternalEnergy().longValue());
         nbt.putDouble("heatCapacity", getHeatCapacity());
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         setInternalEnergy(nbt.getLong("internalEnergy"));
         setHeatCapacity(nbt.getDouble("heatCapacity"), false);
     }
@@ -334,7 +335,7 @@ public abstract class HeatNetwork implements IHeatHandler{
                 if(!transferType.canTransfer()) continue;
 
                 globalTransferType = globalTransferType.or(transferType);
-                TileEntity tile = world.getBlockEntity(cable.getPos().relative(dir));
+                BlockEntity tile = world.getBlockEntity(cable.getPos().relative(dir));
                 if (tile == null || tile instanceof HeatTransmitterTile) continue;
 
                 LazyOptional<IHeatHandler> handler = tile.getCapability(Capabilities.HEAT_HANDLER_CAPABILITY, dir.getOpposite());

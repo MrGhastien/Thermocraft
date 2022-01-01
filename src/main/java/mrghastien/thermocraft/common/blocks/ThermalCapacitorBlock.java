@@ -1,55 +1,62 @@
 package mrghastien.thermocraft.common.blocks;
 
-import mrghastien.thermocraft.common.tileentities.ThermalCapacitorTile;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraftforge.fmllegacy.network.NetworkHooks;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class ThermalCapacitorBlock extends Block {
+public class ThermalCapacitorBlock extends Block implements EntityBlock {
 
     public ThermalCapacitorBlock() {
         super(Properties.of(Material.METAL).sound(SoundType.METAL).noOcclusion());
     }
 
+    @Nonnull
     @Override
-    public boolean hasTileEntity(BlockState state) {
-        return true;
+    public InteractionResult use(@Nonnull BlockState state, Level world, @Nonnull BlockPos pos, @Nonnull Player player, @Nonnull InteractionHand hand, @Nonnull BlockHitResult hit) {
+        if(!world.isClientSide()) {
+            BlockEntity tileentity = world.getBlockEntity(pos);
+            if(tileentity instanceof MenuProvider) {
+                NetworkHooks.openGui((ServerPlayer) player, (MenuProvider) tileentity, tileentity.getBlockPos());
+            }
+        }
+        return InteractionResult.SUCCESS;
+    }
+
+
+
+    @Nonnull
+    @Override
+    public RenderShape getRenderShape(@Nonnull BlockState p_149645_1_) {
+        return RenderShape.MODEL;
     }
 
     @Nullable
     @Override
-    public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-        return new ThermalCapacitorTile();
+    public BlockEntity newBlockEntity(@Nonnull BlockPos blockPos, @Nonnull BlockState blockState) {
+        return null;
     }
 
+    @Nullable
     @Override
-    public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
-        if(!world.isClientSide()) {
-            TileEntity tileentity = world.getBlockEntity(pos);
-            if(tileentity instanceof INamedContainerProvider) {
-                NetworkHooks.openGui((ServerPlayerEntity)player, (INamedContainerProvider) tileentity, tileentity.getBlockPos());
-            }
-        }
-        return ActionResultType.SUCCESS;
-    }
-
-    @Override
-    public BlockRenderType getRenderShape(BlockState p_149645_1_) {
-        return BlockRenderType.MODEL;
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@Nonnull Level p_153212_, @Nonnull BlockState p_153213_, @Nonnull BlockEntityType<T> p_153214_) {
+        return EntityBlock.super.getTicker(p_153212_, p_153213_, p_153214_);
     }
 }

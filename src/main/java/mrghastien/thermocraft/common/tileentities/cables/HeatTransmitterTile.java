@@ -4,16 +4,15 @@ import mrghastien.thermocraft.api.heat.TransferType;
 import mrghastien.thermocraft.common.capabilities.Capabilities;
 import mrghastien.thermocraft.common.capabilities.heat.transport.cables.Cable;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetwork;
-import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetworkHandler;
-import net.minecraft.block.BlockState;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.Util;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.client.model.data.ModelProperty;
@@ -26,7 +25,7 @@ import javax.annotation.Nullable;
 import java.util.EnumMap;
 import java.util.Map;
 
-public abstract class HeatTransmitterTile<C extends Cable> extends TileEntity {
+public abstract class HeatTransmitterTile<C extends Cable> extends BlockEntity {
 
     private static final ModelProperty<TransferType> NORTH_PROPERTY = new ModelProperty<>();
     private static final ModelProperty<TransferType> SOUTH_PROPERTY = new ModelProperty<>();
@@ -46,9 +45,11 @@ public abstract class HeatTransmitterTile<C extends Cable> extends TileEntity {
 
     C cable;
 
-    public HeatTransmitterTile(TileEntityType<?> type) {
-        super(type);
+    public HeatTransmitterTile(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
     }
+
+
 
     @Override
     public void onLoad() {
@@ -59,28 +60,28 @@ public abstract class HeatTransmitterTile<C extends Cable> extends TileEntity {
 
     @Nonnull
     @Override
-    public CompoundNBT getUpdateTag() {
+    public CompoundTag getUpdateTag() {
         if(cable.updateDirections() && cable.hasNetwork()) {
             cable.getNetwork().requestRefresh(worldPosition, cable);
         }
-        CompoundNBT tag = super.getUpdateTag();
+        CompoundTag tag = super.getUpdateTag();
         cable.writeToNbt(tag);
         return tag;
     }
 
     @Nullable
     @Override
-    public SUpdateTileEntityPacket getUpdatePacket() {
-        return new SUpdateTileEntityPacket(getBlockPos(), -1, getUpdateTag());
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return new ClientboundBlockEntityDataPacket(getBlockPos(), -1, getUpdateTag());
     }
 
     @Override
-    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        handleUpdateTag(getBlockState(), pkt.getTag());
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
+        handleUpdateTag(pkt.getTag());
     }
 
     @Override
-    public void handleUpdateTag(BlockState state, CompoundNBT tag) {
+    public void handleUpdateTag(CompoundTag tag) {
         if(cable.handleUpdateTag(tag))
             requestModelDataUpdate();
     }

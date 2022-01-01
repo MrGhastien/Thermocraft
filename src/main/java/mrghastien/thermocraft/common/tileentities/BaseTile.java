@@ -1,39 +1,40 @@
 package mrghastien.thermocraft.common.tileentities;
 
-import mrghastien.thermocraft.common.network.data.IDataHolder;
-import mrghastien.thermocraft.common.network.data.TileEntityDataHolder;
+import mrghastien.thermocraft.common.network.data.BlockEntityDataHolder;
 import mrghastien.thermocraft.common.network.data.DataReference;
-import net.minecraft.block.BlockState;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
-import net.minecraft.tileentity.ITickableTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.chunk.Chunk;
+import mrghastien.thermocraft.common.network.data.IDataHolder;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
  * Base class for all the tile entities of the ThermoCraft mod.
  */
-public abstract class BaseTile extends TileEntity implements INamedContainerProvider, ITickableTileEntity {
+public abstract class BaseTile extends BlockEntity implements MenuProvider {
 
     @Nullable
     private final IDataHolder holder;
 
-    public BaseTile(TileEntityType<?> type, boolean syncDirectly) {
-        super(type);
+    public BaseTile(BlockEntityType<?> type, BlockPos pos, BlockState state, boolean syncDirectly) {
+        super(type, pos, state);
         if(syncDirectly)
-            holder = new TileEntityDataHolder(this);
+            holder = new BlockEntityDataHolder(this);
         else holder = null;
     }
 
-    public BaseTile(TileEntityType<?> type) {
-        this(type, false);
+    public BaseTile(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        this(type, pos, state, false);
     }
 
     @Override
@@ -43,31 +44,23 @@ public abstract class BaseTile extends TileEntity implements INamedContainerProv
     }
 
     @Override
-    public ITextComponent getDisplayName() {
-        return new StringTextComponent("NAME");
+    public Component getDisplayName() {
+        return new TextComponent("NAME");
     }
 
-    protected abstract void loadInternal(BlockState state, CompoundNBT nbt);
+    protected abstract void loadInternal(CompoundTag nbt);
 
-    protected abstract void saveInternal(CompoundNBT nbt);
-
-    @Override
-    public final void tick() {
-        if(level.isClientSide)
-            clientTick();
-        else
-            serverTick();
-    }
+    protected abstract void saveInternal(CompoundTag nbt);
 
     @Nullable
     @Override
-    public SUpdateTileEntityPacket getUpdatePacket() {
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
         return null;
     }
 
     @Override
-    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        CompoundNBT tag = pkt.getTag();
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
+        CompoundTag tag = pkt.getTag();
 
     }
 
@@ -85,19 +78,24 @@ public abstract class BaseTile extends TileEntity implements INamedContainerProv
     }
 
     @Override
-    public void load(BlockState state, CompoundNBT nbt) {
-        super.load(state, nbt);
-        loadInternal(state, nbt);
+    public void load(@Nonnull CompoundTag nbt) {
+        super.load(nbt);
+        loadInternal(nbt.getCompound("Internal"));
     }
 
+
+
+    @Nonnull
     @Override
-    public CompoundNBT save(CompoundNBT nbt) {
+    public CompoundTag save(@Nonnull CompoundTag nbt) {
         super.save(nbt);
-        saveInternal(nbt);
+        CompoundTag internal = new CompoundTag();
+        nbt.put("Internal", internal);
+        saveInternal(internal);
         return nbt;
     }
 
-    public Chunk getChunk() {
+    public LevelChunk getChunk() {
         return level.getChunkAt(worldPosition);
     }
 

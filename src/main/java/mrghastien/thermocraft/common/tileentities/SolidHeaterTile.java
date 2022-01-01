@@ -12,18 +12,19 @@ import mrghastien.thermocraft.common.network.data.IDataHolder;
 import mrghastien.thermocraft.common.registries.ModTileEntities;
 import mrghastien.thermocraft.util.MathUtils;
 import mrghastien.thermocraft.util.math.FixedPointNumber;
-import net.minecraft.block.AbstractFurnaceBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.tileentity.AbstractFurnaceTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.block.AbstractFurnaceBlock;
+import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
@@ -45,15 +46,15 @@ public class SolidHeaterTile extends BaseTile {
 
     private final SidedHeatHandler heatHandler = new SidedHeatHandler(1200, 40.0, 1, this::setChanged, d -> TransferType.OUTPUT);
 
-    private final ModItemStackHandler inputInv = new ModItemStackHandler((slot, stack) -> ForgeHooks.getBurnTime(stack) > 0, slot-> this.setChanged());
+    private final ModItemStackHandler inputInv = new ModItemStackHandler((slot, stack) -> ForgeHooks.getBurnTime(stack, RecipeType.SMELTING) > 0, slot-> this.setChanged());
 
-    public SolidHeaterTile() {
-        super(ModTileEntities.SOLID_HEATER.get());
+    public SolidHeaterTile(BlockPos pos, BlockState state) {
+        super(ModTileEntities.SOLID_HEATER.get(), pos, state);
     }
 
     @Nullable
     @Override
-    public Container createMenu(int id, PlayerInventory inv, PlayerEntity player) {
+    public AbstractContainerMenu createMenu(int id, Inventory inv, Player player) {
         return new SolidHeaterContainer(this, id, inv);
     }
 
@@ -81,10 +82,10 @@ public class SolidHeaterTile extends BaseTile {
             setInactiveState();
         }
 
-        TileEntity te = level.getBlockEntity(worldPosition.above());
+        BlockEntity te = level.getBlockEntity(worldPosition.above());
         if(te == null) return;
-        if(te instanceof AbstractFurnaceTileEntity) {
-            AbstractFurnaceTileEntity furnace = (AbstractFurnaceTileEntity) te;
+        if(te instanceof AbstractFurnaceBlockEntity) {
+            AbstractFurnaceBlockEntity furnace = (AbstractFurnaceBlockEntity) te;
             if(furnace.getItem(1) == ItemStack.EMPTY) {
                 furnace.litTime = (int) MathUtils.clampedMap(heatHandler.getTemperature(), FURNACE_LIT_TEMPERATURE, 500, 0, 1200);
                 furnace.litDuration = 1200;
@@ -131,7 +132,7 @@ public class SolidHeaterTile extends BaseTile {
 
     private boolean containsFuel() {
         for(int i = 0; i < inputInv.getSlots(); i++) {
-            if(ForgeHooks.getBurnTime(inputInv.getStackInSlot(i), IRecipeType.SMELTING) > 0) {
+            if(ForgeHooks.getBurnTime(inputInv.getStackInSlot(i), RecipeType.SMELTING) > 0) {
                 return true;
             }
         }
@@ -141,7 +142,7 @@ public class SolidHeaterTile extends BaseTile {
     private void consumeFuel() {
         ItemStack stack = inputInv.getStackInSlot(0);
         if(stack != ItemStack.EMPTY) {
-            burnTime = totalBurnTime = ForgeHooks.getBurnTime(stack);
+            burnTime = totalBurnTime = ForgeHooks.getBurnTime(stack, RecipeType.SMELTING);
             inputInv.extractItem(0, 1, false);
         }
     }
@@ -153,7 +154,7 @@ public class SolidHeaterTile extends BaseTile {
     }
 
     @Override
-    public void loadInternal(BlockState state, CompoundNBT nbt) {
+    public void loadInternal(CompoundTag nbt) {
         inputInv.deserializeNBT(nbt.getCompound("Input"));
         heatHandler.deserializeNBT(nbt.getCompound("Heat"));
 		/*NBT shape :
@@ -173,7 +174,7 @@ public class SolidHeaterTile extends BaseTile {
     }
 
     @Override
-    public void saveInternal(CompoundNBT nbt) {
+    public void saveInternal(CompoundTag nbt) {
         nbt.put("Input", inputInv.serializeNBT());
         nbt.put("Heat", heatHandler.serializeNBT());
     }

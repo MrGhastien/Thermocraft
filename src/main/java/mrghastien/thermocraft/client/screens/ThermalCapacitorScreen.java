@@ -4,12 +4,12 @@ import mrghastien.thermocraft.client.screens.widgets.ThermoBar;
 import mrghastien.thermocraft.client.screens.widgets.Widget;
 import mrghastien.thermocraft.common.inventory.containers.ThermalCapacitorContainer;
 import mrghastien.thermocraft.common.tileentities.ThermalCapacitorTile;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Inventory;
 
 public class ThermalCapacitorScreen extends BaseContainerScreen<ThermalCapacitorContainer, ThermalCapacitorTile> {
 
-    public ThermalCapacitorScreen(ThermalCapacitorContainer container, PlayerInventory playerInventory, ITextComponent title) {
+    public ThermalCapacitorScreen(ThermalCapacitorContainer container, Inventory playerInventory, Component title) {
         super(container, playerInventory, title);
     }
 

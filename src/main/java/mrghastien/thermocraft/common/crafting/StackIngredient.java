@@ -5,15 +5,17 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 import mrghastien.thermocraft.common.ThermoCraft;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tags.ITag;
+import net.minecraft.core.NonNullList;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.tags.Tag;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.ForgeConfig;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.IIngredientSerializer;
@@ -32,7 +34,7 @@ public class StackIngredient extends Ingredient {
 
     private int count = 0;
 
-    private StackIngredient(Stream<? extends IItemList> itemLists) {
+    private StackIngredient(Stream<? extends Value> itemLists) {
         super(itemLists);
     }
 
@@ -55,35 +57,35 @@ public class StackIngredient extends Ingredient {
         return fromItemListStream(Arrays.stream(stacks).map(ItemStackList::new));
     }
 
-    public static StackIngredient of(ITag<Item> tag, int count) {
+    public static StackIngredient of(Tag<Item> tag, int count) {
         return fromItemListStream(Stream.of(new TagStackList(tag, count)));
     }
 
-    public static StackIngredient fromItemListStream(Stream<? extends Ingredient.IItemList> stream) {
+    public static StackIngredient fromItemListStream(Stream<? extends Ingredient.Value> stream) {
         StackIngredient ingredient = new StackIngredient(stream);
         return ingredient.isEmpty() ? StackIngredient.EMPTY : ingredient;
     }
 
-    private static IItemList deserializeItemStackList(JsonObject json) {
+    private static Value deserializeItemStackList(JsonObject json) {
         if (json.has("item") && json.has("tag")) {
             throw new JsonParseException("An ingredient entry is either a tag or an item, not both");
 
         } else if (json.has("item")) { //Parsing item
-            ResourceLocation itemName = new ResourceLocation(JSONUtils.getAsString(json, "item"));
+            ResourceLocation itemName = new ResourceLocation(GsonHelper.getAsString(json, "item"));
             if(ForgeRegistries.ITEMS.containsKey(itemName)) {
                 Item item = ForgeRegistries.ITEMS.getValue(itemName);
-                int count = JSONUtils.getAsInt(json, "count", 1);
+                int count = GsonHelper.getAsInt(json, "count", 1);
                 return new ItemStackList(new ItemStack(item, count));
             } else
                 throw new JsonSyntaxException("Unknown item '" + itemName + "'");
 
         } else if (json.has("tag")) { //Parsing tag
-            ResourceLocation tagName = new ResourceLocation(JSONUtils.getAsString(json, "tag"));
-            ITag<Item> tag = ItemTags.getAllTags().getTag(tagName);
+            ResourceLocation tagName = new ResourceLocation(GsonHelper.getAsString(json, "tag"));
+            Tag<Item> tag = ItemTags.getAllTags().getTag(tagName);
             if (tag == null) {
                 throw new JsonSyntaxException("Unknown item tag '" + tagName + "'");
             } else {
-                int count = JSONUtils.getAsInt(json, "count", 1);
+                int count = GsonHelper.getAsInt(json, "count", 1);
                 return new TagStackList(tag, count);
             }
 
@@ -117,7 +119,7 @@ public class StackIngredient extends Ingredient {
         return Serializer.INSTANCE;
     }
 
-    public static class ItemStackList implements IItemList {
+    public static class ItemStackList implements Value {
 
         private final ItemStack stack;
 
@@ -142,12 +144,12 @@ public class StackIngredient extends Ingredient {
         }
     }
 
-    public static class TagStackList implements IItemList {
+    public static class TagStackList implements Value {
 
-        private final ITag<Item> tag;
+        private final Tag<Item> tag;
         private final int count;
 
-        public TagStackList(ITag<Item> tag, int count) {
+        public TagStackList(Tag<Item> tag, int count) {
             this.tag = tag;
             this.count = count;
         }
@@ -161,8 +163,8 @@ public class StackIngredient extends Ingredient {
             }
 
             if(list.size() == 0 && !ForgeConfig.SERVER.treatEmptyTagsAsAir.get()) {
-                list.add(new ItemStack(net.minecraft.block.Blocks.BARRIER)
-                        .setHoverName(new net.minecraft.util.text.StringTextComponent(
+                list.add(new ItemStack(Blocks.BARRIER)
+                        .setHoverName(new TextComponent(
                                 "Empty Tag: " + ItemTags.getAllTags().getId(this.tag).toString())));
             }
             return list;
@@ -186,7 +188,7 @@ public class StackIngredient extends Ingredient {
 
         @Nonnull
         @Override
-        public StackIngredient parse(@Nonnull PacketBuffer buffer) {
+        public StackIngredient parse(@Nonnull FriendlyByteBuf buffer) {
             return fromItemListStream(Stream.generate(() -> new ItemStackList(buffer.readItem())));
         }
 
@@ -197,7 +199,7 @@ public class StackIngredient extends Ingredient {
         }
 
         @Override
-        public void write(PacketBuffer buffer, StackIngredient ingredient) {
+        public void write(FriendlyByteBuf buffer, StackIngredient ingredient) {
             ItemStack[] items = ingredient.getItems();
             buffer.writeVarInt(items.length);
 

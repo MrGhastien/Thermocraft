@@ -1,15 +1,15 @@
 package mrghastien.thermocraft.common.crafting;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
-public abstract class BaseRecipe implements IRecipe<BaseRecipe.DummyInventory> {
+public abstract class BaseRecipe implements Recipe<BaseRecipe.DummyContainer> {
 
     private final ResourceLocation id;
 
@@ -21,7 +21,7 @@ public abstract class BaseRecipe implements IRecipe<BaseRecipe.DummyInventory> {
 
     @Deprecated
     @Override
-    public boolean matches(DummyInventory inv, World worldIn) {
+    public boolean matches(DummyContainer inv, Level worldIn) {
         return true;
     }
 
@@ -32,7 +32,7 @@ public abstract class BaseRecipe implements IRecipe<BaseRecipe.DummyInventory> {
 
     @Deprecated
     @Override
-    public ItemStack assemble(DummyInventory inv) {
+    public ItemStack assemble(DummyContainer inv) {
         return ItemStack.EMPTY;
     }
 
@@ -52,15 +52,15 @@ public abstract class BaseRecipe implements IRecipe<BaseRecipe.DummyInventory> {
         return true;
     }
 
-    public static class DummyInventory implements IInventory {
+    public static class DummyContainer implements Container {
 
-        private static final DummyInventory INSTANCE = new DummyInventory();
+        private static final DummyContainer INSTANCE = new DummyContainer();
 
-        public static DummyInventory getInstance() {
+        public static DummyContainer getInstance() {
             return INSTANCE;
         }
 
-        private DummyInventory() {}
+        private DummyContainer() {}
 
         @Override
         public void clearContent() {}
@@ -97,12 +97,12 @@ public abstract class BaseRecipe implements IRecipe<BaseRecipe.DummyInventory> {
         public void setChanged() {}
 
         @Override
-        public boolean stillValid(PlayerEntity player) {
+        public boolean stillValid(Player player) {
             return false;
         }
     }
 
     //Just to shorten the code
-    public abstract static class Serializer<T extends BaseRecipe> extends ForgeRegistryEntry<IRecipeSerializer<?>> implements IRecipeSerializer<T> {
+    public abstract static class Serializer<T extends BaseRecipe> extends ForgeRegistryEntry<RecipeSerializer<?>> implements RecipeSerializer<T> {
     }
 }

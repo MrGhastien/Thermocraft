@@ -4,17 +4,17 @@ import mrghastien.thermocraft.common.ThermoCraft;
 import mrghastien.thermocraft.common.registries.ModBlocks;
 import mrghastien.thermocraft.common.registries.ModFluids;
 import mrghastien.thermocraft.common.registries.ModItems;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.FlowingFluidBlock;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.material.MaterialColor;
-import net.minecraft.item.BucketItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.MaterialColor;
 import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.fmllegacy.RegistryObject;
 
 import java.util.function.UnaryOperator;
 
@@ -22,7 +22,7 @@ public class FluidRegistryObject {
 
     private final RegistryObject<ForgeFlowingFluid.Source> source;
     private final RegistryObject<ForgeFlowingFluid.Flowing> flowing;
-    private final RegistryObject<FlowingFluidBlock> block;
+    private final RegistryObject<LiquidBlock> block;
     private final RegistryObject<BucketItem> bucket;
 
     private final ResourceLocation id;
@@ -34,7 +34,7 @@ public class FluidRegistryObject {
 
         this.source = ModFluids.FLUIDS.register(name, () -> new ForgeFlowingFluid.Source(properties));
         this.flowing = ModFluids.FLUIDS.register("flowing_" + name, () -> new ForgeFlowingFluid.Flowing(properties));
-        this.block = ModBlocks.BLOCKS.register(name, () -> new FlowingFluidBlock(this::getSource, AbstractBlock.Properties.of(Material.WATER, MaterialColor.COLOR_PURPLE).noCollission().strength(100.0F).noDrops()));
+        this.block = ModBlocks.BLOCKS.register(name, () -> new LiquidBlock(this::getSource, BlockBehaviour.Properties.of(Material.WATER, MaterialColor.COLOR_PURPLE).noCollission().strength(100.0F).noDrops()));
         this.bucket = ModItems.ITEMS.register(name + "_bucket", () -> new BucketItem(this::getSource, new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1).tab(ModItems.Tabs.MAIN)));
         this.id = ThermoCraft.modLoc(name);
     }
@@ -51,7 +51,7 @@ public class FluidRegistryObject {
         return flowing.get();
     }
 
-    public FlowingFluidBlock getBlock() {
+    public LiquidBlock getBlock() {
         return block.get();
     }
 

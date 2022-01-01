@@ -2,11 +2,11 @@ package mrghastien.thermocraft.datagen.providers;
 
 import mrghastien.thermocraft.common.ThermoCraft;
 import mrghastien.thermocraft.common.registries.ModBlocks;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
+import net.minecraft.core.Direction;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.util.Direction;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ConfiguredModel;
 import net.minecraftforge.client.model.generators.ModelFile;

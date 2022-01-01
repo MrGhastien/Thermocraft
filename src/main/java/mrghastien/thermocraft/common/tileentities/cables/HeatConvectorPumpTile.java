@@ -3,14 +3,16 @@ package mrghastien.thermocraft.common.tileentities.cables;
 import mrghastien.thermocraft.common.capabilities.heat.transport.cables.Pump;
 import mrghastien.thermocraft.common.inventory.containers.ConvectorControllerContainer;
 import mrghastien.thermocraft.common.registries.ModTileEntities;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.util.Direction;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
@@ -18,10 +20,10 @@ import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class HeatConvectorPumpTile extends HeatTransmitterTile<Pump> implements INamedContainerProvider {
+public class HeatConvectorPumpTile extends HeatTransmitterTile<Pump> implements MenuProvider {
 
-    public HeatConvectorPumpTile() {
-        super(ModTileEntities.HEAT_CONVECTOR_PUMP.get());
+    public HeatConvectorPumpTile(BlockPos pos, BlockState state) {
+        super(ModTileEntities.HEAT_CONVECTOR_PUMP.get(), pos, state);
     }
 
     @Override
@@ -31,7 +33,7 @@ public class HeatConvectorPumpTile extends HeatTransmitterTile<Pump> implements 
 
     @Nullable
     @Override
-    public Container createMenu(int id, PlayerInventory inv, PlayerEntity player) {
+    public AbstractContainerMenu createMenu(int id, Inventory inv, Player player) {
         return new ConvectorControllerContainer(id, inv, this);
     }
 
@@ -50,7 +52,7 @@ public class HeatConvectorPumpTile extends HeatTransmitterTile<Pump> implements 
     }
 
     @Override
-    public ITextComponent getDisplayName() {
-        return new StringTextComponent("NAME");
+    public Component getDisplayName() {
+        return new TextComponent("NAME");
     }
 }

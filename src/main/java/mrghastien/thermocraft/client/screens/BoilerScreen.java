@@ -1,6 +1,6 @@
 package mrghastien.thermocraft.client.screens;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import mrghastien.thermocraft.api.heat.IHeatHandler;
 import mrghastien.thermocraft.client.screens.widgets.FluidTankWidget;
 import mrghastien.thermocraft.client.screens.widgets.ThermoBar;
@@ -8,11 +8,12 @@ import mrghastien.thermocraft.client.screens.widgets.Widget;
 import mrghastien.thermocraft.common.inventory.containers.BoilerContainer;
 import mrghastien.thermocraft.common.tileentities.BoilerTile;
 import mrghastien.thermocraft.util.MathUtils;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.entity.player.Inventory;
 
 public class BoilerScreen extends BaseContainerScreen<BoilerContainer, BoilerTile> {
-    public BoilerScreen(BoilerContainer container, PlayerInventory playerInventory, ITextComponent title) {
+    public BoilerScreen(BoilerContainer container, Inventory playerInventory, Component title) {
         super(container, playerInventory, title);
 
     }
@@ -29,7 +30,7 @@ public class BoilerScreen extends BaseContainerScreen<BoilerContainer, BoilerTil
     }
 
     @Override
-    protected void renderBg(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) {
+    protected void renderBg(PoseStack matrixStack, float partialTicks, int mouseX, int mouseY) {
         super.renderBg(matrixStack, partialTicks, mouseX, mouseY);
         blit(matrixStack, leftPos + 8, topPos + 8, 176, 18, 16, 70);
         blit(matrixStack, leftPos + 152, topPos + 8, 176, 18, 16, 70);

@@ -2,18 +2,19 @@ package mrghastien.thermocraft.common.capabilities.heat;
 
 import mrghastien.thermocraft.api.IChangeListener;
 import mrghastien.thermocraft.api.heat.IHeatHandler;
+import mrghastien.thermocraft.api.heat.ISidedHeatHandler;
 import mrghastien.thermocraft.api.heat.TransferType;
 import mrghastien.thermocraft.util.Constants;
 import mrghastien.thermocraft.util.math.FixedPointNumber;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.LazyOptional;
 
 import javax.annotation.Nullable;
 import java.util.EnumMap;
 import java.util.function.Function;
 
-public class SidedHeatHandler extends HeatHandler implements mrghastien.thermocraft.api.heat.ISidedHeatHandler {
+public class SidedHeatHandler extends HeatHandler implements ISidedHeatHandler {
 
     private final Function<Direction, TransferType> transferTypeFunction;
     private final EnumMap<Direction, LazyOptional<Interface>> interfaces = new EnumMap<>(Direction.class);
@@ -159,12 +160,12 @@ public class SidedHeatHandler extends HeatHandler implements mrghastien.thermocr
         }
 
         @Override
-        public CompoundNBT serializeNBT() {
+        public CompoundTag serializeNBT() {
             return SidedHeatHandler.this.serializeNBT();
         }
 
         @Override
-        public void deserializeNBT(CompoundNBT nbt) {
+        public void deserializeNBT(CompoundTag nbt) {
             SidedHeatHandler.this.deserializeNBT(nbt);
         }
 

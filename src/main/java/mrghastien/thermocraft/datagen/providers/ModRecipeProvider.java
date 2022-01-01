@@ -7,14 +7,14 @@ import mrghastien.thermocraft.datagen.CriterionHelper;
 import mrghastien.thermocraft.datagen.builders.recipe.BoilingRecipeBuilder;
 import mrghastien.thermocraft.datagen.builders.recipe.FluidInjectionRecipeBuilder;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.data.IFinishedRecipe;
-import net.minecraft.data.RecipeProvider;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeProvider;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.fluids.FluidStack;
 
 import javax.annotation.Nonnull;
@@ -27,15 +27,15 @@ public class ModRecipeProvider extends RecipeProvider {
     }
 
     @Override
-    protected void buildShapelessRecipes(@Nonnull Consumer<IFinishedRecipe> consumer) {
+    protected void buildCraftingRecipes(@Nonnull Consumer<FinishedRecipe> consumer) {
         BoilingRecipeBuilder.boiling(Fluids.LAVA, 10, 10).ingredient(Fluids.WATER, 10).save(consumer, new ResourceLocation(ThermoCraft.MODID, "boiling/water_to_lava"));
 
         convectorInjectionRecipe(consumer, ModFluids.ETHER_OF_SADNESS.getSource());
         convectorInjectionRecipe(consumer, Fluids.WATER);
     }
 
-    private void convectorInjectionRecipe(@Nonnull Consumer<IFinishedRecipe> consumer, Fluid f) {
-        CompoundNBT nbt = new CompoundNBT();
+    private void convectorInjectionRecipe(@Nonnull Consumer<FinishedRecipe> consumer, Fluid f) {
+        CompoundTag nbt = new CompoundTag();
         ResourceLocation name = f.getRegistryName();
         nbt.putString("fluid", name.toString());
         Item heatConvectorItem = ModBlocks.HEAT_CONVECTOR_BLOCK.get().asItem();

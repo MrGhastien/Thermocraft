@@ -8,13 +8,14 @@ import mrghastien.thermocraft.common.inventory.containers.ThermalCapacitorContai
 import mrghastien.thermocraft.common.network.data.IDataHolder;
 import mrghastien.thermocraft.common.registries.ModTileEntities;
 import mrghastien.thermocraft.util.Constants;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 
@@ -25,13 +26,13 @@ public class ThermalCapacitorTile extends BaseTile {
 
     private final SidedHeatHandler heatHandler = new SidedHeatHandler(1400, 100, 0.05, this::setChanged, d -> TransferType.BOTH);
 
-    public ThermalCapacitorTile() {
-        super(ModTileEntities.THERMAL_CAPACITOR.get(), true);
+    public ThermalCapacitorTile(BlockPos pos, BlockState state) {
+        super(ModTileEntities.THERMAL_CAPACITOR.get(), pos, state, true);
     }
 
     @Nullable
     @Override
-    public Container createMenu(int id, PlayerInventory inv, PlayerEntity player) {
+    public AbstractContainerMenu createMenu(int id, Inventory inv, Player player) {
         return new ThermalCapacitorContainer(id, inv, this);
     }
 
@@ -43,7 +44,7 @@ public class ThermalCapacitorTile extends BaseTile {
 
     private void transferHeatToNearbyBlocks() {
         for(Direction dir : Constants.DIRECTIONS) {
-            TileEntity te = level.getBlockEntity(worldPosition.relative(dir));
+            BlockEntity te = level.getBlockEntity(worldPosition.relative(dir));
             if(te == null) continue;
             Direction facing = dir.getOpposite();
             te.getCapability(Capabilities.HEAT_HANDLER_CAPABILITY, facing).ifPresent(h -> {
@@ -67,12 +68,12 @@ public class ThermalCapacitorTile extends BaseTile {
     }
 
     @Override
-    protected void loadInternal(BlockState state, CompoundNBT nbt) {
+    protected void loadInternal(CompoundTag nbt) {
         heatHandler.deserializeNBT(nbt.getCompound("Heat"));
     }
 
     @Override
-    protected void saveInternal(CompoundNBT nbt) {
+    protected void saveInternal(CompoundTag nbt) {
         nbt.put("Heat", heatHandler.serializeNBT());
     }
 

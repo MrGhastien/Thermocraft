@@ -1,7 +1,7 @@
 package mrghastien.thermocraft.api.heat;
 
 import mrghastien.thermocraft.util.math.FixedPointNumber;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
 
 public interface ISidedHeatHandler extends IHeatHandler {
 

@@ -10,13 +10,14 @@ import mrghastien.thermocraft.common.inventory.containers.FluidInjectorContainer
 import mrghastien.thermocraft.common.network.data.DataType;
 import mrghastien.thermocraft.common.network.data.IDataHolder;
 import mrghastien.thermocraft.common.registries.ModTileEntities;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.util.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
@@ -42,8 +43,8 @@ public class FluidInjectorTile extends BaseTile {
 
     private boolean changed;
 
-    public FluidInjectorTile() {
-        super(ModTileEntities.FLUID_INJECTOR.get());
+    public FluidInjectorTile(BlockPos pos, BlockState state) {
+        super(ModTileEntities.FLUID_INJECTOR.get(), pos, state);
     }
 
     @Override
@@ -104,12 +105,12 @@ public class FluidInjectorTile extends BaseTile {
     }
 
     @Override
-    protected void loadInternal(BlockState state, CompoundNBT nbt) {
+    protected void loadInternal(CompoundTag nbt) {
         tank.deserializeNBT(nbt.getCompound("inputTank"));
     }
 
     @Override
-    protected void saveInternal(CompoundNBT nbt) {
+    protected void saveInternal(CompoundTag nbt) {
         nbt.put("inputTank", tank.serializeNBT());
     }
 
@@ -137,7 +138,7 @@ public class FluidInjectorTile extends BaseTile {
 
     @Nullable
     @Override
-    public Container createMenu(int id, PlayerInventory inventory, PlayerEntity player) {
+    public AbstractContainerMenu createMenu(int id, Inventory inventory, Player player) {
         return new FluidInjectorContainer(this, id, inventory);
     }
 

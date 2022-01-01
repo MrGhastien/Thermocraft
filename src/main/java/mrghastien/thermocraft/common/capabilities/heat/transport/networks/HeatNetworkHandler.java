@@ -11,13 +11,13 @@ import mrghastien.thermocraft.common.network.packets.UpdateCablePacket;
 import mrghastien.thermocraft.util.Constants;
 import mrghastien.thermocraft.util.DimPos;
 import mrghastien.thermocraft.util.ModUtils;
-import mrghastien.thermocraft.util.Pair;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.WorldEvent;
-import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraftforge.fmllegacy.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -52,7 +52,7 @@ public final class  HeatNetworkHandler {
         return null;
     }
 
-    public HeatNetwork get(BlockPos pos, World world, HeatNetworkType type) {
+    public HeatNetwork get(BlockPos pos, Level world, HeatNetworkType type) {
         return get(new DimPos(pos, world), type);
     }
 
@@ -60,7 +60,7 @@ public final class  HeatNetworkHandler {
         return id == -1 ? null : networks.get(id);
     }
 
-    public boolean isPresent(BlockPos pos, World world, HeatNetworkType type) {
+    public boolean isPresent(BlockPos pos, Level world, HeatNetworkType type) {
         return get(pos, world, type) != null;
     }
 
@@ -68,7 +68,7 @@ public final class  HeatNetworkHandler {
         return id == -1 ? null : clientNetworks.get(id);
     }
 
-    public HeatNetwork create(World world, HeatNetworkType type) {
+    public HeatNetwork create(Level world, HeatNetworkType type) {
         if(world.isClientSide()) throw new IllegalArgumentException("Cannot create a client network on the server !");
         long id = nextId();
         HeatNetwork net = type.create(id, world);
@@ -78,7 +78,7 @@ public final class  HeatNetworkHandler {
         return net;
     }
 
-    public HeatNetwork createClient(World world, HeatNetworkType type, long id) {
+    public HeatNetwork createClient(ClientLevel world, HeatNetworkType type, long id) {
         if(!world.isClientSide()) throw new IllegalArgumentException("Cannot create a server network on the client !");
         HeatNetwork net = type.create(id, world);
         clientNetworks.put(id, net);
@@ -86,7 +86,7 @@ public final class  HeatNetworkHandler {
         return net;
     }
 
-    public HeatNetwork getOrCreate(World world, BlockPos pos, HeatNetworkType type) {
+    public HeatNetwork getOrCreate(Level world, BlockPos pos, HeatNetworkType type) {
         DimPos dPos = new DimPos(pos, world);
         for(Direction ignored : Constants.DIRECTIONS) {
             HeatNetwork net = get(dPos, type);
@@ -97,7 +97,7 @@ public final class  HeatNetworkHandler {
         return create(world, type);
     }
 
-    public HeatNetwork getOrCreate(long id, World world, HeatNetworkType type) {
+    public HeatNetwork getOrCreate(long id, Level world, HeatNetworkType type) {
         for(Direction ignored : Constants.DIRECTIONS) {
             HeatNetwork net;
             if(world.isClientSide()) net = getClient(id);
@@ -131,7 +131,7 @@ public final class  HeatNetworkHandler {
         }
     }
 
-    private HeatNetwork checkPath(final BlockPos firstPos, final World world, Set<BlockPos> travelCache) {
+    private HeatNetwork checkPath(final BlockPos firstPos, final Level world, Set<BlockPos> travelCache) {
         final Cable initialCable = ModUtils.getCable(firstPos, world);
         LinkedHashSet<HeatNetwork> netCache = new LinkedHashSet<>();
         travelCache.add(firstPos);
@@ -140,7 +140,7 @@ public final class  HeatNetworkHandler {
         return netCache.stream().reduce(this::mergeNetworks).orElseGet(() -> create(initialCable.getWorld(), initialCable.getType()));
     }
 
-    private void checkIntersectionPaths(Cable cable, final World world, Set<BlockPos> travelCache, Set<HeatNetwork> netCache) {
+    private void checkIntersectionPaths(Cable cable, final Level world, Set<BlockPos> travelCache, Set<HeatNetwork> netCache) {
         BlockPos pos = cable.getPos();
         for(Direction dir : cable.getCableConnections()) {
             BlockPos rel = pos.relative(dir);
@@ -161,7 +161,7 @@ public final class  HeatNetworkHandler {
 
     //Advances in the cable's path and returns either the first encountered intersection or null if no intersection was found (reached dead-end, already checked cable or assigned cable)
     //Always call near a cached cable
-    private Cable checkLinearCables(Cable c, final World world, Set<BlockPos> travelCache) {
+    private Cable checkLinearCables(Cable c, final Level world, Set<BlockPos> travelCache) {
         BlockPos pos = c.getPos();
         Cable rel = c;
         boolean isNewCableInCache = false;
@@ -180,7 +180,7 @@ public final class  HeatNetworkHandler {
     }
     
     public void sendCableChangesToClient(Cable c, UpdateCablePacket.UpdateType updateType) {
-        World world = c.getWorld();
+        Level world = c.getWorld();
         PacketHandler.MAIN_CHANNEL.send(PacketDistributor.TRACKING_CHUNK.with(() -> world.getChunkAt(c.getPos())), new UpdateCablePacket(c, updateType));
     }
     
@@ -289,13 +289,13 @@ public final class  HeatNetworkHandler {
         CONVECTOR(HeatConvectorNetwork::new),
         ANY(null);
 
-        private final BiFunction<Long, World, HeatNetwork> factory;
+        private final BiFunction<Long, Level, HeatNetwork> factory;
 
-        HeatNetworkType(BiFunction<Long, World, HeatNetwork> factory) {
+        HeatNetworkType(BiFunction<Long, Level, HeatNetwork> factory) {
            this.factory = factory;
         }
 
-        HeatNetwork create(long id, World world) {
+        HeatNetwork create(long id, Level world) {
             if(factory == null) throw new UnsupportedOperationException("Cannot create a network without a type");
             return factory.apply(id, world);
         }

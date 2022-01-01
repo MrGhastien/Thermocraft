@@ -1,12 +1,12 @@
 package mrghastien.thermocraft.common.blocks;
 
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.Material;
 
 public class CaloriteOreBlock extends Block {
 
     public CaloriteOreBlock() {
-        super(AbstractBlock.Properties.of(Material.STONE));
+        super(BlockBehaviour.Properties.of(Material.STONE));
     }
 }

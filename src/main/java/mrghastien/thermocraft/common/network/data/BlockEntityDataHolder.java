@@ -1,16 +1,16 @@
 package mrghastien.thermocraft.common.network.data;
 
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class TileEntityDataHolder extends DefaultDataHolder {
+public class BlockEntityDataHolder extends DefaultDataHolder {
 
-    private final TileEntity te;
+    private final BlockEntity te;
 
-    public TileEntityDataHolder(TileEntity te) {
+    public BlockEntityDataHolder(BlockEntity te) {
         super();
         this.te = te;
     }
