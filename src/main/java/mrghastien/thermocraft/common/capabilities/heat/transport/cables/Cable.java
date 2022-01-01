@@ -6,7 +6,7 @@ import mrghastien.thermocraft.common.ThermoCraft;
 import mrghastien.thermocraft.common.capabilities.Capabilities;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetwork;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetworkHandler;
-import mrghastien.thermocraft.common.tileentities.cables.HeatTransmitterTile;
+import mrghastien.thermocraft.common.blocks.transmitters.HeatTransmitterTile;
 import mrghastien.thermocraft.util.Constants;
 import mrghastien.thermocraft.util.ModUtils;
 import net.minecraft.core.BlockPos;

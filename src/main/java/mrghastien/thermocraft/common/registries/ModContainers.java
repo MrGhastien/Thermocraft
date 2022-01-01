@@ -1,7 +1,7 @@
 package mrghastien.thermocraft.common.registries;
 
 import mrghastien.thermocraft.common.ThermoCraft;
-import mrghastien.thermocraft.common.inventory.containers.*;
+import mrghastien.thermocraft.common.inventory.menus.*;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraftforge.common.extensions.IForgeContainerType;;

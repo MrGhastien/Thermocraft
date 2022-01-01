@@ -64,10 +64,10 @@ public class PacketHandler {
                 .consumer(UpdateCablePacket::handle)
                 .add();
 
-        MAIN_CHANNEL.messageBuilder(ModUpdateTileEntityPacket.class, nextID())
-                .encoder(ModUpdateTileEntityPacket::encode)
-                .decoder(ModUpdateTileEntityPacket::new)
-                .consumer(ModUpdateTileEntityPacket::handle)
+        MAIN_CHANNEL.messageBuilder(ModUpdateBlockEntityPacket.class, nextID())
+                .encoder(ModUpdateBlockEntityPacket::encode)
+                .decoder(ModUpdateBlockEntityPacket::new)
+                .consumer(ModUpdateBlockEntityPacket::handle)
                 .add();
 
         MAIN_CHANNEL.messageBuilder(UpdateHeatNetworkPacket.class, nextID())

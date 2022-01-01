@@ -1,13 +1,17 @@
 package mrghastien.thermocraft.util;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidAttributes;
 
@@ -24,34 +28,32 @@ public final class RenderUtils {
 			GradientMode mode) {
 		int lastXPos = xPos + width;
 		int lastYPos = yPos + height;
-		RenderSystem.disableTexture();
+
 		RenderSystem.enableBlend();
-		//RenderSystem.disableAlphaTest();
+		RenderSystem.disableTexture();
 		RenderSystem.defaultBlendFunc();
-		//RenderSystem.shadeModel(GL11.GL_SMOOTH);
+		RenderSystem.setShader(GameRenderer::getPositionColorShader);
+
 		Tesselator tessellator = Tesselator.getInstance();
 		BufferBuilder bufferbuilder = tessellator.getBuilder();
 		bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-		switch(mode) {
-			case VERTICAL:
+		switch (mode) {
+			case VERTICAL -> {
 				bufferbuilder.vertex(lastXPos, yPos, offset).color(start.getRed(), start.getGreen(), start.getBlue(), start.getAlpha()).endVertex();
 				bufferbuilder.vertex(xPos, yPos, offset).color(start.getRed(), start.getGreen(), start.getBlue(), start.getAlpha()).endVertex();
 				bufferbuilder.vertex(xPos, lastYPos, offset).color(end.getRed(), end.getGreen(), end.getBlue(), end.getAlpha()).endVertex();
 				bufferbuilder.vertex(lastXPos, lastYPos, offset).color(end.getRed(), end.getGreen(), end.getBlue(), end.getAlpha()).endVertex();
-			break;
-			
-			case HORIZONTAL:
+			}
+			case HORIZONTAL -> {
 				bufferbuilder.vertex(lastXPos, yPos, offset).color(start.getRed(), start.getGreen(), start.getBlue(), start.getAlpha()).endVertex();
 				bufferbuilder.vertex(xPos, yPos, offset).color(end.getRed(), end.getGreen(), end.getBlue(), end.getAlpha()).endVertex();
 				bufferbuilder.vertex(xPos, lastYPos, offset).color(end.getRed(), end.getGreen(), end.getBlue(), end.getAlpha()).endVertex();
 				bufferbuilder.vertex(lastXPos, lastYPos, offset).color(start.getRed(), start.getGreen(), start.getBlue(), start.getAlpha()).endVertex();
-				break;
+			}
 		}
 		tessellator.end();
-		//RenderSystem.shadeModel(GL11.GL_FLAT);
-		RenderSystem.disableBlend();
-		//RenderSystem.enableAlphaTest();
 		RenderSystem.enableTexture();
+		RenderSystem.disableBlend();
 	}
 	
 	public static void fillGradientLerpColor(int xPos, int yPos, int width, int height, int maxWidth, int maxHeight, int offset, Color start, Color end,
@@ -65,16 +67,19 @@ public final class RenderUtils {
 		Minecraft mc = Minecraft.getInstance();
 		FluidAttributes attributes = f.getAttributes();
 		ResourceLocation id = attributes.getStillTexture();
-		TextureAtlasSprite sprite = mc.getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(id);
-		RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
-		Color color = new Color(attributes.getColor());
-		RenderSystem.setShaderColor(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
+		TextureAtlasSprite sprite = mc.getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(id);
 		int heightIterations = (height) / sprite.getHeight(); //The amount of full height quads
 		int widthIterations = (width) / sprite.getWidth(); //The amount of full width quads
 		int heightRemainder = (height) % sprite.getHeight(); //The height of the last quad
 		int widthRemainder = (width) % sprite.getWidth(); //The width of the last quad
+
+		Minecraft.getInstance().getEntityRenderDispatcher().textureManager.bindForSetup(InventoryMenu.BLOCK_ATLAS);
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
+		setColor(attributes.getColor());
 		BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
 		bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+
 		for(int i = 0; i < heightIterations; i++) {
 			for(int j = 0; j < widthIterations; j++) {
 				//Bottom left full quads (if large enough)
@@ -89,10 +94,12 @@ public final class RenderUtils {
 		}
 		//Top Right quad
 		renderFluidQuad(stack, sprite, x + widthIterations * sprite.getWidth(), y, offset, widthRemainder, heightRemainder);
-		bufferbuilder.end();
-		//RenderSystem.enableAlphaTest();
-		bufferbuilder.end();
-		RenderSystem.setShaderColor(1, 1, 1, 1);
+		Tesselator.getInstance().end();
+		RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+	}
+
+	public static void setColor(int color) {
+		RenderSystem.setShaderColor(((color >> 16) & 0xff) / 255.0f, ((color >> 8) & 0xff) / 255.0f, (color & 0xff) / 255.0f, 1.0f);
 	}
 
 	public static void renderFluidQuad(PoseStack stack, TextureAtlasSprite sprite, int x, int y, int z, int width, int height) {

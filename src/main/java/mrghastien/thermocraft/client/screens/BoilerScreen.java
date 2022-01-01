@@ -5,14 +5,13 @@ import mrghastien.thermocraft.api.heat.IHeatHandler;
 import mrghastien.thermocraft.client.screens.widgets.FluidTankWidget;
 import mrghastien.thermocraft.client.screens.widgets.ThermoBar;
 import mrghastien.thermocraft.client.screens.widgets.Widget;
-import mrghastien.thermocraft.common.inventory.containers.BoilerContainer;
-import mrghastien.thermocraft.common.tileentities.BoilerTile;
+import mrghastien.thermocraft.common.inventory.menus.BoilerContainer;
+import mrghastien.thermocraft.common.blocks.machines.boiler.BoilerBlockEntity;
 import mrghastien.thermocraft.util.MathUtils;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.entity.player.Inventory;
 
-public class BoilerScreen extends BaseContainerScreen<BoilerContainer, BoilerTile> {
+public class BoilerScreen extends BaseContainerScreen<BoilerContainer, BoilerBlockEntity> {
     public BoilerScreen(BoilerContainer container, Inventory playerInventory, Component title) {
         super(container, playerInventory, title);
 

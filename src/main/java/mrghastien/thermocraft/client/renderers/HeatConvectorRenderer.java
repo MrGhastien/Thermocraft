@@ -6,7 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import mrghastien.thermocraft.common.capabilities.heat.transport.cables.Cable;
 import mrghastien.thermocraft.common.capabilities.heat.transport.cables.ConvectorCable;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatConvectorNetwork;
-import mrghastien.thermocraft.common.tileentities.cables.HeatConvectorTile;
+import mrghastien.thermocraft.common.blocks.transmitters.convector.HeatConvectorBlockEntity;
 import mrghastien.thermocraft.util.MathUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -23,7 +23,7 @@ import net.minecraft.world.level.material.Fluids;
 import javax.annotation.Nonnull;
 import java.util.EnumSet;
 
-public class HeatConvectorRenderer implements BlockEntityRenderer<HeatConvectorTile> {
+public class HeatConvectorRenderer implements BlockEntityRenderer<HeatConvectorBlockEntity> {
 
     private static final EnumSet<Direction> X_AXIS_DIRECTIONS = EnumSet.of(Direction.EAST, Direction.WEST);
     private static final EnumSet<Direction> Y_AXIS_DIRECTIONS = EnumSet.of(Direction.UP, Direction.DOWN);
@@ -34,7 +34,7 @@ public class HeatConvectorRenderer implements BlockEntityRenderer<HeatConvectorT
 
 
     @Override
-    public void render(HeatConvectorTile tile, float partialTicks, @Nonnull PoseStack matrixStack, @Nonnull MultiBufferSource multiBufferSource, int lightLevel, int overlay) {
+    public void render(HeatConvectorBlockEntity tile, float partialTicks, @Nonnull PoseStack matrixStack, @Nonnull MultiBufferSource multiBufferSource, int lightLevel, int overlay) {
         Minecraft mc = Minecraft.getInstance();
         ConvectorCable cable = tile.getCable();
         HeatConvectorNetwork net = (HeatConvectorNetwork) cable.getNetwork();

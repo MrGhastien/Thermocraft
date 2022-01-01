@@ -2,15 +2,15 @@ package mrghastien.thermocraft.client.screens;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import mrghastien.thermocraft.client.screens.widgets.FluidTankWidget;
-import mrghastien.thermocraft.common.inventory.containers.FluidInjectorContainer;
-import mrghastien.thermocraft.common.tileentities.FluidInjectorTile;
+import mrghastien.thermocraft.common.blocks.machines.fluidinjector.FluidInjectorBlockEntity;
+import mrghastien.thermocraft.common.inventory.menus.FluidInjectorContainer;
 import mrghastien.thermocraft.util.MathUtils;
 import mrghastien.thermocraft.util.RenderUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraftforge.fluids.FluidStack;
 
-public class FluidInjectorScreen extends BaseContainerScreen<FluidInjectorContainer, FluidInjectorTile> {
+public class FluidInjectorScreen extends BaseContainerScreen<FluidInjectorContainer, FluidInjectorBlockEntity> {
 
     public FluidInjectorScreen(FluidInjectorContainer container, Inventory playerInventory, Component title) {
         super(container, playerInventory, title);

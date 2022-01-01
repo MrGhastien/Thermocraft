@@ -2,7 +2,7 @@ package mrghastien.thermocraft.common.network.packets;
 
 import io.netty.buffer.Unpooled;
 import mrghastien.thermocraft.common.ThermoCraft;
-import mrghastien.thermocraft.common.inventory.containers.BaseContainer;
+import mrghastien.thermocraft.common.inventory.menus.BaseContainer;
 import mrghastien.thermocraft.common.network.INetworkBinding;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;

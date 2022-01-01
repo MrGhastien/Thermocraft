@@ -24,7 +24,8 @@ public class ModBlockStateProvider extends BlockStateProvider {
     protected void registerStatesAndModels() {
         horizontalBlock(ModBlocks.SOLID_HEATER.get(), state -> {
             boolean lit = state.getValue(BlockStateProperties.LIT);
-            return models().cube(ModBlocks.SOLID_HEATER.getId().getPath() + (lit ? "_lit" : ""), mcLoc("block/furnace_top"),
+            return models().cube(ModBlocks.SOLID_HEATER.getId().getPath() + (lit ? "_lit" : ""),
+                    mcLoc("block/furnace_top"),
                     modLoc("block/solid_heater_top"),
                     modLoc("block/solid_heater_front" + (lit ? "_lit" : "")),
                     modLoc("block/solid_heater_side"),

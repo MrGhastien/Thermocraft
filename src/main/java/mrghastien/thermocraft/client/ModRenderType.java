@@ -10,12 +10,12 @@ public class ModRenderType extends RenderType {
     public static final RenderType GLOW_TRANSPARENT = glowTransparent();
 
     public static RenderType glowTransparent() {
-        return RenderType.create("glow_transparent", DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS, 256, true, false,
+        return RenderType.create("glow_transparent", DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS, 256, false, false,
         RenderType.CompositeState.builder()
                 .setWriteMaskState(RenderStateShard.COLOR_WRITE)
                 .setTextureState(RenderStateShard.NO_TEXTURE)
                 .setLayeringState(RenderStateShard.POLYGON_OFFSET_LAYERING)
-                //.setShaderState(FLAT_SHADE)
+                .setShaderState(RENDERTYPE_LIGHTNING_SHADER)
                 .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
                 //.setOutputState(RenderState.WEATHER_TARGET)
                 .setCullState(RenderStateShard.NO_CULL)

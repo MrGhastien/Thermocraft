@@ -1,12 +1,11 @@
 package mrghastien.thermocraft.client.renderers;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import mrghastien.thermocraft.client.ModRenderType;
 import mrghastien.thermocraft.common.ThermoCraft;
+import mrghastien.thermocraft.common.blocks.machines.thermalcapacitor.ThermalCapacitorBlockEntity;
 import mrghastien.thermocraft.common.capabilities.heat.HeatHandler;
-import mrghastien.thermocraft.common.tileentities.ThermalCapacitorTile;
 import mrghastien.thermocraft.util.MathUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -16,7 +15,7 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 
-public class ThermalCapacitorRenderer implements BlockEntityRenderer<ThermalCapacitorTile> {
+public class ThermalCapacitorRenderer implements BlockEntityRenderer<ThermalCapacitorBlockEntity> {
 
     public static final ResourceLocation TEXTURE = new ResourceLocation(ThermoCraft.MODID, "block/thermal_capacitor_core");
 
@@ -24,7 +23,7 @@ public class ThermalCapacitorRenderer implements BlockEntityRenderer<ThermalCapa
     }
 
     @Override
-    public void render(ThermalCapacitorTile tile, float partialTicks, PoseStack matrixStack, MultiBufferSource multiBufferSource, int lightLevel, int overlay) {
+    public void render(ThermalCapacitorBlockEntity tile, float partialTicks, PoseStack matrixStack, MultiBufferSource multiBufferSource, int lightLevel, int overlay) {
         Minecraft mc = Minecraft.getInstance();
         TextureAtlasSprite sprite = mc.getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(TEXTURE);
         VertexConsumer builder = multiBufferSource.getBuffer(ModRenderType.glowTransparent());
@@ -39,7 +38,7 @@ public class ThermalCapacitorRenderer implements BlockEntityRenderer<ThermalCapa
         matrixStack.popPose();
     }
 
-    private void vertex(VertexConsumer builder, PoseStack stack, float x, float y, float z, float u, float v, ThermalCapacitorTile tile) {
+    private void vertex(VertexConsumer builder, PoseStack stack, float x, float y, float z, float u, float v, ThermalCapacitorBlockEntity tile) {
         HeatHandler handler = tile.getHeatHandler();
         int scaledTemp = (int) MathUtils.clampedMap(handler.getTemperature(), 1000, 4000, 0, 765);
         int r = MathUtils.clamp(scaledTemp, 0, 255);
@@ -54,14 +53,14 @@ public class ThermalCapacitorRenderer implements BlockEntityRenderer<ThermalCapa
     }
 
     private void quad(VertexConsumer builder, PoseStack stack, float x1, float y1, float z1, float x2, float y2, float z2,
-                      float x3, float y3, float z3, float x4, float y4, float z4, TextureAtlasSprite sprite, ThermalCapacitorTile tile) {
+                      float x3, float y3, float z3, float x4, float y4, float z4, TextureAtlasSprite sprite, ThermalCapacitorBlockEntity tile) {
         vertex(builder, stack, x1, y1, z1, sprite.getU0(), sprite.getV0(), tile);
         vertex(builder, stack, x2, y2, z2, sprite.getU1(), sprite.getV0(), tile);
         vertex(builder, stack, x3, y3, z3, sprite.getU1(), sprite.getV1(), tile);
         vertex(builder, stack, x4, y4, z4, sprite.getU0(), sprite.getV1(), tile);
     }
 
-    private void cube(VertexConsumer builder, PoseStack stack, float x, float y, float z, float scale, TextureAtlasSprite sprite, ThermalCapacitorTile tile) {
+    private void cube(VertexConsumer builder, PoseStack stack, float x, float y, float z, float scale, TextureAtlasSprite sprite, ThermalCapacitorBlockEntity tile) {
         float minX = x - scale, maxX = x + scale;
         float minY = y - scale, maxY = y + scale;
         float minZ = z - scale, maxZ = z + scale;

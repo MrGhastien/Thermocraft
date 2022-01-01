@@ -1,12 +1,10 @@
 package mrghastien.thermocraft.common.registries;
 
-import mrghastien.thermocraft.api.heat.IHeatHandler;
 import mrghastien.thermocraft.common.ThermoCraft;
 import mrghastien.thermocraft.common.crafting.FluidIngredient;
 import mrghastien.thermocraft.common.crafting.StackIngredient;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;

@@ -11,7 +11,7 @@ import mrghastien.thermocraft.common.network.data.DataType;
 import mrghastien.thermocraft.common.network.data.IDataHolder;
 import mrghastien.thermocraft.common.network.packets.PacketHandler;
 import mrghastien.thermocraft.common.network.packets.UpdateHeatNetworkPacket;
-import mrghastien.thermocraft.common.tileentities.cables.HeatTransmitterTile;
+import mrghastien.thermocraft.common.blocks.transmitters.HeatTransmitterTile;
 import mrghastien.thermocraft.util.Constants;
 import mrghastien.thermocraft.util.math.FixedPointNumber;
 import net.minecraft.core.BlockPos;

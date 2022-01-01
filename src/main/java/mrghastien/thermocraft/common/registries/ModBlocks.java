@@ -2,6 +2,13 @@ package mrghastien.thermocraft.common.registries;
 
 import mrghastien.thermocraft.common.ThermoCraft;
 import mrghastien.thermocraft.common.blocks.*;
+import mrghastien.thermocraft.common.blocks.machines.boiler.BoilerBlock;
+import mrghastien.thermocraft.common.blocks.machines.fluidinjector.FluidInjectorBlock;
+import mrghastien.thermocraft.common.blocks.machines.solidheater.SolidHeaterBlock;
+import mrghastien.thermocraft.common.blocks.machines.thermalcapacitor.ThermalCapacitorBlock;
+import mrghastien.thermocraft.common.blocks.transmitters.conductor.HeatConductorBlock;
+import mrghastien.thermocraft.common.blocks.transmitters.convector.HeatConvectorBlock;
+import mrghastien.thermocraft.common.blocks.transmitters.convector.HeatConvectorPumpBlock;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -25,7 +32,7 @@ public class ModBlocks {
         return BLOCKS.register(name, supplier);
     }
 
-    private static Supplier<BlockItem> basicItem(final RegistryObject<? extends Block> block) {
+    private static <T extends Block> Supplier<BlockItem> basicItem(final RegistryObject<T> block) {
         return () -> new BlockItem(block.get(), new Item.Properties().tab(ModItems.Tabs.MAIN));
     }
 

@@ -6,6 +6,7 @@ import mrghastien.thermocraft.client.renderers.ThermalCapacitorRenderer;
 import mrghastien.thermocraft.client.screens.*;
 import mrghastien.thermocraft.common.capabilities.Capabilities;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetworkHandler;
+import mrghastien.thermocraft.common.inventory.menus.BaseContainer;
 import mrghastien.thermocraft.common.network.packets.PacketHandler;
 import mrghastien.thermocraft.common.registries.*;
 import net.minecraft.client.gui.screens.MenuScreens;
@@ -30,10 +31,13 @@ class Setup {
 
     public static void init() {
         final IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        final IEventBus forgeBus = MinecraftForge.EVENT_BUS;
+        //Other setup events
         bus.addListener(Setup::setup);
         bus.addListener(Setup.Client::setup);
         bus.addListener(Setup.Server::setup);
-        bus.addListener(Capabilities::registerCapabilities);
+
+        //Game objects
         ModBlocks.BLOCKS.register(bus);
         ModItems.ITEMS.register(bus);
         ModTileEntities.TILES.register(bus);
@@ -41,12 +45,18 @@ class Setup {
         ModRecipeSerializers.SERIALIZERS.register(bus);
         ModFluids.FLUIDS.register(bus);
 
-        MinecraftForge.EVENT_BUS.addListener(HeatNetworkHandler.instance()::onWorldTick);
-        MinecraftForge.EVENT_BUS.addListener(HeatNetworkHandler.instance()::onWorldUnload);
+        bus.addListener(Capabilities::registerCapabilities);
+
+        //Heat Network events
+        forgeBus.addListener(HeatNetworkHandler.instance()::onWorldTick);
+        forgeBus.addListener(HeatNetworkHandler.instance()::onWorldUnload);
         //MinecraftForge.EVENT_BUS.addListener(NetworkHandler.getInstance(LogicalSide.SERVER)::onServerTick);
         //MinecraftForge.EVENT_BUS.addListener(NetworkHandler.getInstance(LogicalSide.SERVER)::onWorldUnload);
         //MinecraftForge.EVENT_BUS.addListener(NetworkHandler.getInstance(LogicalSide.CLIENT)::onWorldUnload);
 
+        //Game events
+        forgeBus.addListener(BaseContainer::onContainerClosedByPlayer);
+        forgeBus.addListener(BaseContainer::onContainerOpenedByPlayer);
     }
 
     public static void setup(final FMLCommonSetupEvent e) {
@@ -64,7 +74,7 @@ class Setup {
 
             MenuScreens.register(ModContainers.HEAT_CONVECTOR_PUMP.get(), HeatConvectorPumpScreen::new);
 
-            //TERs
+            //Block entity renderers
             BlockEntityRenderers.register(ModTileEntities.THERMAL_CAPACITOR.get(), ThermalCapacitorRenderer::new);
             BlockEntityRenderers.register(ModTileEntities.HEAT_CONVECTOR.get(), HeatConvectorRenderer::new);
 

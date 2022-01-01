@@ -2,7 +2,7 @@ package mrghastien.thermocraft.common.capabilities.heat.transport.cables;
 
 
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetworkHandler;
-import mrghastien.thermocraft.common.tileentities.cables.HeatTransmitterTile;
+import mrghastien.thermocraft.common.blocks.transmitters.HeatTransmitterTile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 

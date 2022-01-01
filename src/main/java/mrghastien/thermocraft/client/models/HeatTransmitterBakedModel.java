@@ -2,7 +2,7 @@ package mrghastien.thermocraft.client.models;
 
 import com.google.common.collect.ImmutableMap;
 import mrghastien.thermocraft.api.heat.TransferType;
-import mrghastien.thermocraft.common.tileentities.cables.HeatTransmitterTile;
+import mrghastien.thermocraft.common.blocks.transmitters.HeatTransmitterTile;
 import mrghastien.thermocraft.util.Constants;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;

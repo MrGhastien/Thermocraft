@@ -1,9 +1,10 @@
 package mrghastien.thermocraft.client.screens;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import mrghastien.thermocraft.client.screens.widgets.Widget;
 import mrghastien.thermocraft.common.ThermoCraft;
-import mrghastien.thermocraft.common.inventory.containers.BaseContainer;
+import mrghastien.thermocraft.common.inventory.menus.BaseContainer;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -44,11 +45,11 @@ public abstract class BaseContainerScreen<T extends BaseContainer, U extends Blo
 
     @Override
     protected void renderBg(PoseStack Transformation, float partialTicks, int mouseX, int mouseY) {
-        this.minecraft.getTextureManager().bindForSetup(guiTexture);
+        bindGuiTexture();
         this.blit(Transformation, leftPos, topPos, 0, 0, imageWidth, imageHeight);
     }
 
     protected void bindGuiTexture() {
-        this.minecraft.getTextureManager().bindForSetup(guiTexture);
+        RenderSystem.setShaderTexture(0, guiTexture);
     }
 }
