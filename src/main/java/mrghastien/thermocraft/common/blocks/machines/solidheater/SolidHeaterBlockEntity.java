@@ -7,7 +7,7 @@ import mrghastien.thermocraft.common.capabilities.Capabilities;
 import mrghastien.thermocraft.common.capabilities.heat.HeatHandler;
 import mrghastien.thermocraft.common.capabilities.heat.SidedHeatHandler;
 import mrghastien.thermocraft.common.capabilities.item.ModItemStackHandler;
-import mrghastien.thermocraft.common.inventory.menus.SolidHeaterContainer;
+import mrghastien.thermocraft.common.inventory.menus.SolidHeaterMenu;
 import mrghastien.thermocraft.common.network.data.DataType;
 import mrghastien.thermocraft.common.network.data.IDataHolder;
 import mrghastien.thermocraft.common.registries.ModTileEntities;
@@ -55,8 +55,8 @@ public class SolidHeaterBlockEntity extends MachineBlockEntity {
 
     @Nullable
     @Override
-    public AbstractContainerMenu createMenu(int id, Inventory inv, Player player) {
-        return new SolidHeaterContainer(this, id, inv);
+    public AbstractContainerMenu createMenu(int id, @Nonnull Inventory inv, @Nonnull Player player) {
+        return new SolidHeaterMenu(this, id, inv);
     }
 
     @Override
@@ -85,8 +85,7 @@ public class SolidHeaterBlockEntity extends MachineBlockEntity {
 
         BlockEntity te = level.getBlockEntity(worldPosition.above());
         if(te == null) return;
-        if(te instanceof AbstractFurnaceBlockEntity) {
-            AbstractFurnaceBlockEntity furnace = (AbstractFurnaceBlockEntity) te;
+        if(te instanceof AbstractFurnaceBlockEntity furnace) {
             if(furnace.getItem(1) == ItemStack.EMPTY) {
                 furnace.litTime = (int) MathUtils.clampedMap(heatHandler.getTemperature(), FURNACE_LIT_TEMPERATURE, 500, 0, 1200);
                 furnace.litDuration = 1200;

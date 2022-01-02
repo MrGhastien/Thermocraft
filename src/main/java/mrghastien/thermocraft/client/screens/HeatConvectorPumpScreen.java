@@ -3,14 +3,14 @@ package mrghastien.thermocraft.client.screens;
 import com.mojang.blaze3d.vertex.PoseStack;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatConvectorNetwork;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetworkHandler;
-import mrghastien.thermocraft.common.inventory.menus.ConvectorControllerContainer;
+import mrghastien.thermocraft.common.inventory.menus.ConvectorControllerMenu;
 import mrghastien.thermocraft.common.blocks.transmitters.convector.HeatConvectorPumpBlockEntity;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
-public class HeatConvectorPumpScreen extends BaseContainerScreen<ConvectorControllerContainer, HeatConvectorPumpBlockEntity> {
+public class HeatConvectorPumpScreen extends BaseContainerScreen<ConvectorControllerMenu, HeatConvectorPumpBlockEntity> {
 
-    public HeatConvectorPumpScreen(ConvectorControllerContainer container, Inventory playerInventory, Component title) {
+    public HeatConvectorPumpScreen(ConvectorControllerMenu container, Inventory playerInventory, Component title) {
         super(container, playerInventory, title);
     }
 

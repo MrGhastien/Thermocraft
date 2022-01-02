@@ -3,15 +3,15 @@ package mrghastien.thermocraft.client.screens;
 import com.mojang.blaze3d.vertex.PoseStack;
 import mrghastien.thermocraft.client.screens.widgets.ThermoBar;
 import mrghastien.thermocraft.client.screens.widgets.Widget;
-import mrghastien.thermocraft.common.inventory.menus.SolidHeaterContainer;
+import mrghastien.thermocraft.common.inventory.menus.SolidHeaterMenu;
 import mrghastien.thermocraft.common.blocks.machines.solidheater.SolidHeaterBlockEntity;
 import mrghastien.thermocraft.util.MathUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
-public class SolidHeaterScreen extends BaseContainerScreen<SolidHeaterContainer, SolidHeaterBlockEntity> {
+public class SolidHeaterScreen extends BaseContainerScreen<SolidHeaterMenu, SolidHeaterBlockEntity> {
 
-    public SolidHeaterScreen(SolidHeaterContainer container, Inventory playerInventory, Component title) {
+    public SolidHeaterScreen(SolidHeaterMenu container, Inventory playerInventory, Component title) {
         super(container, playerInventory, title);
     }
 

@@ -6,7 +6,7 @@ import mrghastien.thermocraft.common.ThermoCraft;
 import mrghastien.thermocraft.common.capabilities.Capabilities;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetwork;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetworkHandler;
-import mrghastien.thermocraft.common.blocks.transmitters.HeatTransmitterTile;
+import mrghastien.thermocraft.common.blocks.transmitters.HeatTransmitterBlockEntity;
 import mrghastien.thermocraft.util.Constants;
 import mrghastien.thermocraft.util.ModUtils;
 import net.minecraft.core.BlockPos;
@@ -31,10 +31,10 @@ public abstract class Cable {
     private final EnumSet<Direction> otherConnections; //Cache
     protected final BlockPos pos;
     protected final Supplier<BlockState> stateSupplier;
-    protected final HeatTransmitterTile<?> tileEntity;
+    protected final HeatTransmitterBlockEntity<?> tileEntity;
     private boolean valid = true;
 
-    public Cable(Level world, BlockPos pos, HeatTransmitterTile<?> tileEntity) {
+    public Cable(Level world, BlockPos pos, HeatTransmitterBlockEntity<?> tileEntity) {
         this.world = world;
         this.pos = pos;
         this.stateSupplier = () -> world.getBlockState(pos);
@@ -48,7 +48,7 @@ public abstract class Cable {
         }
     }
 
-    public HeatTransmitterTile<?> getTileEntity() {
+    public HeatTransmitterBlockEntity<?> getTileEntity() {
         return tileEntity;
     }
 

@@ -1,14 +1,14 @@
 package mrghastien.thermocraft.common.blocks.transmitters.convector;
 
 import mrghastien.thermocraft.common.ThermoCraft;
-import mrghastien.thermocraft.common.blocks.transmitters.HeatTransmitterTile;
+import mrghastien.thermocraft.common.blocks.transmitters.HeatTransmitterBlockEntity;
 import mrghastien.thermocraft.common.capabilities.heat.transport.cables.ConvectorCable;
 import mrghastien.thermocraft.common.registries.ModTileEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 
-public class HeatConvectorBlockEntity extends HeatTransmitterTile<ConvectorCable> {
+public class HeatConvectorBlockEntity extends HeatTransmitterBlockEntity<ConvectorCable> {
 
     protected Fluid fluid;
 

@@ -5,7 +5,7 @@ import mrghastien.thermocraft.common.blocks.MachineBlockEntity;
 import mrghastien.thermocraft.common.capabilities.Capabilities;
 import mrghastien.thermocraft.common.capabilities.heat.HeatHandler;
 import mrghastien.thermocraft.common.capabilities.heat.SidedHeatHandler;
-import mrghastien.thermocraft.common.inventory.menus.ThermalCapacitorContainer;
+import mrghastien.thermocraft.common.inventory.menus.ThermalCapacitorMenu;
 import mrghastien.thermocraft.common.network.data.IDataHolder;
 import mrghastien.thermocraft.common.registries.ModTileEntities;
 import mrghastien.thermocraft.util.Constants;
@@ -34,7 +34,7 @@ public class ThermalCapacitorBlockEntity extends MachineBlockEntity {
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int id, Inventory inv, Player player) {
-        return new ThermalCapacitorContainer(id, inv, this);
+        return new ThermalCapacitorMenu(id, inv, this);
     }
 
     @Override

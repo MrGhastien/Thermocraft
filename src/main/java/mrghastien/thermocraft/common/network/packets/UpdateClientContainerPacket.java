@@ -2,7 +2,7 @@ package mrghastien.thermocraft.common.network.packets;
 
 import io.netty.buffer.Unpooled;
 import mrghastien.thermocraft.common.ThermoCraft;
-import mrghastien.thermocraft.common.inventory.menus.BaseContainer;
+import mrghastien.thermocraft.common.inventory.menus.BaseMenu;
 import mrghastien.thermocraft.common.network.INetworkBinding;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -41,12 +41,12 @@ public class UpdateClientContainerPacket {
                 return;
             }
             AbstractContainerMenu menu = mc.player.containerMenu;
-            if(!(menu instanceof BaseContainer)) {
+            if(!(menu instanceof BaseMenu)) {
                 ThermoCraft.LOGGER.debug("Could not synchronize menu value, as it is invalid");
                 return;
             }
-            BaseContainer baseContainer = (BaseContainer) menu;
-            baseContainer.getDataHolder().getBinding().decode(buf);
+            BaseMenu baseMenu = (BaseMenu) menu;
+            baseMenu.getDataHolder().getBinding().decode(buf);
 
         });
         ctx.get().setPacketHandled(true);

@@ -4,7 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import mrghastien.thermocraft.client.screens.widgets.Widget;
 import mrghastien.thermocraft.common.ThermoCraft;
-import mrghastien.thermocraft.common.inventory.menus.BaseContainer;
+import mrghastien.thermocraft.common.inventory.menus.BaseMenu;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -14,7 +14,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BaseContainerScreen<T extends BaseContainer, U extends BlockEntity> extends AbstractContainerScreen<T> {
+public abstract class BaseContainerScreen<T extends BaseMenu, U extends BlockEntity> extends AbstractContainerScreen<T> {
 
     protected final ResourceLocation guiTexture;
     public final List<Widget> widgets = new ArrayList<>();

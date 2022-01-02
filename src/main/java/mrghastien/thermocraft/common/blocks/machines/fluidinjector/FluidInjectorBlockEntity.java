@@ -7,7 +7,7 @@ import mrghastien.thermocraft.common.capabilities.fluid.SingletonFluidHandler;
 import mrghastien.thermocraft.common.capabilities.item.ModItemStackHandler;
 import mrghastien.thermocraft.common.crafting.FluidInjectionRecipe;
 import mrghastien.thermocraft.common.crafting.ModRecipeType;
-import mrghastien.thermocraft.common.inventory.menus.FluidInjectorContainer;
+import mrghastien.thermocraft.common.inventory.menus.FluidInjectorMenu;
 import mrghastien.thermocraft.common.network.data.DataType;
 import mrghastien.thermocraft.common.network.data.IDataHolder;
 import mrghastien.thermocraft.common.registries.ModTileEntities;
@@ -141,7 +141,7 @@ public class FluidInjectorBlockEntity extends MachineBlockEntity {
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int id, Inventory inventory, Player player) {
-        return new FluidInjectorContainer(this, id, inventory);
+        return new FluidInjectorMenu(this, id, inventory);
     }
 
     @Override

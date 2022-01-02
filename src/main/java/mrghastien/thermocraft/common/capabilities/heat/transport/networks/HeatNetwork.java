@@ -11,7 +11,7 @@ import mrghastien.thermocraft.common.network.data.DataType;
 import mrghastien.thermocraft.common.network.data.IDataHolder;
 import mrghastien.thermocraft.common.network.packets.PacketHandler;
 import mrghastien.thermocraft.common.network.packets.UpdateHeatNetworkPacket;
-import mrghastien.thermocraft.common.blocks.transmitters.HeatTransmitterTile;
+import mrghastien.thermocraft.common.blocks.transmitters.HeatTransmitterBlockEntity;
 import mrghastien.thermocraft.util.Constants;
 import mrghastien.thermocraft.util.math.FixedPointNumber;
 import net.minecraft.core.BlockPos;
@@ -336,7 +336,7 @@ public abstract class HeatNetwork implements IHeatHandler{
 
                 globalTransferType = globalTransferType.or(transferType);
                 BlockEntity tile = world.getBlockEntity(cable.getPos().relative(dir));
-                if (tile == null || tile instanceof HeatTransmitterTile) continue;
+                if (tile == null || tile instanceof HeatTransmitterBlockEntity) continue;
 
                 LazyOptional<IHeatHandler> handler = tile.getCapability(Capabilities.HEAT_HANDLER_CAPABILITY, dir.getOpposite());
                 if(handler.map(IHeatHandler::canReceive).orElse(false)) {

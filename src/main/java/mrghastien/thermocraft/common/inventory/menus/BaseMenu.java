@@ -25,7 +25,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BaseContainer extends AbstractContainerMenu {
+public abstract class BaseMenu extends AbstractContainerMenu {
 
     public final BlockEntity tileEntity;
     protected final IItemHandler playerInventory;
@@ -37,7 +37,7 @@ public abstract class BaseContainer extends AbstractContainerMenu {
 
     protected final ContainerDataHolder dataHolder;
 
-    protected BaseContainer(@Nullable MenuType<?> containerType, int id, Inventory playerInventory, BlockEntity tileEntity, int size) {
+    protected BaseMenu(@Nullable MenuType<?> containerType, int id, Inventory playerInventory, BlockEntity tileEntity, int size) {
         super(containerType, id);
         this.tileEntity = tileEntity;
         this.world = tileEntity.getLevel();
@@ -125,14 +125,14 @@ public abstract class BaseContainer extends AbstractContainerMenu {
 
     //Necessary because ServerPlayer no longer implements ContainerListener
     public static void onContainerOpenedByPlayer(PlayerContainerEvent.Open e) {
-        if(e.getContainer() instanceof BaseContainer menu) {
+        if(e.getContainer() instanceof BaseMenu menu) {
             if(e.getPlayer() instanceof ServerPlayer player)
                 menu.playerListeners.add(player);
         }
     }
 
     public static void onContainerClosedByPlayer(PlayerContainerEvent.Close e) {
-        if(e.getContainer() instanceof BaseContainer menu) {
+        if(e.getContainer() instanceof BaseMenu menu) {
             if(e.getPlayer() instanceof ServerPlayer player)
                 menu.playerListeners.remove(player);
         }

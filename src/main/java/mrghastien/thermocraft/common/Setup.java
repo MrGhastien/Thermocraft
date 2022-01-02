@@ -6,7 +6,7 @@ import mrghastien.thermocraft.client.renderers.ThermalCapacitorRenderer;
 import mrghastien.thermocraft.client.screens.*;
 import mrghastien.thermocraft.common.capabilities.Capabilities;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetworkHandler;
-import mrghastien.thermocraft.common.inventory.menus.BaseContainer;
+import mrghastien.thermocraft.common.inventory.menus.BaseMenu;
 import mrghastien.thermocraft.common.network.packets.PacketHandler;
 import mrghastien.thermocraft.common.registries.*;
 import net.minecraft.client.gui.screens.MenuScreens;
@@ -41,7 +41,7 @@ class Setup {
         ModBlocks.BLOCKS.register(bus);
         ModItems.ITEMS.register(bus);
         ModTileEntities.TILES.register(bus);
-        ModContainers.CONTAINERS.register(bus);
+        ModMenus.MENUS.register(bus);
         ModRecipeSerializers.SERIALIZERS.register(bus);
         ModFluids.FLUIDS.register(bus);
 
@@ -55,8 +55,8 @@ class Setup {
         //MinecraftForge.EVENT_BUS.addListener(NetworkHandler.getInstance(LogicalSide.CLIENT)::onWorldUnload);
 
         //Game events
-        forgeBus.addListener(BaseContainer::onContainerClosedByPlayer);
-        forgeBus.addListener(BaseContainer::onContainerOpenedByPlayer);
+        forgeBus.addListener(BaseMenu::onContainerClosedByPlayer);
+        forgeBus.addListener(BaseMenu::onContainerOpenedByPlayer);
     }
 
     public static void setup(final FMLCommonSetupEvent e) {
@@ -67,12 +67,12 @@ class Setup {
     static class Client {
 
         private static void setup(final FMLClientSetupEvent e) {
-            MenuScreens.register(ModContainers.SOLID_HEATER.get(), SolidHeaterScreen::new);
-            MenuScreens.register(ModContainers.BOILER.get(), BoilerScreen::new);
-            MenuScreens.register(ModContainers.THERMAL_CAPACITOR.get(), ThermalCapacitorScreen::new);
-            MenuScreens.register(ModContainers.FLUID_INJECTOR.get(), FluidInjectorScreen::new);
+            MenuScreens.register(ModMenus.SOLID_HEATER.get(), SolidHeaterScreen::new);
+            MenuScreens.register(ModMenus.BOILER.get(), BoilerScreen::new);
+            MenuScreens.register(ModMenus.THERMAL_CAPACITOR.get(), ThermalCapacitorScreen::new);
+            MenuScreens.register(ModMenus.FLUID_INJECTOR.get(), FluidInjectorScreen::new);
 
-            MenuScreens.register(ModContainers.HEAT_CONVECTOR_PUMP.get(), HeatConvectorPumpScreen::new);
+            MenuScreens.register(ModMenus.HEAT_CONVECTOR_PUMP.get(), HeatConvectorPumpScreen::new);
 
             //Block entity renderers
             BlockEntityRenderers.register(ModTileEntities.THERMAL_CAPACITOR.get(), ThermalCapacitorRenderer::new);

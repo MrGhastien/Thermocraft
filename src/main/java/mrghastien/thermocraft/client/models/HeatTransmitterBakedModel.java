@@ -2,7 +2,7 @@ package mrghastien.thermocraft.client.models;
 
 import com.google.common.collect.ImmutableMap;
 import mrghastien.thermocraft.api.heat.TransferType;
-import mrghastien.thermocraft.common.blocks.transmitters.HeatTransmitterTile;
+import mrghastien.thermocraft.common.blocks.transmitters.HeatTransmitterBlockEntity;
 import mrghastien.thermocraft.util.Constants;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -45,7 +45,7 @@ public class HeatTransmitterBakedModel implements IDynamicBakedModel {
 
         quads.addAll(bakedCenter.getQuads(state, side, rand, extraData));
         for(Direction dir : Constants.DIRECTIONS) {
-            TransferType transferType = extraData.getData(HeatTransmitterTile.PROPERTY_MAP.get(dir));
+            TransferType transferType = extraData.getData(HeatTransmitterBlockEntity.PROPERTY_MAP.get(dir));
             if(transferType == null) transferType = TransferType.NONE;
             if(transferType.canTransfer()) quads.addAll(transferModels.get(dir).getQuads(state, side, rand, extraData));
             else if(transferType == TransferType.NEUTRAL) quads.addAll(neutralModels.get(dir).getQuads(state, side, rand, extraData));

@@ -3,7 +3,7 @@ package mrghastien.thermocraft.common.blocks.transmitters.convector;
 import mrghastien.thermocraft.common.ThermoCraft;
 import mrghastien.thermocraft.common.blocks.transmitters.HeatTransmitterBlock;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetworkHandler;
-import mrghastien.thermocraft.common.blocks.transmitters.HeatTransmitterTile;
+import mrghastien.thermocraft.common.blocks.transmitters.HeatTransmitterBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TextComponent;
@@ -37,8 +37,8 @@ public class HeatConvectorBlock extends HeatTransmitterBlock {
         if(!world.isClientSide()) return InteractionResult.PASS;
         if(player.getItemInHand(hand).getItem() == Items.BOWL) {
             BlockEntity te = world.getBlockEntity(pos);
-            if(te instanceof HeatTransmitterTile<?>)
-                player.sendMessage(new TextComponent("Cable connections : " + ((HeatTransmitterTile<?>)te).getCable().getCableConnections()), player.getUUID());
+            if(te instanceof HeatTransmitterBlockEntity<?>)
+                player.sendMessage(new TextComponent("Cable connections : " + ((HeatTransmitterBlockEntity<?>)te).getCable().getCableConnections()), player.getUUID());
         }
         return InteractionResult.PASS;
     }

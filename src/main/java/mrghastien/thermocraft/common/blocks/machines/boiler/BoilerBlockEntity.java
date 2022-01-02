@@ -10,7 +10,7 @@ import mrghastien.thermocraft.common.capabilities.heat.HeatHandler;
 import mrghastien.thermocraft.common.capabilities.heat.SidedHeatHandler;
 import mrghastien.thermocraft.common.crafting.BoilingRecipe;
 import mrghastien.thermocraft.common.crafting.ModRecipeType;
-import mrghastien.thermocraft.common.inventory.menus.BoilerContainer;
+import mrghastien.thermocraft.common.inventory.menus.BoilerMenu;
 import mrghastien.thermocraft.common.network.data.IDataHolder;
 import mrghastien.thermocraft.common.registries.ModTileEntities;
 import net.minecraft.core.BlockPos;
@@ -55,7 +55,7 @@ public class BoilerBlockEntity extends MachineBlockEntity {
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int id, Inventory playerInventory, Player player) {
-        return new BoilerContainer(id, playerInventory, this);
+        return new BoilerMenu(id, playerInventory, this);
     }
 
     @Override

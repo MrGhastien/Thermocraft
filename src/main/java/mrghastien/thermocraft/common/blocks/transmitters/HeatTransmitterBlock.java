@@ -2,7 +2,6 @@ package mrghastien.thermocraft.common.blocks.transmitters;
 
 import mrghastien.thermocraft.api.heat.TransferType;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetworkHandler;
-import mrghastien.thermocraft.common.blocks.transmitters.HeatTransmitterTile;
 import mrghastien.thermocraft.util.Constants;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -48,8 +47,8 @@ public abstract class HeatTransmitterBlock extends Block implements EntityBlock 
     public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext ctx) {
         VoxelShape shape = CENTER_BOX;
         BlockEntity te = world.getBlockEntity(pos);
-        if(te instanceof HeatTransmitterTile<?>) {
-            EnumMap<Direction, TransferType> connections = ((HeatTransmitterTile<?>) te).getCable().getConnections();
+        if(te instanceof HeatTransmitterBlockEntity<?>) {
+            EnumMap<Direction, TransferType> connections = ((HeatTransmitterBlockEntity<?>) te).getCable().getConnections();
             for (Direction dir : Constants.DIRECTIONS) {
                 TransferType type = connections.get(dir);
                 if (type != TransferType.NONE)
@@ -65,11 +64,11 @@ public abstract class HeatTransmitterBlock extends Block implements EntityBlock 
         super.neighborChanged(state, world, pos, neighborBlock, neighborPos, isMoving);
         if(world.isClientSide()) return;
         BlockEntity te = world.getBlockEntity(pos);
-        if(te instanceof HeatTransmitterTile<?>) {
+        if(te instanceof HeatTransmitterBlockEntity<?>) {
             Direction dir = Direction.getNearest(neighborPos.getX() - pos.getX(),
                     neighborPos.getY() - pos.getY(),
                     neighborPos.getZ() - pos.getZ());
-            ((HeatTransmitterTile<?>)te).OnNeighborChanged(dir);
+            ((HeatTransmitterBlockEntity<?>)te).OnNeighborChanged(dir);
         }
 
     }

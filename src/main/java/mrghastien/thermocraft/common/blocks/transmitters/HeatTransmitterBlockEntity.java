@@ -25,7 +25,7 @@ import javax.annotation.Nullable;
 import java.util.EnumMap;
 import java.util.Map;
 
-public abstract class HeatTransmitterTile<C extends Cable> extends BlockEntity {
+public abstract class HeatTransmitterBlockEntity<C extends Cable> extends BlockEntity {
 
     private static final ModelProperty<TransferType> NORTH_PROPERTY = new ModelProperty<>();
     private static final ModelProperty<TransferType> SOUTH_PROPERTY = new ModelProperty<>();
@@ -45,7 +45,7 @@ public abstract class HeatTransmitterTile<C extends Cable> extends BlockEntity {
 
     protected C cable;
 
-    public HeatTransmitterTile(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+    public HeatTransmitterBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }
 

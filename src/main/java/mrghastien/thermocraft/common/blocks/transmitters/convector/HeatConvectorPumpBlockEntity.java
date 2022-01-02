@@ -1,8 +1,8 @@
 package mrghastien.thermocraft.common.blocks.transmitters.convector;
 
-import mrghastien.thermocraft.common.blocks.transmitters.HeatTransmitterTile;
+import mrghastien.thermocraft.common.blocks.transmitters.HeatTransmitterBlockEntity;
 import mrghastien.thermocraft.common.capabilities.heat.transport.cables.Pump;
-import mrghastien.thermocraft.common.inventory.menus.ConvectorControllerContainer;
+import mrghastien.thermocraft.common.inventory.menus.ConvectorControllerMenu;
 import mrghastien.thermocraft.common.registries.ModTileEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -21,7 +21,7 @@ import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class HeatConvectorPumpBlockEntity extends HeatTransmitterTile<Pump> implements MenuProvider {
+public class HeatConvectorPumpBlockEntity extends HeatTransmitterBlockEntity<Pump> implements MenuProvider {
 
     public HeatConvectorPumpBlockEntity(BlockPos pos, BlockState state) {
         super(ModTileEntities.HEAT_CONVECTOR_PUMP.get(), pos, state);
@@ -35,7 +35,7 @@ public class HeatConvectorPumpBlockEntity extends HeatTransmitterTile<Pump> impl
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int id, Inventory inv, Player player) {
-        return new ConvectorControllerContainer(id, inv, this);
+        return new ConvectorControllerMenu(id, inv, this);
     }
 
     @Nonnull

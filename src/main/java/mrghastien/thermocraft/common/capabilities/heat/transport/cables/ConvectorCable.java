@@ -1,7 +1,7 @@
 package mrghastien.thermocraft.common.capabilities.heat.transport.cables;
 
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetworkHandler;
-import mrghastien.thermocraft.common.blocks.transmitters.HeatTransmitterTile;
+import mrghastien.thermocraft.common.blocks.transmitters.HeatTransmitterBlockEntity;
 import mrghastien.thermocraft.util.ModUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -13,7 +13,7 @@ public class ConvectorCable extends Cable {
 
     protected Fluid fluid;
 
-    public ConvectorCable(Level world, BlockPos pos, HeatTransmitterTile<?> tileEntity) {
+    public ConvectorCable(Level world, BlockPos pos, HeatTransmitterBlockEntity<?> tileEntity) {
         super(world, pos, tileEntity);
     }
 
