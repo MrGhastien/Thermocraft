@@ -3,7 +3,7 @@
   "textures": {
     "frame": "thermocraft:block/thermal_capacitor_frame",
     "interface": "thermocraft:block/interface",
-    "core": "thermocraft:block/conductor_core",
+    "core": "minecraft:block/cut_copper",
     "particle": "thermocraft:block/thermal_capacitor_frame"
   },
   "center": {
@@ -219,19 +219,8 @@
       },
       {
         "name": "core",
-        "from": [8, 8, 11],
-        "to": [10, 10, 13],
-        "faces": {
-          "east": {"uv": [8, 12, 12, 16], "rotation": 90, "texture": "#core"},
-          "west": {"uv": [8, 12, 12, 16], "rotation": 270, "texture": "#core"},
-          "up": {"uv": [8, 12, 12, 16], "texture": "#core"},
-          "down": {"uv": [8, 12, 12, 16], "rotation": 180, "texture": "#core"}
-        }
-      },
-      {
-        "name": "core",
         "from": [6, 6, 11],
-        "to": [8, 8, 13],
+        "to": [10, 10, 13],
         "faces": {
           "east": {"uv": [8, 12, 12, 16], "rotation": 90, "texture": "#core"},
           "west": {"uv": [8, 12, 12, 16], "rotation": 270, "texture": "#core"},

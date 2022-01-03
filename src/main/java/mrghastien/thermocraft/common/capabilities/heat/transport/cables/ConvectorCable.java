@@ -6,8 +6,8 @@ import mrghastien.thermocraft.util.ModUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.util.Constants;
 
 public class ConvectorCable extends Cable {
 
@@ -24,7 +24,7 @@ public class ConvectorCable extends Cable {
     public void setFluid(Fluid fluid) {
         this.fluid = fluid;
         if(!world.isClientSide() && updateDirections())
-            world.sendBlockUpdated(pos, getBlockState(), getBlockState(), Constants.BlockFlags.DEFAULT | Constants.BlockFlags.UPDATE_NEIGHBORS);
+            world.sendBlockUpdated(pos, getBlockState(), getBlockState(), Block.UPDATE_ALL);
     }
 
     @Override

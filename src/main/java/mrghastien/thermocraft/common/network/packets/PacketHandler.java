@@ -9,13 +9,14 @@ import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraftforge.fmllegacy.network.NetworkDirection;
-import net.minecraftforge.fmllegacy.network.NetworkRegistry;
-import net.minecraftforge.fmllegacy.network.PacketDistributor;
-import net.minecraftforge.fmllegacy.network.simple.SimpleChannel;
+import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.network.simple.SimpleChannel;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -97,12 +98,11 @@ public class PacketHandler {
         return p -> {
             Set<ServerPlayer> alreadySentTargets = new HashSet<>();
             for (LevelChunk chunk : supplier.get()) {
-                ((ServerChunkCache)chunk.getLevel().getChunkSource()).chunkMap.getPlayers(chunk.getPos(), false)
-                        .filter(player -> !alreadySentTargets.contains(player))
-                        .forEach(e -> {
-                    e.connection.send(p);
-                    alreadySentTargets.add(e);
-                });
+                List<ServerPlayer> players = ((ServerChunkCache)chunk.getLevel().getChunkSource()).chunkMap.getPlayers(chunk.getPos(), false);
+                for(ServerPlayer player : players) {
+                    if(alreadySentTargets.add(player))
+                        player.connection.send(p);
+                }
             }
         };
     }

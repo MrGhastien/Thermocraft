@@ -40,7 +40,7 @@ public class HeatTransmitterBakedModel implements IDynamicBakedModel {
     @Override
     public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @Nonnull Random rand, @Nonnull IModelData extraData) {
         List<BakedQuad> quads = new ArrayList<>();
-        RenderType layer = MinecraftForgeClient.getRenderLayer();
+        RenderType layer = MinecraftForgeClient.getRenderType();
         if(state == null || layer == null) return quads;
 
         quads.addAll(bakedCenter.getQuads(state, side, rand, extraData));

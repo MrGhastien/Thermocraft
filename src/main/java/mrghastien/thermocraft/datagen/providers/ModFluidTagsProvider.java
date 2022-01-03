@@ -20,6 +20,6 @@ public class ModFluidTagsProvider extends FluidTagsProvider {
 
     @Override
     public String getName() {
-        return "Thermocraft fluid tags";
+        return ThermoCraft.MODID + " Fluid Tags";
     }
 }

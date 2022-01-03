@@ -31,7 +31,7 @@ public class HeatHandler implements IHeatHandler {
 
     public HeatHandler(double heatCapacity, FixedPointNumber internalEnergy, double conductionCoefficient, double insulationCoefficient, @Nullable IChangeListener listener) {
         this.heatCapacity = heatCapacity;
-        this.internalEnergy = new FixedPointNumber.Mutable(internalEnergy);
+        this.internalEnergy = internalEnergy.toMutable();
         this.changeListener = listener;
         this.conductionCoefficient = conductionCoefficient * 0.05; //Multiplying by 0.05 because 1 tick is 0.05 second
         this.insulationCoefficient = insulationCoefficient * 0.05;

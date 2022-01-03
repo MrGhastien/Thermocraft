@@ -89,7 +89,7 @@ class Setup {
 
         @SubscribeEvent
         public static void onTextureStitch(TextureStitchEvent.Pre e) {
-            if(!e.getMap().location().equals(TextureAtlas.LOCATION_BLOCKS)) return;
+            if(!e.getAtlas().location().equals(TextureAtlas.LOCATION_BLOCKS)) return;
             e.addSprite(ThermalCapacitorRenderer.TEXTURE);
         }
 

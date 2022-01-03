@@ -43,6 +43,11 @@ public class ModRecipeProvider extends RecipeProvider {
         inputStack.setTag(null);
         ItemStack resultStack = new ItemStack(heatConvectorItem, 1);
         resultStack.setTag(nbt);
-        FluidInjectionRecipeBuilder.recipe(new FluidStack(f, 250), inputStack, resultStack).unlockedBy("placed_injector", CriterionHelper.placedBlock(ModBlocks.FLUID_INJECTOR.get())).save(consumer,  ThermoCraft.modLoc("fluid_injection/" + name.getPath() + "_heat_convector"));
+        FluidInjectionRecipeBuilder.recipe(new FluidStack(f, 250), inputStack, resultStack).unlockedBy("placed_injector", CriterionHelper.placedBlock(ModBlocks.FLUID_INJECTOR.getBlock())).save(consumer,  ThermoCraft.modLoc("fluid_injection/" + name.getPath() + "_heat_convector"));
+    }
+
+    @Override
+    public String getName() {
+        return ThermoCraft.MODID + " Recipes";
     }
 }

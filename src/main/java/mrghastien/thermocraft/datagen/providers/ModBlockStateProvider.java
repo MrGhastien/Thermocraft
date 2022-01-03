@@ -11,8 +11,13 @@ import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ConfiguredModel;
 import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import net.minecraftforge.registries.RegistryObject;
 
+import javax.annotation.Nonnull;
+import java.util.Objects;
 import java.util.function.Function;
+
+import static mrghastien.thermocraft.common.registries.ModBlocks.*;
 
 public class ModBlockStateProvider extends BlockStateProvider {
 
@@ -22,9 +27,9 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
     @Override
     protected void registerStatesAndModels() {
-        horizontalBlock(ModBlocks.SOLID_HEATER.get(), state -> {
+        horizontalBlock(SOLID_HEATER.getBlock(), state -> {
             boolean lit = state.getValue(BlockStateProperties.LIT);
-            return models().cube(ModBlocks.SOLID_HEATER.getId().getPath() + (lit ? "_lit" : ""),
+            return models().cube(SOLID_HEATER.getId().getPath() + (lit ? "_lit" : ""),
                     mcLoc("block/furnace_top"),
                     modLoc("block/solid_heater_top"),
                     modLoc("block/solid_heater_front" + (lit ? "_lit" : "")),
@@ -32,7 +37,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
                     modLoc("block/solid_heater_side"),
                     modLoc("block/solid_heater_side"));
         },180);
-        itemModels().withExistingParent("solid_heater", modLoc("block/" + ModBlocks.SOLID_HEATER.getId().getPath()));
+        itemModels().withExistingParent(SOLID_HEATER.getId().getPath(), modLoc("block/" + SOLID_HEATER.getId().getPath()));
 
 //        horizontalBlock(ModBlocks.BOILER.get(), state -> {
 //            boolean lit = state.getValue(BlockStateProperties.LIT);
@@ -44,6 +49,8 @@ public class ModBlockStateProvider extends BlockStateProvider {
 //                    modLoc("block/boiler_side"));
 //        },180);
 //        itemModels().withExistingParent("boiler", ModBlocks.BOILER.getId());
+
+        basicBlock(CALORITE_ORE.getBlock());
     }
 
     @Override
@@ -57,5 +64,17 @@ public class ModBlockStateProvider extends BlockStateProvider {
                             .rotationY(dir.getAxis().isVertical() ? 0 : (((int) dir.toYRot()) + angleOffset) % 360)
                             .build();
                 });
+    }
+
+    private void basicBlock(Block block) {
+        ModelFile modelFile = cubeAll(block);
+        simpleBlock(block, modelFile);
+        simpleBlockItem(block, modelFile);
+    }
+
+    @Nonnull
+    @Override
+    public String getName() {
+        return ThermoCraft.MODID + " BlockStates";
     }
 }

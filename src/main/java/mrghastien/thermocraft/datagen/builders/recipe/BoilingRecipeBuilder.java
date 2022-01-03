@@ -27,7 +27,7 @@ public class BoilingRecipeBuilder extends ModRecipeBuilder<BoilingRecipeBuilder>
 	}
 	
 	public static BoilingRecipeBuilder boiling(Fluid result, int count, double inputHeatCapacity) {
-		return new BoilingRecipeBuilder(result, count, inputHeatCapacity).unlockedBy("placed_boiler", CriterionHelper.placedBlock(ModBlocks.BOILER.get()));
+		return new BoilingRecipeBuilder(result, count, inputHeatCapacity).unlockedBy("placed_boiler", CriterionHelper.placedBlock(ModBlocks.BOILER.getBlock()));
 	}
 	
 	public BoilingRecipeBuilder ingredient(FluidIngredient ingredient) {

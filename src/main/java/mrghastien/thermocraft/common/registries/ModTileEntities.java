@@ -8,12 +8,13 @@ import mrghastien.thermocraft.common.blocks.machines.thermalcapacitor.ThermalCap
 import mrghastien.thermocraft.common.blocks.transmitters.conductor.HeatConductorBlockEntity;
 import mrghastien.thermocraft.common.blocks.transmitters.convector.HeatConvectorBlockEntity;
 import mrghastien.thermocraft.common.blocks.transmitters.convector.HeatConvectorPumpBlockEntity;
+import mrghastien.thermocraft.util.BlockRegistryObject;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.fmllegacy.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 
 import java.util.Arrays;
 
@@ -25,6 +26,10 @@ public class ModTileEntities {
     @SafeVarargs
     public static <T extends BlockEntity> RegistryObject<BlockEntityType<T>> register(String name, BlockEntityType.BlockEntitySupplier<T> supplier, RegistryObject<? extends Block>... blocks) {
         return TILES.register(name, () -> BlockEntityType.Builder.of(supplier, Arrays.stream(blocks).map(RegistryObject::get).toArray(Block[]::new)).build(null));
+    }
+
+    public static <T extends BlockEntity> RegistryObject<BlockEntityType<T>> register(String name, BlockEntityType.BlockEntitySupplier<T> supplier, BlockRegistryObject<?>... blocks) {
+        return TILES.register(name, () -> BlockEntityType.Builder.of(supplier, Arrays.stream(blocks).map(BlockRegistryObject::getBlock).toArray(Block[]::new)).build(null));
     }
 
     public static final RegistryObject<BlockEntityType<SolidHeaterBlockEntity>> SOLID_HEATER = register("solid_heater", SolidHeaterBlockEntity::new, ModBlocks.SOLID_HEATER);

@@ -4,7 +4,7 @@ import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNe
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetworkHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.fmllegacy.network.NetworkEvent;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 

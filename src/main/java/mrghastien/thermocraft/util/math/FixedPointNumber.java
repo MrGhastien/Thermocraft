@@ -278,6 +278,14 @@ public class FixedPointNumber extends Number implements Comparable<FixedPointNum
         buf.writeShort(fractional);
     }
 
+    public FixedPointNumber toImmutable() {
+        return this;
+    }
+
+    public Mutable toMutable() {
+        return new Mutable(this);
+    }
+
     private static byte findExponent(long integral, short fractional) {
         byte exponent = 0;
         if(integral == 0) {
@@ -396,11 +404,11 @@ public class FixedPointNumber extends Number implements Comparable<FixedPointNum
 
     public static class Mutable extends FixedPointNumber {
 
-        public Mutable(FixedPointNumber number) {
+        private Mutable(FixedPointNumber number) {
             super(number.integral, number.fractional);
         }
 
-        public Mutable(long integral, short fractional) {
+        private Mutable(long integral, short fractional) {
             super(integral, fractional);
         }
 
@@ -481,6 +489,16 @@ public class FixedPointNumber extends Number implements Comparable<FixedPointNum
         @Override
         public FixedPointNumber copy() {
             return new Mutable(integral, fractional);
+        }
+
+        @Override
+        public FixedPointNumber toImmutable() {
+            return new FixedPointNumber(integral, fractional);
+        }
+
+        @Override
+        public Mutable toMutable() {
+            return this;
         }
     }
 }

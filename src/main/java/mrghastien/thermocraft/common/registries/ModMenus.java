@@ -4,18 +4,20 @@ import mrghastien.thermocraft.common.ThermoCraft;
 import mrghastien.thermocraft.common.inventory.menus.*;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraftforge.common.extensions.IForgeContainerType;;
-import net.minecraftforge.fmllegacy.RegistryObject;
-import net.minecraftforge.fmllegacy.network.IContainerFactory;
+import net.minecraftforge.common.extensions.IForgeMenuType;
+import net.minecraftforge.network.IContainerFactory;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
+
+;
 
 public class ModMenus {
 
     public static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(ForgeRegistries.CONTAINERS, ThermoCraft.MODID);
 
     public static <T extends AbstractContainerMenu> RegistryObject<MenuType<T>> register(String name, IContainerFactory<T> factory) {
-        return MENUS.register(name, () -> IForgeContainerType.create(factory));
+        return MENUS.register(name, () -> IForgeMenuType.create(factory));
     }
 
     public static final RegistryObject<MenuType<SolidHeaterMenu>> SOLID_HEATER = register("solid_heater", SolidHeaterMenu::createClient);

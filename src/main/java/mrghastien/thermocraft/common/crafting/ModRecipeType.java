@@ -9,8 +9,8 @@
     import net.minecraft.world.item.crafting.RecipeSerializer;
     import net.minecraft.world.item.crafting.RecipeType;
     import net.minecraft.world.level.Level;
-    import net.minecraftforge.fmllegacy.server.ServerLifecycleHooks;
     import net.minecraftforge.registries.IForgeRegistry;
+    import net.minecraftforge.server.ServerLifecycleHooks;
 
     import java.util.*;
     import java.util.function.Function;

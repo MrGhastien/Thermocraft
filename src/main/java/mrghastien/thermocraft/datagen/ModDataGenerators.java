@@ -1,15 +1,14 @@
 package mrghastien.thermocraft.datagen;
 
-import mrghastien.thermocraft.datagen.providers.ModBlockStateProvider;
-import mrghastien.thermocraft.datagen.providers.ModFluidTagsProvider;
-import mrghastien.thermocraft.datagen.providers.ModRecipeProvider;
+import mrghastien.thermocraft.common.ThermoCraft;
+import mrghastien.thermocraft.datagen.providers.*;
 import net.minecraft.data.DataGenerator;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
+@Mod.EventBusSubscriber(modid = ThermoCraft.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ModDataGenerators {
 
     @SubscribeEvent
@@ -18,10 +17,10 @@ public class ModDataGenerators {
         ExistingFileHelper exFileHelper = event.getExistingFileHelper();
         if(event.includeServer()) {
             generator.addProvider(new ModRecipeProvider(generator));
-            //ModBlockTagsProvider blocks = new ModBlockTagsProvider(generator, exFileHelper);
-            //generator.addProvider(new ModItemTagsProvider(generator, blocks, exFileHelper));
+            ModBlockTagsProvider blocks = new ModBlockTagsProvider(generator, exFileHelper);
+            generator.addProvider(new ModItemTagsProvider(generator, blocks, exFileHelper));
             generator.addProvider(new ModFluidTagsProvider(generator, exFileHelper));
-            //generator.addProvider(blocks);
+            generator.addProvider(blocks);
         }
         if(event.includeClient()) {
             generator.addProvider(new ModBlockStateProvider(generator, exFileHelper));
