@@ -13,7 +13,7 @@ import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
-import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
@@ -80,7 +80,7 @@ class Setup {
 
             //Block render layers
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.HEAT_CONVECTOR_BLOCK.get(), RenderType.cutout());
-            ItemBlockRenderTypes.setRenderLayer(ModBlocks.HEAT_CONVECTOR_PUMP.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.HEAT_CONVECTOR_PUMP.getBlock(), RenderType.cutout());
 
             ItemBlockRenderTypes.setRenderLayer(ModFluids.ETHER_OF_SADNESS.getSource(), RenderType.translucent());
             ItemBlockRenderTypes.setRenderLayer(ModFluids.ETHER_OF_SADNESS.getFlowing(), RenderType.translucent());
@@ -89,7 +89,7 @@ class Setup {
 
         @SubscribeEvent
         public static void onTextureStitch(TextureStitchEvent.Pre e) {
-            if(!e.getAtlas().location().equals(TextureAtlas.LOCATION_BLOCKS)) return;
+            if(!e.getAtlas().location().equals(InventoryMenu.BLOCK_ATLAS)) return;
             e.addSprite(ThermalCapacitorRenderer.TEXTURE);
         }
 

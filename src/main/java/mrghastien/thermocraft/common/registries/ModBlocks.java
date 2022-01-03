@@ -24,19 +24,8 @@ public class ModBlocks {
 
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, ThermoCraft.MODID);
 
-    //TODO: Make dual registry objects to access block items with blocks
-    private static <T extends Block> RegistryObject<T> registerWithItem(String name, Supplier<T> supplier) {
-        RegistryObject<T> ro = BLOCKS.register(name, supplier);
-        ModItems.ITEMS.register(name, basicItem(ro));
-        return ro;
-    }
-
     private static <T extends Block> RegistryObject<T> register(String name, Supplier<T> supplier) {
         return BLOCKS.register(name, supplier);
-    }
-
-    private static <T extends Block> Supplier<BlockItem> basicItem(final RegistryObject<T> block) {
-        return () -> new BlockItem(block.get(), new Item.Properties().tab(ModItems.Tabs.MAIN));
     }
 
     public static final BlockBehaviour.Properties ORE_PROPERTIES = BlockBehaviour.Properties.of(Material.STONE).strength(3f);
