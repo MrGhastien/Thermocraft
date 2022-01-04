@@ -18,6 +18,11 @@ public class ModItems {
 
     public static final RegistryObject<HeatConvectorItem> HEAT_CONVECTOR = ITEMS.register("heat_convector", HeatConvectorItem::new);
 
+    public static final Item.Properties DEFAULT_ITEM_PROPERTIES = new Item.Properties().tab(Tabs.MAIN);
+
+    public static final RegistryObject<Item> RAW_CALORITE = ITEMS.register("raw_calorite", () -> new Item(DEFAULT_ITEM_PROPERTIES));
+    public static final RegistryObject<Item> POLISHED_CALORITE_CRYSTAL = ITEMS.register("polished_calorite_crystal", () -> new Item(DEFAULT_ITEM_PROPERTIES));
+
     public static class Tabs {
         public static final CreativeModeTab MAIN = new CreativeModeTab(ThermoCraft.MODID) {
             @Nonnull

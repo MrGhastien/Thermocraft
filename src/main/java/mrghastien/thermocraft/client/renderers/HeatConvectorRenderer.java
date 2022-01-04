@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 
@@ -37,8 +38,11 @@ public class HeatConvectorRenderer implements BlockEntityRenderer<HeatConvectorB
     public void render(HeatConvectorBlockEntity tile, float partialTicks, @Nonnull PoseStack matrixStack, @Nonnull MultiBufferSource multiBufferSource, int lightLevel, int overlay) {
         Minecraft mc = Minecraft.getInstance();
         ConvectorCable cable = tile.getCable();
+        if(cable == null) return;
+
         HeatConvectorNetwork net = (HeatConvectorNetwork) cable.getNetwork();
         if(net == null || !net.isValid()) return;
+
         Fluid fluid = cable.getFluid();
         if(fluid == null || fluid == Fluids.EMPTY) return;
 
@@ -47,8 +51,8 @@ public class HeatConvectorRenderer implements BlockEntityRenderer<HeatConvectorB
         matrixStack.pushPose();
         matrixStack.translate(0.5, 0.5, 0.5);
         matrixStack.scale(0.5f, 0.5f, 0.5f);
-        RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
-        TextureAtlasSprite sprite = mc.getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(fluid.getAttributes().getStillTexture());
+        RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
+        TextureAtlasSprite sprite = mc.getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluid.getAttributes().getStillTexture());
         //Vertex coordinates for the center part
         float offset = 0.24f;
         float verticalWidth = offset * 2f;
@@ -63,24 +67,12 @@ public class HeatConvectorRenderer implements BlockEntityRenderer<HeatConvectorB
         //Segments
         for (Direction dir : cable.getCableConnections()) {
             switch (dir) {
-                case NORTH:
-                    cuboid(builder, matrixStack, minX, minY, -1, tubeWidth, height, length, sprite, Z_AXIS_DIRECTIONS);
-                    break;
-                case SOUTH:
-                    cuboid(builder, matrixStack, minX, minY, minZ + tubeWidth, tubeWidth, height, length, sprite, Z_AXIS_DIRECTIONS);
-                    break;
-                case EAST:
-                    cuboid(builder, matrixStack, minX + tubeWidth, minY, minZ, length, height, tubeWidth, sprite, X_AXIS_DIRECTIONS);
-                    break;
-                case WEST:
-                    cuboid(builder, matrixStack, -1, minY, minZ, length, height, tubeWidth, sprite, X_AXIS_DIRECTIONS);
-                    break;
-                case DOWN:
-                    cuboid(builder, matrixStack, -offset, -1, -offset, verticalWidth, length, verticalWidth, sprite, Y_AXIS_DIRECTIONS);
-                    break;
-                case UP:
-                    cuboid(builder, matrixStack, -offset, minY + tubeWidth, -offset, verticalWidth, length, verticalWidth, sprite, Y_AXIS_DIRECTIONS);
-                    break;
+                case NORTH -> cuboid(builder, matrixStack, minX, minY, -1, tubeWidth, height, length, sprite, Z_AXIS_DIRECTIONS);
+                case SOUTH -> cuboid(builder, matrixStack, minX, minY, minZ + tubeWidth, tubeWidth, height, length, sprite, Z_AXIS_DIRECTIONS);
+                case EAST -> cuboid(builder, matrixStack, minX + tubeWidth, minY, minZ, length, height, tubeWidth, sprite, X_AXIS_DIRECTIONS);
+                case WEST -> cuboid(builder, matrixStack, -1, minY, minZ, length, height, tubeWidth, sprite, X_AXIS_DIRECTIONS);
+                case DOWN -> cuboid(builder, matrixStack, -offset, -1, -offset, verticalWidth, length, verticalWidth, sprite, Y_AXIS_DIRECTIONS);
+                case UP -> cuboid(builder, matrixStack, -offset, minY + tubeWidth, -offset, verticalWidth, length, verticalWidth, sprite, Y_AXIS_DIRECTIONS);
             }
         }
         matrixStack.popPose();

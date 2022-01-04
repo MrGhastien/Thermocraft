@@ -21,10 +21,11 @@ public class ModDataGenerators {
             generator.addProvider(new ModItemTagsProvider(generator, blocks, exFileHelper));
             generator.addProvider(new ModFluidTagsProvider(generator, exFileHelper));
             generator.addProvider(blocks);
+            generator.addProvider(new ModLootTableProvider(generator));
         }
         if(event.includeClient()) {
             generator.addProvider(new ModBlockStateProvider(generator, exFileHelper));
-            //generator.addProvider(new ModItemModelProvider(generator, exFileHelper));
+            generator.addProvider(new ModItemModelProvider(generator, exFileHelper));
         }
     }
 

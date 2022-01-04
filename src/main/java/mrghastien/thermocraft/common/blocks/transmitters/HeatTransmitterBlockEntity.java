@@ -49,8 +49,6 @@ public abstract class HeatTransmitterBlockEntity<C extends Cable> extends BlockE
         super(type, pos, state);
     }
 
-
-
     @Override
     public void onLoad() {
         super.onLoad();
