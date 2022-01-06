@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "thermocraft:boiling/calorite_purification"
+    ]
+  },
+  "criteria": {
+    "placed_boiler": {
+      "trigger": "minecraft:placed_block",
+      "conditions": {
+        "block": "thermocraft:boiler"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "placed_boiler"
+    ]
+  ]
+}

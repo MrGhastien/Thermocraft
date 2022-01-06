@@ -1,7 +1,6 @@
 package mrghastien.thermocraft.common.inventory.menus;
 
 import mrghastien.thermocraft.common.blocks.MachineBlockEntity;
-import mrghastien.thermocraft.common.network.INetworkBinding;
 import mrghastien.thermocraft.common.network.data.ContainerDataHolder;
 import mrghastien.thermocraft.common.network.packets.PacketHandler;
 import mrghastien.thermocraft.common.network.packets.UpdateClientContainerPacket;
@@ -103,14 +102,15 @@ public abstract class BaseMenu extends AbstractContainerMenu {
         return itemstack;
     }
 
+
+
     @Override
     public void broadcastChanges() {
         super.broadcastChanges();
 
-        INetworkBinding binding = dataHolder.getBinding();
-        if(binding.hasChanged()) {
+        if(dataHolder.hasChanged()) {
             for (ServerPlayer player : playerListeners)
-                PacketHandler.sendToPlayer(new UpdateClientContainerPacket(binding), player);
+                PacketHandler.sendToPlayer(new UpdateClientContainerPacket(dataHolder.getBinding()), player);
         }
     }
 
@@ -126,8 +126,10 @@ public abstract class BaseMenu extends AbstractContainerMenu {
     //Necessary because ServerPlayer no longer implements ContainerListener
     public static void onContainerOpenedByPlayer(PlayerContainerEvent.Open e) {
         if(e.getContainer() instanceof BaseMenu menu) {
-            if(e.getPlayer() instanceof ServerPlayer player)
+            if(e.getPlayer() instanceof ServerPlayer player) {
                 menu.playerListeners.add(player);
+                PacketHandler.sendToPlayer(new UpdateClientContainerPacket(menu.getDataHolder().getBinding()), player);
+            }
         }
     }
 

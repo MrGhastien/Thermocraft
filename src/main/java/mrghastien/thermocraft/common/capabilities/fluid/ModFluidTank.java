@@ -1,7 +1,7 @@
 package mrghastien.thermocraft.common.capabilities.fluid;
 
 import mrghastien.thermocraft.api.IChangeListener;
-import mrghastien.thermocraft.api.fluid.IModFluidTank;
+import mrghastien.thermocraft.api.capabilities.fluid.IModFluidTank;
 import mrghastien.thermocraft.common.network.data.DataType;
 import mrghastien.thermocraft.common.network.data.IDataHolder;
 import net.minecraft.nbt.CompoundTag;

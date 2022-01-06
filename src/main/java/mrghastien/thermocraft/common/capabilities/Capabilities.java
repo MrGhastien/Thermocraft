@@ -1,7 +1,7 @@
 package mrghastien.thermocraft.common.capabilities;
 
-import mrghastien.thermocraft.api.heat.IHeatHandler;
-import mrghastien.thermocraft.common.capabilities.tartanicflux.ITartanicFluxHandler;
+import mrghastien.thermocraft.api.capabilities.heat.IHeatHandler;
+import mrghastien.thermocraft.api.capabilities.tartanicflux.ITartanicFluxHandler;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.CapabilityToken;

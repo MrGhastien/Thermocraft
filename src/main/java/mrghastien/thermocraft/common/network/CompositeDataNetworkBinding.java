@@ -5,10 +5,6 @@ import mrghastien.thermocraft.common.network.data.DataType;
 import mrghastien.thermocraft.common.network.data.IDataHolder;
 import mrghastien.thermocraft.common.network.data.ReadOnlyDataHolder;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * Default implementation of a network binding.
@@ -24,30 +20,20 @@ import java.util.Map;
  */
 public class CompositeDataNetworkBinding implements INetworkBinding {
 
-    private final Map<ResourceLocation, DataReference<?>> dirtyMap = new LinkedHashMap<>();
-
     private final ReadOnlyDataHolder holder;
 
     public CompositeDataNetworkBinding(IDataHolder holder) {
         this.holder = new ReadOnlyDataHolder(holder);
     }
 
-    public boolean hasChanged() {
-        //Put the modified data in a temporary map
-        holder.forEach((id, data) -> {if (data.hasChanged()) dirtyMap.put(id, data);});
-        return dirtyMap.size() != 0;
-    }
-
     @Override
     public void encode(FriendlyByteBuf buf) {
         //Encode the modified data in the buffer
-        for (Map.Entry<ResourceLocation, DataReference<?>> entry : dirtyMap.entrySet()) {
-            DataReference<?> ref = entry.getValue();
+        for (DataReference<?> ref : holder.getChangedReferences()) {
             buf.writeUtf(ref.getType().getFullName()); //Safety
-            buf.writeResourceLocation(entry.getKey());
+            buf.writeResourceLocation(ref.getId());
             ref.encode(buf);
         }
-        dirtyMap.clear();
     }
 
     @Override

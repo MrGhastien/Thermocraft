@@ -1,12 +1,12 @@
 package mrghastien.thermocraft.common.capabilities.heat.transport.cables;
 
-import mrghastien.thermocraft.api.heat.IHeatHandler;
-import mrghastien.thermocraft.api.heat.TransferType;
+import mrghastien.thermocraft.api.capabilities.heat.IHeatHandler;
+import mrghastien.thermocraft.api.capabilities.heat.TransferType;
 import mrghastien.thermocraft.common.ThermoCraft;
+import mrghastien.thermocraft.common.blocks.transmitters.HeatTransmitterBlockEntity;
 import mrghastien.thermocraft.common.capabilities.Capabilities;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetwork;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetworkHandler;
-import mrghastien.thermocraft.common.blocks.transmitters.HeatTransmitterBlockEntity;
 import mrghastien.thermocraft.util.Constants;
 import mrghastien.thermocraft.util.ModUtils;
 import net.minecraft.core.BlockPos;

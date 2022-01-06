@@ -1,9 +1,9 @@
 package mrghastien.thermocraft.common.capabilities.heat;
 
 import mrghastien.thermocraft.api.IChangeListener;
-import mrghastien.thermocraft.api.heat.IHeatHandler;
-import mrghastien.thermocraft.api.heat.ISidedHeatHandler;
-import mrghastien.thermocraft.api.heat.TransferType;
+import mrghastien.thermocraft.api.capabilities.heat.IHeatHandler;
+import mrghastien.thermocraft.api.capabilities.heat.ISidedHeatHandler;
+import mrghastien.thermocraft.api.capabilities.heat.TransferType;
 import mrghastien.thermocraft.util.Constants;
 import mrghastien.thermocraft.util.math.FixedPointNumber;
 import net.minecraft.core.Direction;

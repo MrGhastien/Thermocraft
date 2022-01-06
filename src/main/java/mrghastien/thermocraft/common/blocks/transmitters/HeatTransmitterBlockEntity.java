@@ -1,6 +1,6 @@
 package mrghastien.thermocraft.common.blocks.transmitters;
 
-import mrghastien.thermocraft.api.heat.TransferType;
+import mrghastien.thermocraft.api.capabilities.heat.TransferType;
 import mrghastien.thermocraft.common.capabilities.Capabilities;
 import mrghastien.thermocraft.common.capabilities.heat.transport.cables.Cable;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetwork;

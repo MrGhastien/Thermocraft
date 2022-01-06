@@ -56,7 +56,6 @@ public class FluidInjectorBlockEntity extends MachineBlockEntity {
 
     @Override
     public void serverTick() {
-        super.serverTick();
         if(canRun()) {
             if(changed) {
                 searchRecipe();
@@ -107,12 +106,13 @@ public class FluidInjectorBlockEntity extends MachineBlockEntity {
     }
 
     @Override
-    protected void loadInternal(CompoundTag nbt) {
+    public void load(@Nonnull CompoundTag nbt) {
+        super.load(nbt);
         tank.deserializeNBT(nbt.getCompound("inputTank"));
     }
 
     @Override
-    protected void saveInternal(CompoundTag nbt) {
+    public void saveAdditional(CompoundTag nbt) {
         nbt.put("inputTank", tank.serializeNBT());
     }
 
@@ -140,7 +140,7 @@ public class FluidInjectorBlockEntity extends MachineBlockEntity {
 
     @Nullable
     @Override
-    public AbstractContainerMenu createMenu(int id, Inventory inventory, Player player) {
+    public AbstractContainerMenu createMenu(int id, @Nonnull Inventory inventory, @Nonnull Player player) {
         return new FluidInjectorMenu(this, id, inventory);
     }
 

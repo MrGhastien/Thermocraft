@@ -14,6 +14,7 @@
 
     import java.util.*;
     import java.util.function.Function;
+    import java.util.function.Predicate;
     import java.util.stream.Stream;
 
     public class ModRecipeType<T extends BaseRecipe> implements RecipeType<T> {
@@ -74,5 +75,9 @@
 
         public Stream<T> stream(Level world) {
             return getRecipes(world).values().stream();
+        }
+
+        public boolean anyMatch(Level level, Predicate<T> predicate) {
+            return stream(level).anyMatch(predicate);
         }
     }

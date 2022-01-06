@@ -1,5 +1,6 @@
 package mrghastien.thermocraft.common.capabilities.tartanicflux;
 
+import mrghastien.thermocraft.api.capabilities.tartanicflux.ITartanicFluxHandler;
 import mrghastien.thermocraft.util.math.FixedPointNumber;
 
 public class TartanicFluxHandler implements ITartanicFluxHandler {

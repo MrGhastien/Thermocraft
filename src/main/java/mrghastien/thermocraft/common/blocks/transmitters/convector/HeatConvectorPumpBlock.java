@@ -59,7 +59,8 @@ public class HeatConvectorPumpBlock extends HeatTransmitterBlock {
         return this.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, ctx.getHorizontalDirection().getOpposite());
     }
 
-    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext ctx) {
+    @Nonnull
+    public VoxelShape getShape(@Nonnull BlockState state, BlockGetter world, @Nonnull BlockPos pos, @Nonnull CollisionContext ctx) {
         //TODO: Make a proper voxel shape
         return Shapes.block();
     }

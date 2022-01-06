@@ -4,6 +4,7 @@ import mrghastien.thermocraft.common.ThermoCraft;
 import mrghastien.thermocraft.common.network.INetworkBinding;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -49,6 +50,10 @@ public interface IDataHolder {
      */
     <T> void addData(DataReference<T> data) throws IllegalArgumentException;
 
+    boolean hasChanged();
+
+    Set<DataReference<?>> getChangedReferences();
+
     /**
      * Creates a {@link DataReference data reference} and registers it into this holder.
      * @param type The type of the data to be synchronized
@@ -70,7 +75,8 @@ public interface IDataHolder {
     enum DataHolderCategory {
         CONTAINER,
         TILE_ENTITY,
-        HEAT_NETWORK
+        HEAT_NETWORK,
+        OTHER
     }
 
 }

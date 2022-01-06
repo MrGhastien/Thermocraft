@@ -35,11 +35,11 @@ public class FluidTankWidget extends Widget {
     }
 
     @Override
-    protected void onHovered(Screen screen, PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+    protected void onHovered(Screen screen, PoseStack stack, int mouseX, int mouseY) {
         IFluidTank tank = getTank();
         Component name = tank.getFluid().getFluid().getAttributes().getDisplayName(tank.getFluid());
         setTooltips(String.format("%s : %d/%d %s", name.getString(), getTank().getFluidAmount(), getTank().getCapacity(), Constants.VOLUME_UNIT));
-        super.onHovered(screen, stack, mouseX, mouseY, partialTicks);
+        super.onHovered(screen, stack, mouseX, mouseY);
     }
 
     private IFluidTank getTank() {

@@ -1,17 +1,18 @@
 package mrghastien.thermocraft.common.capabilities.heat.transport.networks;
 
-import mrghastien.thermocraft.api.heat.IHeatHandler;
-import mrghastien.thermocraft.api.heat.TransferType;
+import mrghastien.thermocraft.api.capabilities.heat.IHeatHandler;
+import mrghastien.thermocraft.api.capabilities.heat.TransferType;
+import mrghastien.thermocraft.common.blocks.transmitters.HeatTransmitterBlockEntity;
 import mrghastien.thermocraft.common.capabilities.Capabilities;
 import mrghastien.thermocraft.common.capabilities.heat.transport.cables.Cable;
 import mrghastien.thermocraft.common.network.CompositeDataNetworkBinding;
 import mrghastien.thermocraft.common.network.INetworkBinding;
 import mrghastien.thermocraft.common.network.data.DataReference;
 import mrghastien.thermocraft.common.network.data.DataType;
+import mrghastien.thermocraft.common.network.data.DefaultDataHolder;
 import mrghastien.thermocraft.common.network.data.IDataHolder;
 import mrghastien.thermocraft.common.network.packets.PacketHandler;
 import mrghastien.thermocraft.common.network.packets.UpdateHeatNetworkPacket;
-import mrghastien.thermocraft.common.blocks.transmitters.HeatTransmitterBlockEntity;
 import mrghastien.thermocraft.util.Constants;
 import mrghastien.thermocraft.util.math.FixedPointNumber;
 import net.minecraft.core.BlockPos;
@@ -34,7 +35,7 @@ public abstract class HeatNetwork implements IHeatHandler{
     protected boolean needsRefresh;
 
     private double heatCapacity;
-    private FixedPointNumber.Mutable internalEnergy;
+    private final FixedPointNumber.Mutable internalEnergy;
     private double conductionCoefficient;
     private double insulationCoefficient;
 
@@ -156,7 +157,7 @@ public abstract class HeatNetwork implements IHeatHandler{
     }
 
     void broadcastChanges() {
-        if(dataHolder.getBinding().hasChanged()) {
+        if(dataHolder.hasChanged()) {
             PacketHandler.MAIN_CHANNEL.send(PacketHandler.CONTAINER_LISTENERS.with(() -> chunks), new UpdateHeatNetworkPacket(this));
         }
     }
@@ -378,7 +379,7 @@ public abstract class HeatNetwork implements IHeatHandler{
         }
     }
 
-    public class DataHolder implements IDataHolder {
+    public class DataHolder extends DefaultDataHolder implements IDataHolder {
 
         private final Map<ResourceLocation, DataReference<?>> references;
 

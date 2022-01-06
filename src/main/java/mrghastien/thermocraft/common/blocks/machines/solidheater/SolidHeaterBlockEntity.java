@@ -1,6 +1,6 @@
 package mrghastien.thermocraft.common.blocks.machines.solidheater;
 
-import mrghastien.thermocraft.api.heat.TransferType;
+import mrghastien.thermocraft.api.capabilities.heat.TransferType;
 import mrghastien.thermocraft.common.ThermoCraft;
 import mrghastien.thermocraft.common.blocks.MachineBlockEntity;
 import mrghastien.thermocraft.common.capabilities.Capabilities;
@@ -36,7 +36,7 @@ import javax.annotation.Nullable;
 
 public class SolidHeaterBlockEntity extends MachineBlockEntity {
 
-    private static final int ENERGY_PRODUCTION = 3200;
+    private static final int ENERGY_PRODUCTION = 32;
     private static final double FURNACE_LIT_TEMPERATURE = 360;
 
     private int burnTime = 0;
@@ -154,7 +154,8 @@ public class SolidHeaterBlockEntity extends MachineBlockEntity {
     }
 
     @Override
-    public void loadInternal(CompoundTag nbt) {
+    public void load(@Nonnull CompoundTag nbt) {
+        super.load(nbt);
         inputInv.deserializeNBT(nbt.getCompound("Input"));
         heatHandler.deserializeNBT(nbt.getCompound("Heat"));
 		/*NBT shape :
@@ -174,7 +175,7 @@ public class SolidHeaterBlockEntity extends MachineBlockEntity {
     }
 
     @Override
-    public void saveInternal(CompoundTag nbt) {
+    public void saveAdditional(CompoundTag nbt) {
         nbt.put("Input", inputInv.serializeNBT());
         nbt.put("Heat", heatHandler.serializeNBT());
     }

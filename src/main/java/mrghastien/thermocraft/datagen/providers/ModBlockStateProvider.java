@@ -1,7 +1,6 @@
 package mrghastien.thermocraft.datagen.providers;
 
 import mrghastien.thermocraft.common.ThermoCraft;
-import mrghastien.thermocraft.common.registries.ModBlocks;
 import net.minecraft.core.Direction;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.world.level.block.Block;
@@ -11,18 +10,19 @@ import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ConfiguredModel;
 import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.registries.RegistryObject;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
 import java.util.function.Function;
 
 import static mrghastien.thermocraft.common.registries.ModBlocks.*;
 
 public class ModBlockStateProvider extends BlockStateProvider {
 
+    private final ExistingFileHelper existingFileHelper;
+
     public ModBlockStateProvider(DataGenerator gen, ExistingFileHelper exFileHelper) {
         super(gen, ThermoCraft.MODID, exFileHelper);
+        existingFileHelper = exFileHelper;
     }
 
     @Override
@@ -51,6 +51,8 @@ public class ModBlockStateProvider extends BlockStateProvider {
 //        itemModels().withExistingParent("boiler", ModBlocks.BOILER.getId());
 
         basicBlock(CALORITE_ORE.getBlock());
+        //Do not generate a model for the boiler, as it is made manually
+        simpleBlock(BOILER.getBlock(), models().getExistingFile(modLoc("block/" + BOILER.getId().getPath())));
     }
 
     @Override

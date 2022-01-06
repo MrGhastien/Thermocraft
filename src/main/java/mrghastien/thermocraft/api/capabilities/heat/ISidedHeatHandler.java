@@ -1,4 +1,4 @@
-package mrghastien.thermocraft.api.heat;
+package mrghastien.thermocraft.api.capabilities.heat;
 
 import mrghastien.thermocraft.util.math.FixedPointNumber;
 import net.minecraft.core.Direction;

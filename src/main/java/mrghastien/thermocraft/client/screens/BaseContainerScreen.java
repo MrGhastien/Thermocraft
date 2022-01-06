@@ -11,6 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,13 +28,17 @@ public abstract class BaseContainerScreen<T extends BaseMenu, U extends BlockEnt
     }
 
     @Override
-    public void render(PoseStack transformation, int mouseX, int mouseY, float partialTicks) {
-        renderBackground(transformation);
-        super.render(transformation, mouseX, mouseY, partialTicks);
-        for (Widget widget : widgets) {
-            widget.render(this, transformation, mouseX, mouseY, partialTicks);
-        }
-        renderTooltip(transformation, mouseX, mouseY);
+    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+        renderBackground(poseStack);
+        super.render(poseStack, mouseX, mouseY, partialTicks);
+        renderTooltip(poseStack, mouseX, mouseY);
+    }
+
+    @Override
+    protected void renderTooltip(@Nonnull PoseStack poseStack, int pX, int pY) {
+        super.renderTooltip(poseStack, pX, pY);
+        for(Widget widget : widgets)
+            widget.renderTooltip(this, poseStack, pX, pY);
     }
 
     public void addWidget(Widget widget) {
@@ -44,9 +49,13 @@ public abstract class BaseContainerScreen<T extends BaseMenu, U extends BlockEnt
     }
 
     @Override
-    protected void renderBg(PoseStack Transformation, float partialTicks, int mouseX, int mouseY) {
+    protected void renderBg(@Nonnull PoseStack poseStack, float partialTicks, int mouseX, int mouseY) {
         bindGuiTexture();
-        this.blit(Transformation, leftPos, topPos, 0, 0, imageWidth, imageHeight);
+        this.blit(poseStack, leftPos, topPos, 0, 0, imageWidth, imageHeight);
+        for (Widget widget : widgets) {
+            widget.render(this, poseStack, mouseX, mouseY, partialTicks);
+        }
+        bindGuiTexture();
     }
 
     protected void bindGuiTexture() {

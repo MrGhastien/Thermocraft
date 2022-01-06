@@ -3,6 +3,7 @@ package mrghastien.thermocraft.common.network.data;
 import mrghastien.thermocraft.common.network.INetworkBinding;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -55,5 +56,15 @@ public class ReadOnlyDataHolder implements IDataHolder {
     @Override
     public <T> void addData(DataType<T> type, ResourceLocation key, Supplier<T> getter, Consumer<T> setter) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Set<DataReference<?>> getChangedReferences() {
+        return holder.getChangedReferences();
+    }
+
+    @Override
+    public boolean hasChanged() {
+        return holder.hasChanged();
     }
 }

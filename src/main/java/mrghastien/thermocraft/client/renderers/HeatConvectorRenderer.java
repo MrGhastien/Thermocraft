@@ -3,10 +3,10 @@ package mrghastien.thermocraft.client.renderers;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import mrghastien.thermocraft.common.blocks.transmitters.convector.HeatConvectorBlockEntity;
 import mrghastien.thermocraft.common.capabilities.heat.transport.cables.Cable;
 import mrghastien.thermocraft.common.capabilities.heat.transport.cables.ConvectorCable;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatConvectorNetwork;
-import mrghastien.thermocraft.common.blocks.transmitters.convector.HeatConvectorBlockEntity;
 import mrghastien.thermocraft.util.MathUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -14,7 +14,6 @@ import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -31,8 +30,6 @@ public class HeatConvectorRenderer implements BlockEntityRenderer<HeatConvectorB
     private static final EnumSet<Direction> Z_AXIS_DIRECTIONS = EnumSet.of(Direction.NORTH, Direction.SOUTH);
 
     public HeatConvectorRenderer(BlockEntityRendererProvider.Context ctx) {}
-
-
 
     @Override
     public void render(HeatConvectorBlockEntity tile, float partialTicks, @Nonnull PoseStack matrixStack, @Nonnull MultiBufferSource multiBufferSource, int lightLevel, int overlay) {

@@ -3,6 +3,7 @@ package mrghastien.thermocraft.datagen.providers;
 import mrghastien.thermocraft.common.ThermoCraft;
 import mrghastien.thermocraft.common.registries.ModBlocks;
 import mrghastien.thermocraft.common.registries.ModFluids;
+import mrghastien.thermocraft.common.registries.ModItems;
 import mrghastien.thermocraft.datagen.CriterionHelper;
 import mrghastien.thermocraft.datagen.builders.recipe.BoilingRecipeBuilder;
 import mrghastien.thermocraft.datagen.builders.recipe.FluidInjectionRecipeBuilder;
@@ -28,7 +29,14 @@ public class ModRecipeProvider extends RecipeProvider {
 
     @Override
     protected void buildCraftingRecipes(@Nonnull Consumer<FinishedRecipe> consumer) {
-        BoilingRecipeBuilder.boiling(Fluids.LAVA, 10, 10).ingredient(Fluids.WATER, 10).save(consumer, new ResourceLocation(ThermoCraft.MODID, "boiling/water_to_lava"));
+        BoilingRecipeBuilder.boiling(Fluids.LAVA, 10, 10)
+                .ingredient(Fluids.WATER, 10)
+                .save(consumer, new ResourceLocation(ThermoCraft.MODID, "boiling/water_to_lava"));
+        BoilingRecipeBuilder.boiling(Fluids.LAVA, 10, 10)
+                .ingredient(Fluids.WATER, 10)
+                .itemIngredient(ModItems.RAW_CALORITE.get(), 1)
+                .resultItem(ModItems.POLISHED_CALORITE_CRYSTAL.get(), 1)
+                .save(consumer,new ResourceLocation(ThermoCraft.MODID, "boiling/calorite_purification"));
 
         convectorInjectionRecipe(consumer, ModFluids.ETHER_OF_SADNESS.getSource());
         convectorInjectionRecipe(consumer, Fluids.WATER);
@@ -46,6 +54,7 @@ public class ModRecipeProvider extends RecipeProvider {
         FluidInjectionRecipeBuilder.recipe(new FluidStack(f, 250), inputStack, resultStack).unlockedBy("placed_injector", CriterionHelper.placedBlock(ModBlocks.FLUID_INJECTOR.getBlock())).save(consumer,  ThermoCraft.modLoc("fluid_injection/" + name.getPath() + "_heat_convector"));
     }
 
+    @Nonnull
     @Override
     public String getName() {
         return ThermoCraft.MODID + " Recipes";

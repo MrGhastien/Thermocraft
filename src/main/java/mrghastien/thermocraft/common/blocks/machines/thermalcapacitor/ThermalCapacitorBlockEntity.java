@@ -1,6 +1,6 @@
 package mrghastien.thermocraft.common.blocks.machines.thermalcapacitor;
 
-import mrghastien.thermocraft.api.heat.TransferType;
+import mrghastien.thermocraft.api.capabilities.heat.TransferType;
 import mrghastien.thermocraft.common.blocks.MachineBlockEntity;
 import mrghastien.thermocraft.common.capabilities.Capabilities;
 import mrghastien.thermocraft.common.capabilities.heat.HeatHandler;
@@ -33,7 +33,7 @@ public class ThermalCapacitorBlockEntity extends MachineBlockEntity {
 
     @Nullable
     @Override
-    public AbstractContainerMenu createMenu(int id, Inventory inv, Player player) {
+    public AbstractContainerMenu createMenu(int id, @Nonnull Inventory inv, @Nonnull Player player) {
         return new ThermalCapacitorMenu(id, inv, this);
     }
 
@@ -69,12 +69,13 @@ public class ThermalCapacitorBlockEntity extends MachineBlockEntity {
     }
 
     @Override
-    protected void loadInternal(CompoundTag nbt) {
+    public void load(@Nonnull CompoundTag nbt) {
+        super.load(nbt);
         heatHandler.deserializeNBT(nbt.getCompound("Heat"));
     }
 
     @Override
-    protected void saveInternal(CompoundTag nbt) {
+    public void saveAdditional(CompoundTag nbt) {
         nbt.put("Heat", heatHandler.serializeNBT());
     }
 

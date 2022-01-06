@@ -1,4 +1,4 @@
-package mrghastien.thermocraft.api.fluid;
+package mrghastien.thermocraft.api.capabilities.fluid;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;

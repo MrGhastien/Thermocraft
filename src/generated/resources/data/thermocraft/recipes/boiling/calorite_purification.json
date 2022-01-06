@@ -5,12 +5,20 @@
       "type": "thermocraft:fluid",
       "fluid": "minecraft:water",
       "amount": 10
+    },
+    "item": {
+      "type": "thermocraft:stacked_item",
+      "item": "thermocraft:raw_calorite",
+      "count": 1
     }
   },
   "results": {
     "fluid": {
       "fluid": "minecraft:lava",
       "amount": 10
+    },
+    "item": {
+      "item": "thermocraft:polished_calorite_crystal"
     }
   },
   "inputHeatCapacity": 10.0

@@ -1,10 +1,6 @@
-package mrghastien.thermocraft.common.capabilities.tartanicflux;
+package mrghastien.thermocraft.api.capabilities.tartanicflux;
 
-import mrghastien.thermocraft.common.network.data.DataType;
 import mrghastien.thermocraft.util.math.FixedPointNumber;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
-import net.minecraftforge.common.util.INBTSerializable;
 
 public interface ITartanicFluxHandler {
 

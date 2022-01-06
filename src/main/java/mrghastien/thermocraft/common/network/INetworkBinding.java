@@ -13,8 +13,6 @@ import net.minecraft.network.FriendlyByteBuf;
  */
 public interface INetworkBinding {
 
-    boolean hasChanged();
-
     /**
      * Encodes data to the provided {@link io.netty.buffer.ByteBuf}.
      * @param buf The buffer to write to.

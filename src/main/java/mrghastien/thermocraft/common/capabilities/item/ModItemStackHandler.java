@@ -50,4 +50,11 @@ public class ModItemStackHandler extends ItemStackHandler {
     public LazyOptional<ModItemStackHandler> getLazy() {
         return lazy;
     }
+
+    public boolean isEmpty() {
+        for(ItemStack stack : stacks) {
+            if(!stack.isEmpty()) return false;
+        }
+        return true;
+    }
 }

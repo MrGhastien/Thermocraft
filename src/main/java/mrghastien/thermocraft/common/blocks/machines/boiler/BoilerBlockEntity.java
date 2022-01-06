@@ -1,13 +1,14 @@
 package mrghastien.thermocraft.common.blocks.machines.boiler;
 
-import mrghastien.thermocraft.api.heat.IHeatHandler;
-import mrghastien.thermocraft.api.heat.TransferType;
+import mrghastien.thermocraft.api.capabilities.heat.IHeatHandler;
+import mrghastien.thermocraft.api.capabilities.heat.TransferType;
 import mrghastien.thermocraft.common.blocks.MachineBlockEntity;
 import mrghastien.thermocraft.common.capabilities.Capabilities;
 import mrghastien.thermocraft.common.capabilities.fluid.ModFluidHandler;
 import mrghastien.thermocraft.common.capabilities.fluid.ModFluidTank;
 import mrghastien.thermocraft.common.capabilities.heat.HeatHandler;
 import mrghastien.thermocraft.common.capabilities.heat.SidedHeatHandler;
+import mrghastien.thermocraft.common.capabilities.item.ModItemStackHandler;
 import mrghastien.thermocraft.common.crafting.BoilingRecipe;
 import mrghastien.thermocraft.common.crafting.ModRecipeType;
 import mrghastien.thermocraft.common.inventory.menus.BoilerMenu;
@@ -19,14 +20,16 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.wrapper.CombinedInvWrapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -34,8 +37,14 @@ import javax.annotation.Nullable;
 public class BoilerBlockEntity extends MachineBlockEntity {
 
     private final SidedHeatHandler heatHandler = new SidedHeatHandler(1200, 40, 1, this::setChanged, d -> TransferType.INPUT);
-    private final ModFluidHandler inputHandler = new ModFluidHandler(new ModFluidTank(5000));
-    private final ModFluidHandler outputHandler = new ModFluidHandler(new ModFluidTank(5000));
+
+    private final ModFluidHandler inputFluidHandler = new ModFluidHandler(new ModFluidTank(5000));
+    private final ModFluidHandler outputFluidHandler = new ModFluidHandler(new ModFluidTank(5000));
+
+    private final ModItemStackHandler inputItemHandler = new ModItemStackHandler((i, s) -> ModRecipeType.BOILING.anyMatch(level, r -> r.matches(s)), i -> this.setChanged());
+    private final ModItemStackHandler outputItemHandler = new ModItemStackHandler(i -> this.setChanged());
+
+    private final LazyOptional<CombinedInvWrapper> combinedItemHandlers = LazyOptional.of(() -> new CombinedInvWrapper(inputItemHandler, outputItemHandler));
 
     private boolean running;
     private BoilingRecipe currentRecipe;
@@ -48,73 +57,92 @@ public class BoilerBlockEntity extends MachineBlockEntity {
     public void setRemoved() {
         super.setRemoved();
         heatHandler.getLazy().invalidate();
-        inputHandler.getLazy().invalidate();
-        outputHandler.getLazy().invalidate();
+        inputFluidHandler.getLazy().invalidate();
     }
 
     @Nullable
     @Override
-    public AbstractContainerMenu createMenu(int id, Inventory playerInventory, Player player) {
+    public AbstractContainerMenu createMenu(int id, @Nonnull Inventory playerInventory, @Nonnull Player player) {
         return new BoilerMenu(id, playerInventory, this);
     }
 
     @Override
     public void serverTick() {
-        super.serverTick();
         //If fluid in input, and the temperature is high enough, consume a certain amount of input per tick
         //depending on the temperature (higher = faster boiling)
         //Also extract energy from the heat handler
         //Finally fill the output tank.
 
-        this.inputHandler.fill(new FluidStack(Fluids.WATER, 10), IFluidHandler.FluidAction.EXECUTE);
-        heatHandler.transferEnergy(heatHandler.getInsulationCoefficient() * (IHeatHandler.AIR_TEMPERATURE - heatHandler.getTemperature()));
+        //this.inputFluidHandler.fill(new FluidStack(Fluids.WATER, 10), IFluidHandler.FluidAction.EXECUTE);
+        heatHandler.ambient();
         if(canRun()) {
             this.currentRecipe = getRecipe();
 
             if (currentRecipe == null) return;
-            setActiveState();
-            if(outputHandler.fill(currentRecipe.getOutput(), IFluidHandler.FluidAction.SIMULATE) == currentRecipe.getOutput().getAmount()) {
-                FluidStack consumed = consumeInput();
+            if(hasRoomInOutput() && hasNecessaryIngredients()) {
+                consumeInput();
                 heatHandler.transferEnergy(currentRecipe.getInputHeatCapacity() * (IHeatHandler.AIR_TEMPERATURE - heatHandler.getTemperature()));
                 storeResult();
             }
         } else {
             currentRecipe = null;
-            setInactiveState();
         }
     }
 
-    private FluidStack consumeInput() {
-        for(FluidStack stack : currentRecipe.getInput().getFluids()) {
-            if(inputHandler.contains(stack)) {
-                inputHandler.drain(stack.copy(), IFluidHandler.FluidAction.EXECUTE);
-                return stack;
+    private void consumeInput() {
+        for(FluidStack stack : currentRecipe.getInputFluid().getFluids()) {
+            if(inputFluidHandler.contains(stack)) {
+                inputFluidHandler.drain(stack.copy(), IFluidHandler.FluidAction.EXECUTE);
+                break;
             }
         }
-        return null;
+
+        ItemStack stackInInput = inputItemHandler.getStackInSlot(0);
+        for(ItemStack stack : currentRecipe.getInputItem().getItems()) {
+            if(stackInInput.sameItem(stack)) {
+                inputItemHandler.extractItem(0, stack.getCount(), false);
+                break;
+            }
+        }
+
+    }
+
+    private boolean hasNecessaryIngredients() {
+        return currentRecipe.matches(inputItemHandler) && currentRecipe.matches(inputFluidHandler);
     }
 
     private void storeResult() {
-        outputHandler.fill(currentRecipe.getOutput().copy(), IFluidHandler.FluidAction.EXECUTE);
+        //outputFluidHandler.fill(currentRecipe.getOutputFluid().copy(), IFluidHandler.FluidAction.EXECUTE);
+        outputItemHandler.insertItem(0, currentRecipe.getOutputItem().copy(), false);
+    }
+
+    private boolean hasRoomInOutput() {
+        boolean enoughFluidSpace = outputFluidHandler.fill(currentRecipe.getOutputFluid(), IFluidHandler.FluidAction.SIMULATE) == currentRecipe.getOutputFluid().getAmount();
+        boolean enoughItemSpace = outputItemHandler.insertItem(0, currentRecipe.getOutputItem(), true).isEmpty();
+        return enoughFluidSpace && enoughItemSpace;
     }
 
     private BoilingRecipe getRecipe() {
         for(BoilingRecipe recipe : ModRecipeType.BOILING.getRecipes(level).values()) {
-            if(recipe.matches(inputHandler)) return recipe;
+            if(recipe.matches(inputFluidHandler) && recipe.matches(inputItemHandler)) return recipe;
         }
         return null;
     }
 
     private boolean canRun() {
-        return heatHandler.getTemperature() > 400 && !inputHandler.isEmpty();
+        return heatHandler.getTemperature() > 400 && !inputFluidHandler.isEmpty() || !inputItemHandler.isEmpty();
     }
 
-    public ModFluidHandler getInputHandler() {
-        return inputHandler;
+    public boolean isRunning() {
+        return running;
     }
 
-    public ModFluidHandler getOutputHandler() {
-        return outputHandler;
+    public ModFluidHandler getInputFluidHandler() {
+        return inputFluidHandler;
+    }
+
+    public ModFluidHandler getOutputFluidHandler() {
+        return outputFluidHandler;
     }
 
     public HeatHandler getHeatHandler() {
@@ -149,17 +177,22 @@ public class BoilerBlockEntity extends MachineBlockEntity {
     }
 
     @Override
-    protected void loadInternal(CompoundTag nbt) {
+    public void load(@Nonnull CompoundTag nbt) {
+        super.load(nbt);
         heatHandler.deserializeNBT(nbt.getCompound("Heat"));
-        inputHandler.getTank(0).setFluid(FluidStack.loadFluidStackFromNBT(nbt.getCompound("Input")));
-        inputHandler.getTank(0).setFluid(FluidStack.loadFluidStackFromNBT(nbt.getCompound("Output")));
+        inputFluidHandler.getTank(0).setFluid(FluidStack.loadFluidStackFromNBT(nbt.getCompound("InputFluid")));
+        inputItemHandler.deserializeNBT(nbt.getCompound("InputItem"));
+        outputFluidHandler.getTank(0).setFluid(FluidStack.loadFluidStackFromNBT(nbt.getCompound("OutputFluid")));
+        outputItemHandler.deserializeNBT(nbt.getCompound("OutputItem"));
     }
 
     @Override
-    protected void saveInternal(CompoundTag nbt) {
+    protected void saveAdditional(CompoundTag nbt) {
         nbt.put("Heat", heatHandler.serializeNBT());
-        nbt.put("Input", inputHandler.getFluidInTank(0).writeToNBT(new CompoundTag()));
-        nbt.put("Output", outputHandler.getFluidInTank(0).writeToNBT(new CompoundTag()));
+        nbt.put("InputFluid", inputFluidHandler.getFluidInTank(0).writeToNBT(new CompoundTag()));
+        nbt.put("InputItem", inputItemHandler.serializeNBT());
+        nbt.put("Output", outputFluidHandler.getFluidInTank(0).writeToNBT(new CompoundTag()));
+        nbt.put("OutputItem", outputItemHandler.serializeNBT());
     }
 
     @Override
@@ -168,17 +201,21 @@ public class BoilerBlockEntity extends MachineBlockEntity {
         if(holder.getCategory() != IDataHolder.DataHolderCategory.CONTAINER) return;
 
         heatHandler.gatherData(holder);
-        inputHandler.gatherData("input", holder);
-        outputHandler.gatherData("output", holder);
+        inputFluidHandler.gatherData("input", holder);
+        outputFluidHandler.gatherData("output", holder);
     }
 
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
         if(cap == Capabilities.HEAT_HANDLER_CAPABILITY) return (side == null ? heatHandler.getLazy() : heatHandler.getLazy(side)).cast();
-        if(cap == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
-            if(side == Direction.WEST) return inputHandler.getLazy().cast();
-            if(side == Direction.UP) return outputHandler.getLazy().cast();
+        else if(cap == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
+            if(side == Direction.WEST || side == null) return inputFluidHandler.getLazy().cast();
+            if(side == Direction.UP) return outputFluidHandler.getLazy().cast();
+        } else if(cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+            if(side == Direction.UP) return inputItemHandler.getLazy().cast();
+            if(side == Direction.WEST) return outputItemHandler.getLazy().cast();
+            if(side == null) return combinedItemHandlers.cast();
         }
         return super.getCapability(cap, side);
     }

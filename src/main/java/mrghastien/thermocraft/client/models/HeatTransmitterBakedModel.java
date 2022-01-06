@@ -1,7 +1,7 @@
 package mrghastien.thermocraft.client.models;
 
 import com.google.common.collect.ImmutableMap;
-import mrghastien.thermocraft.api.heat.TransferType;
+import mrghastien.thermocraft.api.capabilities.heat.TransferType;
 import mrghastien.thermocraft.common.blocks.transmitters.HeatTransmitterBlockEntity;
 import mrghastien.thermocraft.util.Constants;
 import net.minecraft.client.renderer.RenderType;
@@ -73,11 +73,13 @@ public class HeatTransmitterBakedModel implements IDynamicBakedModel {
         return false;
     }
 
+    @Nonnull
     @Override
     public TextureAtlasSprite getParticleIcon() {
         return particle;
     }
 
+    @Nonnull
     @Override
     public ItemOverrides getOverrides() {
         return null;

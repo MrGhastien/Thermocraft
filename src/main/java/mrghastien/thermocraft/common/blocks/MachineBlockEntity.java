@@ -49,14 +49,11 @@ public abstract class MachineBlockEntity extends BlockEntity implements MenuProv
         if(holder != null) registerSyncData(holder);
     }
 
+    @Nonnull
     @Override
     public Component getDisplayName() {
         return new TextComponent("NAME");
     }
-
-    protected abstract void loadInternal(CompoundTag nbt);
-
-    protected abstract void saveInternal(CompoundTag nbt);
 
     @Nullable
     @Override
@@ -75,7 +72,7 @@ public abstract class MachineBlockEntity extends BlockEntity implements MenuProv
     protected void serverTick() {}
 
     void broadcastChanges() {
-        if(holder != null && holder.getBinding().hasChanged())
+        if(holder != null && holder.hasChanged())
             PacketHandler.MAIN_CHANNEL.send(PacketDistributor.TRACKING_CHUNK.with(this::getChunk), new ModUpdateBlockEntityPacket(worldPosition, holder.getBinding()));
     }
 
@@ -86,22 +83,6 @@ public abstract class MachineBlockEntity extends BlockEntity implements MenuProv
             level.setBlock(worldPosition, newState, 3);
             //level.notifyBlockUpdate(worldPosition, oldState, newState, 3);
         }
-    }
-
-    @Override
-    public void load(@Nonnull CompoundTag nbt) {
-        super.load(nbt);
-        loadInternal(nbt.getCompound("Internal"));
-    }
-
-    @Nonnull
-    @Override
-    public CompoundTag save(@Nonnull CompoundTag nbt) {
-        super.save(nbt);
-        CompoundTag internal = new CompoundTag();
-        nbt.put("Internal", internal);
-        saveInternal(internal);
-        return nbt;
     }
 
     public LevelChunk getChunk() {

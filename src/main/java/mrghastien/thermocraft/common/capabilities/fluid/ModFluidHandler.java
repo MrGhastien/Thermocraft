@@ -1,7 +1,6 @@
 package mrghastien.thermocraft.common.capabilities.fluid;
 
-import mrghastien.thermocraft.api.fluid.IModFluidTank;
-import mrghastien.thermocraft.common.ThermoCraft;
+import mrghastien.thermocraft.api.capabilities.fluid.IModFluidTank;
 import mrghastien.thermocraft.common.network.data.DataType;
 import mrghastien.thermocraft.common.network.data.IDataHolder;
 import net.minecraftforge.common.util.LazyOptional;
@@ -12,8 +11,6 @@ import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
 
 public class ModFluidHandler implements IDelegateFluidHandler {
 

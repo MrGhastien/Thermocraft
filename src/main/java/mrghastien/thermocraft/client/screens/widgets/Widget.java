@@ -7,7 +7,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,15 +29,18 @@ public abstract class Widget {
 	public void render(Screen screen, PoseStack stack, int mouseX, int mouseY, float partialTicks) {
 		renderBg(screen, stack, mouseX, mouseY, partialTicks);
 		renderFg(screen, stack, mouseX, mouseY, partialTicks);
+	}
+
+	public void renderTooltip(Screen screen, PoseStack stack, int mouseX, int mouseY) {
 		isHovered = isHovered(mouseX, mouseY);
-		if(isHovered) onHovered(screen, stack, mouseX, mouseY, partialTicks);
+		if(isHovered) onHovered(screen, stack, mouseX, mouseY);
 	}
 
 	public boolean isHovered(int mouseX, int mouseY) {
 		return mouseX > bounds.x && mouseX < bounds.width + bounds.x && mouseY > bounds.y && mouseY < bounds.height + bounds.y;
 	}
 	
-	protected void onHovered(Screen screen, PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	protected void onHovered(Screen screen, PoseStack stack, int mouseX, int mouseY) {
 		screen.renderComponentTooltip(stack, getTooltips(), mouseX, mouseY);
 	}
 

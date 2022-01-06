@@ -1,6 +1,6 @@
 package mrghastien.thermocraft.common.blocks.transmitters;
 
-import mrghastien.thermocraft.api.heat.TransferType;
+import mrghastien.thermocraft.api.capabilities.heat.TransferType;
 import mrghastien.thermocraft.common.capabilities.heat.transport.networks.HeatNetworkHandler;
 import mrghastien.thermocraft.util.Constants;
 import net.minecraft.Util;
@@ -16,6 +16,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+import javax.annotation.Nonnull;
 import java.util.EnumMap;
 
 public abstract class HeatTransmitterBlock extends Block implements EntityBlock {
@@ -43,8 +44,9 @@ public abstract class HeatTransmitterBlock extends Block implements EntityBlock 
 
     public abstract HeatNetworkHandler.HeatNetworkType getNetworkType();
 
+    @Nonnull
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext ctx) {
+    public VoxelShape getShape(@Nonnull BlockState state, BlockGetter world, @Nonnull BlockPos pos, @Nonnull CollisionContext ctx) {
         VoxelShape shape = CENTER_BOX;
         BlockEntity te = world.getBlockEntity(pos);
         if(te instanceof HeatTransmitterBlockEntity<?>) {
@@ -60,7 +62,7 @@ public abstract class HeatTransmitterBlock extends Block implements EntityBlock 
 
     @SuppressWarnings("deprecation")
     @Override
-    public void neighborChanged(BlockState state, Level world, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean isMoving) {
+    public void neighborChanged(@Nonnull BlockState state, @Nonnull Level world, @Nonnull BlockPos pos, @Nonnull Block neighborBlock, @Nonnull BlockPos neighborPos, boolean isMoving) {
         super.neighborChanged(state, world, pos, neighborBlock, neighborPos, isMoving);
         if(world.isClientSide()) return;
         BlockEntity te = world.getBlockEntity(pos);

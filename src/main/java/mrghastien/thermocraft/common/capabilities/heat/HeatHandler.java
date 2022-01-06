@@ -1,7 +1,7 @@
 package mrghastien.thermocraft.common.capabilities.heat;
 
 import mrghastien.thermocraft.api.IChangeListener;
-import mrghastien.thermocraft.api.heat.IHeatHandler;
+import mrghastien.thermocraft.api.capabilities.heat.IHeatHandler;
 import mrghastien.thermocraft.common.network.data.DataType;
 import mrghastien.thermocraft.common.network.data.IDataHolder;
 import mrghastien.thermocraft.util.math.FixedPointNumber;
