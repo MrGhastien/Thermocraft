@@ -18,11 +18,11 @@ import net.minecraft.network.FriendlyByteBuf;
  * @see IDataHolder
  * @see ReadOnlyDataHolder
  */
-public class CompositeDataNetworkBinding implements INetworkBinding {
+public class ChangedDataNetworkBinding implements INetworkBinding {
 
     private final ReadOnlyDataHolder holder;
 
-    public CompositeDataNetworkBinding(IDataHolder holder) {
+    public ChangedDataNetworkBinding(IDataHolder holder) {
         this.holder = new ReadOnlyDataHolder(holder);
     }
 

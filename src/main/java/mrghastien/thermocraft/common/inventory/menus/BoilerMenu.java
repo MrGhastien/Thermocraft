@@ -31,9 +31,4 @@ public class BoilerMenu extends BaseMenu {
         }
         return null;
     }
-
-    @Override
-    public boolean stillValid(Player player) {
-        return true;
-    }
 }

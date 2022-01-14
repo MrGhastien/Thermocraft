@@ -70,12 +70,7 @@ public abstract class MachineBlock extends Block implements EntityBlock {
     private <A extends BlockEntity, E extends MachineBlockEntity> BlockEntityTicker<E> createTickerInternal(Level level, BlockEntityType<A> providedType, BlockEntityType<E> expectedType) {
         if(expectedType != providedType) return null;
         if(level.isClientSide() && ticksOnClient()) return (l, pos, state1, be) -> be.clientTick();
-        if(!level.isClientSide() && ticksOnServer()) return (l, pos, state1, be) -> {
-            be.serverTick();
-            if(be.tickCount % 20 == 0)
-                be.broadcastChanges();
-            be.tickCount++;
-        };
+        if(!level.isClientSide() && ticksOnServer()) return (l, pos, state1, be) -> be.serverTick();
         return null;
     }
 

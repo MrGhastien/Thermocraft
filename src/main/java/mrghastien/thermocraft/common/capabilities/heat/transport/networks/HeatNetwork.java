@@ -5,7 +5,6 @@ import mrghastien.thermocraft.api.capabilities.heat.TransferType;
 import mrghastien.thermocraft.common.blocks.transmitters.HeatTransmitterBlockEntity;
 import mrghastien.thermocraft.common.capabilities.Capabilities;
 import mrghastien.thermocraft.common.capabilities.heat.transport.cables.Cable;
-import mrghastien.thermocraft.common.network.CompositeDataNetworkBinding;
 import mrghastien.thermocraft.common.network.INetworkBinding;
 import mrghastien.thermocraft.common.network.data.DataReference;
 import mrghastien.thermocraft.common.network.data.DataType;
@@ -26,30 +25,30 @@ import net.minecraftforge.common.util.LazyOptional;
 
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public abstract class HeatNetwork implements IHeatHandler{
 
-    protected boolean needsRefresh;
-
+    /* === HeatHandler fields === */
     private double heatCapacity;
     private final FixedPointNumber.Mutable internalEnergy;
     private double conductionCoefficient;
     private double insulationCoefficient;
 
+    protected boolean needsRefresh;
     protected boolean canWork = true;
     protected boolean valid = true;
-
-    final LazyOptional<IHeatHandler> lazy;
     protected final Level world;
     final Map<BlockPos, Cable> cables;
     final Map<BlockPos, Cable> refreshMap;
     final Map<BlockPos, TransferPoint> nodes;
-    final Set<LevelChunk> chunks;
     protected int receiverCount;
     final long id;
+
+    /* === Caches === */
+    final Set<LevelChunk> chunks;
+    final LazyOptional<IHeatHandler> lazy;
 
     protected final IDataHolder dataHolder;
 
@@ -93,9 +92,9 @@ public abstract class HeatNetwork implements IHeatHandler{
         requestRefresh(cable.getPos(), cable);
     }
 
-    boolean remove(BlockPos pos) {
+    void remove(BlockPos pos) {
         Cable removed = this.cables.remove(pos);
-        if(removed == null) return false;
+        if(removed == null) return;
         boolean canRemove = true;
         LevelChunk c = world.getChunkAt(pos);
         for(BlockPos p : c.getBlockEntitiesPos()) {
@@ -105,7 +104,6 @@ public abstract class HeatNetwork implements IHeatHandler{
             }
         }
         if(canRemove) chunks.remove(c);
-        return true;
     }
 
     public Set<BlockPos> getCablePositions() {
@@ -212,7 +210,7 @@ public abstract class HeatNetwork implements IHeatHandler{
                 '}';
     }
 
-    //================== HeatHandler Implementation ==================
+    /* ================== HeatHandler Implementation ================== */
     @Override
     public double getTemperature() {
         return internalEnergy.doubleValue() / getHeatCapacity();
@@ -314,6 +312,9 @@ public abstract class HeatNetwork implements IHeatHandler{
         return dataHolder.getBinding();
     }
 
+    /**
+     * Represents a cable with inputs and/or outputs to external machines.
+     */
     public class TransferPoint {
 
         protected final EnumMap<Direction, LazyOptional<IHeatHandler>> connectedHandlers;
@@ -381,38 +382,14 @@ public abstract class HeatNetwork implements IHeatHandler{
 
     public class DataHolder extends DefaultDataHolder implements IDataHolder {
 
-        private final Map<ResourceLocation, DataReference<?>> references;
-
-        private final INetworkBinding binding;
-
-        public DataHolder() {
-            this.references = new HashMap<>();
-            binding = new CompositeDataNetworkBinding(this);
-        }
-
-        @Override
-        public INetworkBinding getBinding() {
-            return binding;
-        }
-
         @Override
         public DataHolderCategory getCategory() {
             return DataHolderCategory.HEAT_NETWORK;
         }
 
         @Override
-        public DataReference<?> getData(ResourceLocation id) {
-            return references.get(id);
-        }
-
-        @Override
-        public void forEach(BiConsumer<ResourceLocation, DataReference<?>> action) {
-            references.forEach(action);
-        }
-
-        @Override
-        public <T> void addData(DataReference<T> data) {
-            references.put(data.getId(), data);
+        public <T> void addData(DataReference<T> data) throws IllegalArgumentException {
+            syncedData.put(data.getId(), data);
         }
 
         @Override

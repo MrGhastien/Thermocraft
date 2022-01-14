@@ -2,6 +2,7 @@ package mrghastien.thermocraft.common.capabilities.tartanicflux;
 
 import mrghastien.thermocraft.api.capabilities.tartanicflux.ITartanicFluxHandler;
 import mrghastien.thermocraft.util.math.FixedPointNumber;
+import net.minecraftforge.common.util.LazyOptional;
 
 public class TartanicFluxHandler implements ITartanicFluxHandler {
 
@@ -9,6 +10,7 @@ public class TartanicFluxHandler implements ITartanicFluxHandler {
     private FixedPointNumber capacity, leakageCapacity;
     private boolean canReceive, canExtract;
     private boolean canLeak;
+    private final LazyOptional<TartanicFluxHandler> lazy;
 
     public TartanicFluxHandler(FixedPointNumber flux, FixedPointNumber capacity, FixedPointNumber leakageCapacity, boolean canReceive, boolean canExtract, boolean canLeak) {
         this.flux = flux.toMutable();
@@ -17,6 +19,7 @@ public class TartanicFluxHandler implements ITartanicFluxHandler {
         this.canReceive = canReceive;
         this.canExtract = canExtract;
         this.canLeak = canLeak;
+        this.lazy = LazyOptional.of(() -> this);
     }
 
     public TartanicFluxHandler(long capacity, long leakageCapacity, boolean canReceive, boolean canExtract, boolean canLeak) {
@@ -39,13 +42,25 @@ public class TartanicFluxHandler implements ITartanicFluxHandler {
     }
 
     @Override
-    public void transferFlux(FixedPointNumber flux) {
-        this.flux.add(flux);
-    }
+    public FixedPointNumber transferFlux(FixedPointNumber flux, boolean simulate) {
+        if(flux.isNegative()) {
+            flux = flux.negate();
+            if (!canExtract())
+                return FixedPointNumber.ZERO;
 
-    @Override
-    public void transferFlux(long flux) {
-        this.flux.add(flux);
+            FixedPointNumber extracted = FixedPointNumber.min(this.flux, flux);
+            if (!simulate)
+                this.flux.sub(extracted);
+            return extracted;
+        }
+
+        if(!canReceive())
+            return FixedPointNumber.ZERO;
+
+        FixedPointNumber received = FixedPointNumber.min(capacity.sub(this.flux), flux);
+        if(!simulate)
+            this.flux.add(received);
+        return received;
     }
 
     @Override
@@ -81,5 +96,9 @@ public class TartanicFluxHandler implements ITartanicFluxHandler {
 
     public void setCanLeak(boolean canLeak) {
         this.canLeak = canLeak;
+    }
+
+    public LazyOptional<TartanicFluxHandler> lazy() {
+        return lazy;
     }
 }

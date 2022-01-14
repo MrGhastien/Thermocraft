@@ -22,6 +22,7 @@ public class ModItems {
 
     public static final RegistryObject<Item> RAW_CALORITE = ITEMS.register("raw_calorite", () -> new Item(DEFAULT_ITEM_PROPERTIES));
     public static final RegistryObject<Item> POLISHED_CALORITE_CRYSTAL = ITEMS.register("polished_calorite_crystal", () -> new Item(DEFAULT_ITEM_PROPERTIES));
+    public static final RegistryObject<Item> TARTANE_CRYSTAL = ITEMS.register("tartane_crystal", () -> new Item(DEFAULT_ITEM_PROPERTIES));
 
     public static class Tabs {
         public static final CreativeModeTab MAIN = new CreativeModeTab(ThermoCraft.MODID) {

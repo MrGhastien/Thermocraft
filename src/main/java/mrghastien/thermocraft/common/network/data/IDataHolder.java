@@ -9,8 +9,10 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-/**Holder of data references
- *
+/**
+ * Associates data references to an id.
+ * <p> Provides a network binding to allow sending values over the network, as well as a way
+ * to track any changes made to data held by this holder.
  * @see DataReference
  */
 public interface IDataHolder {
@@ -50,8 +52,18 @@ public interface IDataHolder {
      */
     <T> void addData(DataReference<T> data) throws IllegalArgumentException;
 
+    /**
+     * Checks if this holder contains at least one changed data reference.
+     * @implSpec This method should update changed references.
+     * @return True if any data reference noticed a value change, false otherwise.
+     */
     boolean hasChanged();
 
+    /**
+     * The result set is containing all data references for which {@link DataReference#hasChanged()} returns true.
+     * @implSpec This method should NOT update the references. <p>The return set should act as a read-only set.
+     * @return A set containing all data references that notice a value change.
+     */
     Set<DataReference<?>> getChangedReferences();
 
     /**
@@ -78,5 +90,4 @@ public interface IDataHolder {
         HEAT_NETWORK,
         OTHER
     }
-
 }

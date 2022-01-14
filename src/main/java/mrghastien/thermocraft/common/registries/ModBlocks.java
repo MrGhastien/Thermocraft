@@ -1,6 +1,7 @@
 package mrghastien.thermocraft.common.registries;
 
 import mrghastien.thermocraft.common.ThermoCraft;
+import mrghastien.thermocraft.common.blocks.machines.tartanicholder.TartanicHolderBlock;
 import mrghastien.thermocraft.common.blocks.machines.boiler.BoilerBlock;
 import mrghastien.thermocraft.common.blocks.machines.fluidinjector.FluidInjectorBlock;
 import mrghastien.thermocraft.common.blocks.machines.solidheater.SolidHeaterBlock;
@@ -9,8 +10,6 @@ import mrghastien.thermocraft.common.blocks.transmitters.conductor.HeatConductor
 import mrghastien.thermocraft.common.blocks.transmitters.convector.HeatConvectorBlock;
 import mrghastien.thermocraft.common.blocks.transmitters.convector.HeatConvectorPumpBlock;
 import mrghastien.thermocraft.util.BlockRegistryObject;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Material;
@@ -39,6 +38,7 @@ public class ModBlocks {
     public static final BlockRegistryObject<BoilerBlock> BOILER = BlockRegistryObject.register("boiler", BoilerBlock::new);
     public static final BlockRegistryObject<ThermalCapacitorBlock> THERMAL_CAPACITOR = BlockRegistryObject.register("thermal_capacitor", ThermalCapacitorBlock::new);
     public static final BlockRegistryObject<FluidInjectorBlock> FLUID_INJECTOR = BlockRegistryObject.register("fluid_injector", FluidInjectorBlock::new);
+    public static final BlockRegistryObject<TartanicHolderBlock> TARTANIC_HOLDER = BlockRegistryObject.register("tartanic_holder", TartanicHolderBlock::new);
 
     //Cables
     public static final BlockRegistryObject<HeatConductorBlock> HEAT_CONDUCTOR_BLOCK = BlockRegistryObject.register("heat_conductor", HeatConductorBlock::new);

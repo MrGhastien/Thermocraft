@@ -160,13 +160,7 @@ public class FluidIngredient extends Ingredient {
         JsonObject toJson();
     }
 
-    public static class SingleFluidValue implements FluidValue {
-
-        final FluidStack fluid;
-
-        public SingleFluidValue(FluidStack fluid) {
-            this.fluid = fluid;
-        }
+    public record SingleFluidValue(FluidStack fluid) implements FluidValue {
 
         @Override
         public Collection<FluidStack> getFluids() {

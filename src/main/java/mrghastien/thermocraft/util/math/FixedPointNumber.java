@@ -184,7 +184,7 @@ public class FixedPointNumber extends Number implements Comparable<FixedPointNum
     }
 
     public FixedPointNumber sub(FixedPointNumber n) {
-        return add(n.negate());
+        return add(n.toImmutable().negate());
     }
 
     public FixedPointNumber sub(double d) {
@@ -400,6 +400,16 @@ public class FixedPointNumber extends Number implements Comparable<FixedPointNum
 
     public static FixedPointNumber deserializeNBT(CompoundTag tag) {
         return new FixedPointNumber(tag.getLong("integral"), tag.getShort("fractional"));
+    }
+
+    public static FixedPointNumber min(FixedPointNumber first, FixedPointNumber second) {
+        if(second.isLessThan(first)) return second;
+        else return first;
+    }
+
+    public static FixedPointNumber max(FixedPointNumber first, FixedPointNumber second) {
+        if(second.isGreaterThan(first)) return second;
+        else return first;
     }
 
     public static class Mutable extends FixedPointNumber {

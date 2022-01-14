@@ -1,6 +1,6 @@
 package mrghastien.thermocraft.common.network.data;
 
-import mrghastien.thermocraft.common.network.CompositeDataNetworkBinding;
+import mrghastien.thermocraft.common.network.ChangedDataNetworkBinding;
 import mrghastien.thermocraft.common.network.INetworkBinding;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -13,12 +13,12 @@ public abstract class DefaultDataHolder implements IDataHolder {
 
     protected final Map<ResourceLocation, DataReference<?>> syncedData = new HashMap<>();
 
-    private Set<DataReference<?>> changedSet;
+    private ChangedSet changedSet;
 
     private final INetworkBinding binding;
 
     protected DefaultDataHolder() {
-        this.binding = new CompositeDataNetworkBinding(this);
+        this.binding = new ChangedDataNetworkBinding(this);
     }
 
     protected DefaultDataHolder(INetworkBinding binding) {
@@ -36,13 +36,15 @@ public abstract class DefaultDataHolder implements IDataHolder {
 
     @Override
     public boolean hasChanged() {
-        return !getChangedReferences().isEmpty();
+        ChangedSet set = ((ChangedSet)getChangedReferences());
+        set.refresh();
+        return !set.isEmpty();
     }
 
     @Override
     public Set<DataReference<?>> getChangedReferences() {
         if(this.changedSet == null)
-            this.changedSet = new ChangedMap();
+            this.changedSet = new ChangedSet();
         return changedSet;
     }
 
@@ -56,20 +58,29 @@ public abstract class DefaultDataHolder implements IDataHolder {
         syncedData.forEach(action);
     }
 
-    final class ChangedMap extends AbstractSet<DataReference<?>> {
+    final class ChangedSet extends AbstractSet<DataReference<?>> {
+
+        private final Set<DataReference<?>> refs;
+
+        public ChangedSet() {
+            refs = new HashSet<>();
+        }
 
         @Nonnull
         @Override
         public Iterator<DataReference<?>> iterator() {
-            return new ChangedIterator();
+            return refs.iterator();
+        }
+
+        private void refresh() {
+            refs.clear();
+            for(DataReference<?> ref : syncedData.values())
+                if (ref.hasChanged()) refs.add(ref);
         }
 
         @Override
         public int size() {
-            int size = 0;
-            for(DataReference<?> ref : syncedData.values())
-                if (ref.hasChanged()) size++;
-            return size;
+            return refs.size();
         }
 
         @Override
@@ -78,36 +89,13 @@ public abstract class DefaultDataHolder implements IDataHolder {
         }
 
         @Override
+        public boolean remove(Object o) {
+            throw new UnsupportedOperationException("Cannot remove references from changed set");
+        }
+
+        @Override
         public boolean contains(Object o) {
-            if(o instanceof DataReference<?> ref)
-                return ref.hasChanged();
-            return false;
-        }
-    }
-
-    final class ChangedIterator implements Iterator<DataReference<?>> {
-
-        Iterator<DataReference<?>> completeIterator = syncedData.values().iterator();
-
-        DataReference<?> next;
-        DataReference<?> current;
-
-        @Override
-        public boolean hasNext() {
-            return next != null;
-        }
-
-        private DataReference<?> nextRef() {
-            DataReference<?> ref = null;
-            while(completeIterator.hasNext() && !(ref = completeIterator.next()).hasChanged());
-            return ref;
-        }
-
-        @Override
-        public DataReference<?> next() {
-            current = next;
-            next = nextRef();
-            return current;
+            return refs.contains(o);
         }
     }
 

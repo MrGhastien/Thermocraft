@@ -14,6 +14,7 @@ import java.util.function.Supplier;
  * Effectively acts as a reference to a variable or any value.
  * Not necessarily references a variable, this can be anything as long as a valid {@link DataType} is given.
  *
+ * <p> Allows tracking for any changes made to the value.
  * @param <T> The type of the data that will be synchronized
  */
 public class DataReference<T> implements Supplier<T>, Consumer<T>, INBTSerializable<Tag> {
@@ -89,4 +90,6 @@ public class DataReference<T> implements Supplier<T>, Consumer<T>, INBTSerializa
     public void deserializeNBT(Tag nbt) {
         accept(getType().deserializeNBT(nbt));
     }
+
+
 }

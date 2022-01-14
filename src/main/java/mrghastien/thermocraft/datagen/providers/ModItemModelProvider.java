@@ -20,6 +20,7 @@ public class ModItemModelProvider extends ItemModelProvider {
     protected void registerModels() {
         simpleItem(ModItems.RAW_CALORITE);
         simpleItem(ModItems.POLISHED_CALORITE_CRYSTAL);
+        simpleItem(ModItems.TARTANE_CRYSTAL);
     }
 
     private ItemModelBuilder simpleItem(RegistryObject<Item> item) {

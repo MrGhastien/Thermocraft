@@ -21,11 +21,15 @@ public interface ITartanicFluxHandler {
      */
     FixedPointNumber getLeakageCapacity();
 
-    default void transferFlux(long flux) {
-        transferFlux(FixedPointNumber.valueOf(flux));
+    default FixedPointNumber transferFlux(FixedPointNumber flux) {
+        return transferFlux(flux, false);
     }
 
-    void transferFlux(FixedPointNumber flux);
+    default long transferFlux(long flux, boolean simulate) {
+        return transferFlux(FixedPointNumber.valueOf(flux), false).longValue();
+    }
+
+    FixedPointNumber transferFlux(FixedPointNumber flux, boolean simulate);
 
     boolean canReceive();
 

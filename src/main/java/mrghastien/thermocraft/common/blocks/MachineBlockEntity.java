@@ -25,28 +25,14 @@ import javax.annotation.Nullable;
 /**
  * Base class for all the tile entities of the ThermoCraft mod.
  */
-public abstract class MachineBlockEntity extends BlockEntity implements MenuProvider {
-
-    protected long tickCount = 0;
-
-    @Nullable
-    private final IDataHolder holder;
+public abstract class MachineBlockEntity extends BaseBlockEntity implements MenuProvider {
 
     public MachineBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, boolean syncDirectly) {
-        super(type, pos, state);
-        if(syncDirectly)
-            holder = new BlockEntityDataHolder(this);
-        else holder = null;
+        super(type, pos, state, syncDirectly);
     }
 
     public MachineBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
-        this(type, pos, state, false);
-    }
-
-    @Override
-    public void onLoad() {
-        super.onLoad();
-        if(holder != null) registerSyncData(holder);
+        super(type, pos, state, false);
     }
 
     @Nonnull
@@ -55,50 +41,7 @@ public abstract class MachineBlockEntity extends BlockEntity implements MenuProv
         return new TextComponent("NAME");
     }
 
-    @Nullable
-    @Override
-    public ClientboundBlockEntityDataPacket getUpdatePacket() {
-        return null;
-    }
-
-    @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-        CompoundTag tag = pkt.getTag();
-
-    }
-
     protected void clientTick() {}
 
     protected void serverTick() {}
-
-    void broadcastChanges() {
-        if(holder != null && holder.hasChanged())
-            PacketHandler.MAIN_CHANNEL.send(PacketDistributor.TRACKING_CHUNK.with(this::getChunk), new ModUpdateBlockEntityPacket(worldPosition, holder.getBinding()));
-    }
-
-    protected void updateBlockState(BlockState newState) {
-        if (level == null) return;
-        BlockState oldState = level.getBlockState(worldPosition);
-        if (oldState != newState) {
-            level.setBlock(worldPosition, newState, 3);
-            //level.notifyBlockUpdate(worldPosition, oldState, newState, 3);
-        }
-    }
-
-    public LevelChunk getChunk() {
-        return level.getChunkAt(worldPosition);
-    }
-
-    /**
-     * Used to register data references (mainly for client-server sync)
-     * @param holder The {@link IDataHolder} holding data references
-     *
-     * @see DataReference
-     */
-    public void registerSyncData(IDataHolder holder) {}
-
-    @Nullable
-    public IDataHolder getDataHolder() {
-        return new ReadOnlyDataHolder(holder);
-    }
 }

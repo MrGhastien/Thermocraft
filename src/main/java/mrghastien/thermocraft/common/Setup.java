@@ -3,6 +3,7 @@ package mrghastien.thermocraft.common;
 import mrghastien.thermocraft.client.models.HeatTransmitterLoader;
 import mrghastien.thermocraft.client.renderers.BoilerRenderer;
 import mrghastien.thermocraft.client.renderers.HeatConvectorRenderer;
+import mrghastien.thermocraft.client.renderers.TartanicHolderRenderer;
 import mrghastien.thermocraft.client.renderers.ThermalCapacitorRenderer;
 import mrghastien.thermocraft.client.screens.*;
 import mrghastien.thermocraft.common.capabilities.Capabilities;
@@ -79,6 +80,7 @@ class Setup {
             BlockEntityRenderers.register(ModTileEntities.THERMAL_CAPACITOR.get(), ThermalCapacitorRenderer::new);
             BlockEntityRenderers.register(ModTileEntities.HEAT_CONVECTOR.get(), HeatConvectorRenderer::new);
             BlockEntityRenderers.register(ModTileEntities.BOILER.get(), BoilerRenderer::new);
+            BlockEntityRenderers.register(ModTileEntities.TARTANIC_HOLDER.get(), TartanicHolderRenderer::new);
 
             //Block render layers
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.HEAT_CONVECTOR_BLOCK.get(), RenderType.cutout());

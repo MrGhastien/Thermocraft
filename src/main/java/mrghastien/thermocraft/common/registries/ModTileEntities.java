@@ -1,6 +1,7 @@
 package mrghastien.thermocraft.common.registries;
 
 import mrghastien.thermocraft.common.ThermoCraft;
+import mrghastien.thermocraft.common.blocks.machines.tartanicholder.TartanicHolderBlockEntity;
 import mrghastien.thermocraft.common.blocks.machines.boiler.BoilerBlockEntity;
 import mrghastien.thermocraft.common.blocks.machines.fluidinjector.FluidInjectorBlockEntity;
 import mrghastien.thermocraft.common.blocks.machines.solidheater.SolidHeaterBlockEntity;
@@ -32,10 +33,13 @@ public class ModTileEntities {
         return TILES.register(name, () -> BlockEntityType.Builder.of(supplier, Arrays.stream(blocks).map(BlockRegistryObject::getBlock).toArray(Block[]::new)).build(null));
     }
 
+    //Machines
     public static final RegistryObject<BlockEntityType<SolidHeaterBlockEntity>> SOLID_HEATER = register("solid_heater", SolidHeaterBlockEntity::new, ModBlocks.SOLID_HEATER);
     public static final RegistryObject<BlockEntityType<BoilerBlockEntity>> BOILER = register("boiler", BoilerBlockEntity::new, ModBlocks.BOILER);
     public static final RegistryObject<BlockEntityType<ThermalCapacitorBlockEntity>> THERMAL_CAPACITOR = register("thermal_capacitor", ThermalCapacitorBlockEntity::new, ModBlocks.THERMAL_CAPACITOR);
     public static final RegistryObject<BlockEntityType<FluidInjectorBlockEntity>> FLUID_INJECTOR = register("fluid_injector", FluidInjectorBlockEntity::new, ModBlocks.FLUID_INJECTOR);
+
+    public static final RegistryObject<BlockEntityType<TartanicHolderBlockEntity>> TARTANIC_HOLDER = register("tartanic_holder", TartanicHolderBlockEntity::new, ModBlocks.TARTANIC_HOLDER);
 
     //Transmitters
     public static final RegistryObject<BlockEntityType<HeatConvectorPumpBlockEntity>> HEAT_CONVECTOR_PUMP = register("heat_convector_pump", HeatConvectorPumpBlockEntity::new, ModBlocks.HEAT_CONVECTOR_PUMP);
